@@ -1,0 +1,42 @@
+<script type="text/javascript">
+    RED.nodes.registerType('device-control', {
+        category: 'output',
+        color: '#74b9ff',
+        defaults: {
+            name: {value:""},
+            device: {value: "", required:true},
+            resource: {value: "", required:true},
+            server: {value:"", type:"thinger-server"}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 1,
+        outputs: 0,
+        align: 'right',
+        label: function() {
+            return this.name || this.device ? (this.device + "/" + this.resource) : "Device Control";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="device-control">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-bucket"><i class="fa fa-rocket"></i> Device</label>
+        <input type="text" id="node-input-device" placeholder="Device Identifier">
+    </div>
+    <div class="form-row">
+        <label for="node-input-bucket"><i class="fa fa-gear"></i> Resource</label>
+        <input type="text" id="node-input-resource" placeholder="Device Identifier">
+    </div>
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="device-control">
+    <p>Node that allows sending data to a connected device.
+</script>

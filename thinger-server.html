@@ -1,0 +1,42 @@
+<script type="text/javascript">
+    RED.nodes.registerType('thinger-server', {
+        category: 'config',
+        defaults: {
+            host: {value:"api.thinger.io", required:true},
+            name: {value: "", required:false},
+            ssl: {value:true},
+            username: {value: "", required:true},
+            token: {value: "", required:true}
+        },
+        label: function() {
+            return this.name ? this.name : this.host;
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="thinger-server">
+    <div class="form-row">
+        <label for="node-config-input-host"><i class="fa fa-server"></i> Host</label>
+        <input type="text" id="node-config-input-host" placeholder="API Host">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" placeholder="Optional name to identify the server">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-ssl"><i class="fa fa-lock"></i> SSL</label>
+        <input type="checkbox" id="node-config-input-ssl">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-config-input-username" placeholder="Username">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-token"><i class="fa fa-lock"></i> Token</label>
+        <input type="text" id="node-config-input-token" placeholder="Access Token">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="thinger-server">
+    <p>Configuration node for setting Thinger.io Host and Access Tokens</p>
+</script>

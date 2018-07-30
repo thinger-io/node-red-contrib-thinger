@@ -1,0 +1,37 @@
+<script type="text/javascript">
+    RED.nodes.registerType('endpoint-call', {
+        category: 'output',
+        color: '#74b9ff',
+        defaults: {
+            name: {value:""},
+            endpoint: {value: "", required:true},
+            server: {value:"", type:"thinger-server"}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 1,
+        outputs: 0,
+        align: 'right',
+        label: function() {
+            return this.name || this.endpoint ? this.endpoint : "Endpoint Call";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="endpoint-call">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-endpoint"><i class="fa fa-server"></i> Endpoint</label>
+        <input type="text" id="node-input-endpoint" placeholder="Endpoint Identifier">
+    </div>
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="endpoint-call">
+    <p>Node that allows to call a Thinger.io server endpoint</p>
+</script>

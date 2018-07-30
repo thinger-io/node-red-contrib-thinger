@@ -1,0 +1,37 @@
+<script type="text/javascript">
+    RED.nodes.registerType('bucket-write', {
+        category: 'output',
+        color: '#74b9ff',
+        defaults: {
+            name: {value:""},
+            bucket: {value: "", required:true},
+            server: {value:"", type:"thinger-server"}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 1,
+        outputs: 0,
+        align: 'right',
+        label: function() {
+            return this.name || this.bucket ? this.bucket : "Bucket Write";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="bucket-write">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-bucket"><i class="fa fa-database"></i> Bucket</label>
+        <input type="text" id="node-input-bucket" placeholder="Bucket Identifier">
+    </div>
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="bucket-write">
+    <p>Node that allows to write data to a Thinger.io data bucket</p>
+</script>

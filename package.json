@@ -1,0 +1,18 @@
+{
+	"name": "node-red-contrib-thinger",
+	"version": "0.0.2",
+	"description": "Node-Red library for Thinger.io Platform",
+	"dependencies": {
+		"request" : ">=2.72.0",
+		"ws": "0.8.1"
+	},
+	"node-red": {
+		"nodes": {
+			"thinger-server": "thinger-server.js",
+			"device-input": "device-input.js",
+			"endpoint-call": "endpoint-call.js",
+			"bucket-write": "bucket-write.js",
+			"device-control": "device-control.js"
+		}
+	}
+}
