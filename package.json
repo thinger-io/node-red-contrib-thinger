@@ -9,10 +9,11 @@
 	"node-red": {
 		"nodes": {
 			"thinger-server": "thinger-server.js",
-			"device-input": "device-input.js",
+			"device-read": "device-read.js",
+			"device-stream": "device-stream.js",
 			"endpoint-call": "endpoint-call.js",
 			"bucket-write": "bucket-write.js",
-			"device-control": "device-control.js"
+			"device-write": "device-write.js"
 		}
 	}
 }

@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    RED.nodes.registerType('device-control', {
+    RED.nodes.registerType('device-write', {
         category: 'output',
         color: '#74b9ff',
         defaults: {
@@ -13,12 +13,12 @@
         outputs: 0,
         align: 'right',
         label: function() {
-            return this.name || this.device ? (this.device + "/" + this.resource) : "Device Control";
+            return this.name || (this.device ? (this.device + "/" + this.resource) : "Device Write");
         }
     });
 </script>
 
-<script type="text/x-red" data-template-name="device-control">
+<script type="text/x-red" data-template-name="device-write">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -37,6 +37,6 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="device-control">
+<script type="text/x-red" data-help-name="device-write">
     <p>Node that allows sending data to a connected device.
 </script>

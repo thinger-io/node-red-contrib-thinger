@@ -1,6 +1,6 @@
 module.exports = function(RED) {
 
-    function DeviceControlNode(config) {
+    function DeviceWriteNode(config) {
         RED.nodes.createNode(this, config);
 
         // get node
@@ -16,5 +16,5 @@ module.exports = function(RED) {
         });
     }
 
-    RED.nodes.registerType("device-control", DeviceControlNode);
+    RED.nodes.registerType("device-write", DeviceWriteNode);
 };

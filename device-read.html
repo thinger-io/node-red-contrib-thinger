@@ -1,24 +1,24 @@
 <script type="text/javascript">
-    RED.nodes.registerType('device-input', {
+    RED.nodes.registerType('device-read', {
         category: 'input',
         color: '#74b9ff',
         defaults: {
-            name: {value:""},
+            name: {value: ""},
             device: {value: "", required:true},
             resource: {value: "", required:true},
-            interval: {value: "10", required:true},
             server: {value:"", type:"thinger-server"}
         },
         icon:"thinger_logo_white.png",
-        inputs:0,
+        inputs: 1,
         outputs:1,
+        inputLabels: "event",
         label: function() {
-            return this.name || (this.device && this.resource) ? (this.device + "/" + this.resource + " ("  + this.interval + "s)") : "Device Stream";
+            return this.name || ((this.device && this.resource) ? (this.device + "/" + this.resource) : "Device Read");
         }
     });
 </script>
 
-<script type="text/x-red" data-template-name="device-input">
+<script type="text/x-red" data-template-name="device-read">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -32,15 +32,11 @@
         <input type="text" id="node-input-resource" placeholder="Resource Name">
     </div>
     <div class="form-row">
-        <label for="node-input-interval"><i class="fa fa-clock-o"></i> Interval (s)</label>
-        <input type="text" id="node-input-interval" placeholder="Sampling Interval (s)">
-    </div>
-    <div class="form-row">
         <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
         <input type="text" id="node-input-server" placeholder="Select Server">
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="device-input">
-    <p>Node that reads information from a Thinger.io connected device</p>
+<script type="text/x-red" data-help-name="device-read">
+    <p>Node that reads information from a Thinger.io connected device.
 </script>

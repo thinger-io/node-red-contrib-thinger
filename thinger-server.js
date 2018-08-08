@@ -47,16 +47,14 @@ module.exports = function(RED) {
             });
         };
 
-        node.readDevice = function(deviceId, resourceId, data){
+        node.readDevice = function(deviceId, resourceId, handler){
             const url = (config.ssl ? 'https://' : "http://") + config.host + "/v2/users/" + config.username + "/devices/" + deviceId + "/" + resourceId + "?authorization=" + config.token;
+            console.log(url);
             request({
                 url: url,
                 method: "GET",
-                json: true,
-                body: {in : data}
-            }, function (error, response, body){
-                console.log(response);
-            });
+                json: true
+            }, handler);
         };
 
         node.writeDevice = function(deviceId, resourceId, data){

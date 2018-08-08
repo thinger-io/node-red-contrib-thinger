@@ -1,6 +1,6 @@
 <script type="text/javascript">
     RED.nodes.registerType('bucket-write', {
-        category: 'output',
+        category: 'storage',
         color: '#74b9ff',
         defaults: {
             name: {value:""},
@@ -12,7 +12,7 @@
         outputs: 0,
         align: 'right',
         label: function() {
-            return this.name || this.bucket ? this.bucket : "Bucket Write";
+            return this.name || (this.bucket ? this.bucket : "Bucket Write");
         }
     });
 </script>
