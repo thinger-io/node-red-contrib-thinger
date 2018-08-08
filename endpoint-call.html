@@ -12,7 +12,7 @@
         outputs: 0,
         align: 'right',
         label: function() {
-            return this.name || this.endpoint ? this.endpoint : "Endpoint Call";
+            return this.name || (this.endpoint ? this.endpoint : "Endpoint Call");
         }
     });
 </script>
