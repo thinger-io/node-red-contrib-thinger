@@ -3,8 +3,29 @@ const request = require('request');
 
 module.exports = function(RED) {
 
+    const RECONNECT_TIMEOUT_MS = 10000;
     var devices = {};
     var config = undefined;
+    var timeout = undefined;
+
+
+    function handleReconnection(){
+        for(var id in devices){
+            var device = devices[id];
+            if(device.wss && (device.wss.readyState === device.wss.CLOSED)){
+                device.wss = getDeviceWebsocket(id);
+            }
+        }
+    }
+
+    function closeWebsockets(){
+        for(var id in devices){
+            var device = devices[id];
+            if(device.wss){
+                device.wss.close();
+            }
+        }
+    }
 
     function ThingerServerNode(configa) {
         RED.nodes.createNode(this, configa);
@@ -13,13 +34,12 @@ module.exports = function(RED) {
         var node = this;
 
         node.on('close', function(removed, done) {
+            // clear reconnection timeout
+            clearTimeout(timeout);
+
             // close device connections
-            for(var id in devices){
-                var device = devices[id];
-                if(device.wss){
-                    device.wss.close();
-                }
-            }
+            closeWebsockets();
+
             done();
         });
 
@@ -135,6 +155,11 @@ module.exports = function(RED) {
             // control the device streaming
             controlDeviceResourceStreaming(device, resource);
         };
+
+        timeout = setTimeout(function tick() {
+            handleReconnection();
+            timeout = setTimeout(tick, RECONNECT_TIMEOUT_MS);
+        }, RECONNECT_TIMEOUT_MS);
     }
 
     function controlDeviceResourceStreaming(device, resource){
@@ -296,7 +321,6 @@ module.exports = function(RED) {
                 for(var id in resource.listeners) {
                     var listener = resource.listeners[id];
                     listener.node.status({fill:"red",shape:"ring",text:"disconnected"});
-
                 }
             }
         });
