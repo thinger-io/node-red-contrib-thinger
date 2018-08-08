@@ -1,5 +1,7 @@
 const WebSocket = require('ws');
 const request = require('request');
+const jwt = require('jsonwebtoken');
+
 
 module.exports = function(RED) {
 
@@ -7,7 +9,6 @@ module.exports = function(RED) {
     var devices = {};
     var config = undefined;
     var timeout = undefined;
-
 
     function handleReconnection(){
         for(var id in devices){
@@ -29,9 +30,17 @@ module.exports = function(RED) {
 
     function ThingerServerNode(configa) {
         RED.nodes.createNode(this, configa);
+        var node = this;
         config = configa;
 
-        var node = this;
+        // get the decoded payload and header
+        var decoded = jwt.decode(config.token, {complete: true});
+        if(decoded && decoded.payload.usr){
+            config.username = decoded.payload.usr;
+        }else{
+            node.error("Invalid JWT Token");
+            return;
+        }
 
         node.on('close', function(removed, done) {
             // clear reconnection timeout

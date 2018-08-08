@@ -5,7 +5,6 @@
             host: {value:"api.thinger.io", required:true},
             name: {value: "", required:false},
             ssl: {value:true},
-            username: {value: "", required:true},
             token: {value: "", required:true}
         },
         label: function() {
@@ -26,10 +25,6 @@
     <div class="form-row">
         <label for="node-config-input-ssl"><i class="fa fa-lock"></i> SSL</label>
         <input type="checkbox" id="node-config-input-ssl">
-    </div>
-    <div class="form-row">
-        <label for="node-config-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-config-input-username" placeholder="Username">
     </div>
     <div class="form-row">
         <label for="node-config-input-token"><i class="fa fa-lock"></i> Token</label>
