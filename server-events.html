@@ -1,0 +1,71 @@
+<script type="text/javascript">
+    RED.nodes.registerType('server-events', {
+        category: 'thinger',
+        color: '#74b9ff',
+        defaults: {
+            name: {value:""},
+            event: {value:"", required:true},
+            device: {value:""},
+            state: {value:""},
+            server: {type:"thinger-server", required: true}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 0,
+        outputs: 1,
+        label: function() {
+            return this.name || this.event || "Server Events";
+        },
+        oneditprepare: function() {
+            $("#node-input-event").change(function(e) {
+                var val = $(this).val();
+                $(".node-row-device").toggle(val && val.startsWith("device"));
+                $(".node-row-device-state").toggle(val === "device_state_change");
+            });
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="server-events">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="node-row-device-event">
+        <div class="form-row">
+            <label for="node-input-event"><i class="fa fa-tag"></i> Event</label>
+            <select id="node-input-event" style="width:70%; !important">
+                <option value="" default>Select Event</option>
+                <option value="device_state_change">device_state_change</option>
+                <option value="device_endpoint_call">device_endpoint_call</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-device">
+         <div class="form-row">
+            <label for="node-input-device"><i class="fa fa-tag"></i> Device</label>
+            <input type="text" id="node-input-device" placeholder="Device Filter">
+        </div>
+    </div>
+
+    <div class="node-row-device-state">
+         <div class="form-row">
+            <label for="node-input-state"><i class="fa fa-tag"></i> State</label>
+            <select id="node-input-state" style="width:70%; !important">
+                <option value="">any</option>
+                <option value="connected">connected</option>
+                <option value="disconnected">disconnected</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="server-events">
+    <p>Node that listen for events for </p>
+</script>

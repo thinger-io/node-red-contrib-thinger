@@ -21,7 +21,8 @@
 			"device-stream": "device-stream.js",
 			"endpoint-call": "endpoint-call.js",
 			"bucket-write": "bucket-write.js",
-			"device-write": "device-write.js"
+			"device-write": "device-write.js",
+			"server-events": "server-events.js"
 		}
 	}
 }
