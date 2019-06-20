@@ -50,8 +50,8 @@ module.exports = function(RED) {
         this.on('close', function() {
             closing = true;
             clearTimeout(timeout);
-            node.log("closing websocket connections");
-            if(wss) wss.close(null);
+            node.log("closing websocket connection");
+            if(wss) wss.close(1000);
         });
     }
 

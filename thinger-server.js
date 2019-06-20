@@ -70,8 +70,8 @@ module.exports = function(RED) {
             let wss = new WebSocket(url);
 
             wss.on('error', function(e){
-                node.status({fill:"red", shape:"dot", text: 'disconnected'});
-                wss.close(null);
+                node.status({fill:"red", shape:"dot", text: 'websocket error'});
+                node.error(e && e.message ? e.message : "websocket error");
                 if(on_error) on_error(e);
             });
 
@@ -90,7 +90,6 @@ module.exports = function(RED) {
 
             wss.on('close', function close() {
                 node.status({fill:"red", shape:"dot", text: 'disconnected'});
-                wss.close(null);
                 if(on_close) on_close();
             });
 
