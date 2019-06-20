@@ -33,17 +33,12 @@ module.exports = function(RED) {
         }
 
         function reconnect(){
-            if(!closing){
-                if(!timeout){
-                    timeout = setTimeout(function() {
-                        node.log("trying to reconnect");
-                        timeout=undefined;
-                        wss = server.openWebsocket(node, "/events", on_open, on_message, reconnect, reconnect);
-                    }, RECONNECT_TIMEOUT_MS);
-                }
-            }else{
-                node.trace("skipping reconnection, node is closing...");
-            }
+            if(closing || timeout) return;
+            timeout = setTimeout(function() {
+                node.log("trying to reconnect");
+                timeout=undefined;
+                wss = server.openWebsocket(node, "/events", on_open, on_message, reconnect, reconnect);
+            }, RECONNECT_TIMEOUT_MS);
         }
 
         // initialize websocket connection
