@@ -5,7 +5,9 @@
         defaults: {
             name: {value:""},
             event: {value:"", required:true},
+            bucket: {value:""},
             device: {value:""},
+            endpoint: {value:""},
             state: {value:""},
             server: {type:"thinger-server", required: true}
         },
@@ -18,7 +20,9 @@
         oneditprepare: function() {
             $("#node-input-event").change(function(e) {
                 var val = $(this).val();
+                $(".node-row-bucket").toggle(val && val.startsWith("bucket"));
                 $(".node-row-device").toggle(val && val.startsWith("device"));
+                $(".node-row-endpoint").toggle(val && val.startsWith("endpoint"));
                 $(".node-row-device-state").toggle(val === "device_state_change");
             });
         }
@@ -33,25 +37,43 @@
 
     <div class="node-row-device-event">
         <div class="form-row">
-            <label for="node-input-event"><i class="fa fa-tag"></i> Event</label>
+            <label for="node-input-event"><i class="fa fa-bolt"></i> Event</label>
             <select id="node-input-event" style="width:70%; !important">
                 <option value="" default>Select Event</option>
+                <option value="bucket_write">bucket_write</option>
                 <option value="device_state_change">device_state_change</option>
-                <option value="device_endpoint_call">device_endpoint_call</option>
+                <option value="device_callback_call">device_callback_call</option>
+                <option value="device_property_update">device_property_update</option>
+                <option value="device_location_update">device_location_update</option>
+                <option value="endpoint_call">endpoint_call</option>
             </select>
+        </div>
+    </div>
+
+    <div class="node-row-bucket">
+         <div class="form-row">
+            <label for="node-input-bucket"><i class="fa fa-database"></i> Bucket</label>
+            <input type="text" id="node-input-bucket" placeholder="Bucket Filter">
         </div>
     </div>
 
     <div class="node-row-device">
          <div class="form-row">
-            <label for="node-input-device"><i class="fa fa-tag"></i> Device</label>
+            <label for="node-input-device"><i class="fa fa-rocket"></i> Device</label>
             <input type="text" id="node-input-device" placeholder="Device Filter">
+        </div>
+    </div>
+
+    <div class="node-row-endpoint">
+         <div class="form-row">
+            <label for="node-input-endpoint"><i class="fa fa-server"></i> Endpoint</label>
+            <input type="text" id="node-input-endpoint" placeholder="Endpoint Filter">
         </div>
     </div>
 
     <div class="node-row-device-state">
          <div class="form-row">
-            <label for="node-input-state"><i class="fa fa-tag"></i> State</label>
+            <label for="node-input-state"><i class="fa fa-power-off"></i> State</label>
             <select id="node-input-state" style="width:70%; !important">
                 <option value="">any</option>
                 <option value="connected">connected</option>
@@ -67,5 +89,5 @@
 </script>
 
 <script type="text/x-red" data-help-name="server-events">
-    <p>Node that listen for events for </p>
+    <p>Node that receives server events</p>
 </script>
