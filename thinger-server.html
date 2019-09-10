@@ -2,7 +2,7 @@
     RED.nodes.registerType('thinger-server', {
         category: 'config',
         defaults: {
-            host: {value:"api.thinger.io", required:true},
+            host: {value: "api.thinger.io", required:true},
             name: {value: "", required:false},
             ssl: {value:true}
         },
@@ -10,7 +10,7 @@
             token: {type:"password", required: true}
         },
         label: function() {
-            return this.name ? this.name : this.host;
+            return this.name || this.host;
         }
     });
 </script>
@@ -35,5 +35,12 @@
 </script>
 
 <script type="text/x-red" data-help-name="thinger-server">
-    <p>Configuration node for setting Thinger.io Host and Access Tokens</p>
+    <p>Configuration node for setting Thinger.io Host and Access Tokens
+    <h3>Thinger.io Plugin</h3>
+    When running Node-RED from a Thinger.io plugin, use the following Node configuration:
+    <ul>
+        <li>Host: $(THINGER_HOST)</li>
+        <li>SSL: Disabled (Not required in local connection)</li>
+        <li>Access Token: $(THINGER_TOKEN_NODE_RED_PLUGIN)</li>
+    </ul>
 </script>
