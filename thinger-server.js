@@ -10,6 +10,7 @@ module.exports = function(RED) {
     let config = undefined;
     let token = undefined;
     let timeout = undefined;
+    let node = this;
 
     let websockets = {};
 
@@ -34,7 +35,7 @@ module.exports = function(RED) {
     function ThingerServerNode(configa) {
         RED.nodes.createNode(this, configa);
 
-        let node = this;
+        node = this;
         config = configa;
 
         if(this.credentials && this.credentials.hasOwnProperty("token")) {
@@ -286,7 +287,7 @@ module.exports = function(RED) {
     }
 
     function getDeviceWebsocket(deviceId){
-        const url = (config.ssl ? 'wss://' : "ws://") + config.host + "/v3/users/" + config.username + "/devices/" + deviceId + "?authorization=" + token;
+        const url = (config.ssl ? 'wss://' : "ws://") + config.host + "/v3/users/" + config.username + "/devices/" + deviceId + "/resources?authorization=" + token;
 
         node.log("opening websocket to " + url);
 
