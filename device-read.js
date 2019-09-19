@@ -12,7 +12,7 @@ module.exports = function(RED) {
         // unregister listener on close
         node.on('input', function(msg) {
             server.readDevice(config.device, config.resource, function(error, response, body){
-                node.send({payload: body.out ? body.out : body.in});
+                node.send({payload: body});
             });
         });
     }
