@@ -11,7 +11,6 @@ module.exports = function(RED) {
 
         // call bucket write on message reception
         node.on("input",function(msg) {
-            console.log(msg.payload);
             server.writeDevice(config.device, config.resource, msg.payload);
         });
     }
