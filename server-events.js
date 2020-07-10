@@ -14,7 +14,7 @@ module.exports = function(RED) {
         let server = RED.nodes.getNode(config.server);
 
         // fill event info
-        let event_fields = ["event", "device", "state"];
+        let event_fields = ["event", "device", "bucket", "endpoint", "state"];
         let event = {};
         for (let key in config) {
             if (event_fields.includes(key)){
