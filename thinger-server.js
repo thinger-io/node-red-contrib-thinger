@@ -143,6 +143,16 @@ module.exports = function(RED) {
             });
         };
 
+        node.readProperty = function(assetType, assetId, propertyId, handler){
+            const apiVersion = (assetType == "devices" ? "v3" : "v1");
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + assetType + "/" + assetId + "/properties/" + propertyId + "?authorization=" + token;
+            request({
+                url: url,
+                method: "GET",
+                json: true,
+            }, handler);
+        };
+
         node.unRegisterDeviceResourceListener = function (deviceId, resourceId, node){
             // check the device exists
             let device = devices[deviceId];
@@ -389,4 +399,41 @@ module.exports = function(RED) {
             token: {type: "text"}
         }
     });
+
+    /**
+    *  Admin Endpoints
+    */
+    RED.httpAdmin.get("/assets/:asset", RED.auth.needsPermission('assets.read'), function(req,res) {
+        try {
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/" + req.params.asset + "?authorization=" + token;
+            request({
+              url: url,
+              method: "GET",
+              json: true,
+            }, function (error, response, body){
+                res.json(body);
+            });
+        } catch(err) {
+            res.sendStatus(500);
+            node.error(RED._("assets.failed",{error:err.toString()}));
+        }
+    });
+
+    RED.httpAdmin.get("/assets/:asset/:asset_id/properties", RED.auth.needsPermission('properties.read'), function(req,res) {
+        const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
+        try {
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/properties" + "?authorization=" + token;
+            request({
+              url: url,
+              method: "GET",
+              json: true,
+            }, function (error, response, body){
+              res.json(body);
+            });
+        } catch(err) {
+            res.sendStatus(500);
+            node.error(RED._("properties.failed",{error:err.toString()}));
+        }
+    });
+
 };

@@ -1,0 +1,173 @@
+<script type="text/javascript">
+
+    function paintAssets(assetsIds) {
+        asset = $("#node-input-asset").val();
+        single_asset = asset.slice(0, -1); // removes trailing 's'
+
+        $("#node-input-"+asset).replaceWith($("<select>")
+            .prop('id',"node-input-"+asset)
+            .prop('style',"width:70%; !important")
+            .attr('onChange', "getProperties()"));
+        $("#node-input-"+asset).append($("<option>")
+            .prop('value',"")
+            .prop('default',"")
+            .text("Select "+single_asset));
+
+        for (var i in assetsIds) {
+            let assetId = assetsIds[i][single_asset];
+            $("#node-input-"+asset).append($("<option>")
+                .prop('value',assetId)
+                .text(assetId));
+        }
+
+        // Assign preiously set value
+        if (values[asset]) {
+          $("#node-input-"+asset+" option[value='"+values[asset]+"']").prop('selected',true);
+          getProperties();
+        }
+    }
+
+    function getProperties() {
+        assetId = $("#node-input-"+asset).val();
+
+        $.getJSON("assets/"+asset+"/"+assetId+"/properties")
+          .done(function(json) {
+              paintProperties(json);
+          })
+    }
+
+    function paintProperties(json) {
+        assetId = $("#node-input-"+asset).val();
+
+        $("#node-input-property").replaceWith($("<select>")
+            .prop('id',"node-input-property")
+            .prop('style',"width:70%; !important"));
+        $("#node-input-property").append($("<option>")
+            .prop('value',"")
+            .prop('default',"")
+            .text("Select property"));
+        for (var i in json) {
+            let property = json[i]["property"];
+            $("#node-input-property").append($("<option>")
+                .prop('value',property)
+                .text(property));
+        }
+
+        // Assign previously set value
+        if (values["property"]) {
+          $("#node-input-property option[value='"+values["property"]+"']").prop('selected',true);
+        }
+    }
+
+    RED.nodes.registerType('property-read', {
+        category: 'thinger',
+        color: '#74b9ff',
+        defaults: {
+            name: {value:""},
+            asset: {value: ""},
+            devices: {value: ""},
+            types: {value: ""},
+            groups: {value: ""},
+            property: {value: ""},
+            server: {type:"thinger-server", required:true}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 1,
+        outputs: 1,
+        align: 'left',
+        label: function() {
+            return this.name || (this.property ? this.property : "property read");
+        },
+        oneditprepare: function() {
+
+            // Saving original values to set them into de dynamic fields
+            var node = this;
+            values = [];
+
+            for (var field in node._def.defaults) {
+              values[field] = node[field];
+            }
+
+            // Save original property field to restore in case of asset change
+            var originalProperty = $("#node-input-property")[0].outerHTML;
+
+            $("#node-input-asset").change(function(e) {
+
+                // Hide all dynamic fields and restore fields before showing the selected one
+                $("#node-input-asset option").each(function() {
+                    if ($(this).val()) {
+                        $(".node-row-"+$(this).val()).hide();
+                    }
+                });
+                $("#node-input-property").replaceWith(originalProperty);
+
+                var val = $(this).val();
+                $(".node-row-"+val).show();
+
+                // Endpoint call and set dynamic fields
+                if ($(this).val()) {
+                    asset = $("#node-input-asset").val();
+                    $.getJSON("assets/"+asset, function(json){
+                      paintAssets(json);
+                    });
+                }
+            });
+
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="property-read">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="node-row-asset">
+        <div class="form-row">
+            <label for="node-input-asset"><i class="fa fa-building"></i> Asset</label>
+            <select id="node-input-asset" style="width:70%; !important">
+                <option value="" default>Select Asset</option>
+                <option value="devices">devices</option>
+                <option value="types">types</option>
+                <option value="groups">groups</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-devices" style="display: none;">
+         <div class="form-row">
+            <label for="node-input-devices"><i class="fa fa-rocket"></i> Device</label>
+            <input type="text" id="node-input-devices" placeholder="Device ID">
+        </div>
+    </div>
+
+    <div class="node-row-types" style="display: none;">
+         <div class="form-row">
+            <label for="node-input-types"><i class="fa fa-list-ul"></i> Type</label>
+            <input type="text" id="node-input-types" placeholder="Type ID">
+        </div>
+    </div>
+
+    <div class="node-row-groups" style="display: none;">
+         <div class="form-row">
+            <label for="node-input-groups"><i class="fa fa-th"></i> Group</label>
+            <input type="text" id="node-input-groups" placeholder="Group ID">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-property"><i class="fa fa-pencil-square-o"></i> Property</label>
+        <input type="text" id="node-input-property" placeholder="Property Identifier">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="property-read">
+  <p>Node that reads a property from either a device, type of devices or group of devices.</p>
+  <p>If you leave asset, device or property blank they must be set by using the <code>msg.asset</code>, <code>msg.assetId</code> and <code>msg.property</code> properties in every message sent to the node.</p>
+</script>
