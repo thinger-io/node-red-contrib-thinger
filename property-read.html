@@ -1,63 +1,5 @@
+
 <script type="text/javascript">
-
-    function paintAssets(assetsIds) {
-        asset = $("#node-input-asset").val();
-        single_asset = asset.slice(0, -1); // removes trailing 's'
-
-        $("#node-input-"+asset).replaceWith($("<select>")
-            .prop('id',"node-input-"+asset)
-            .prop('style',"width:70%; !important")
-            .attr('onChange', "getProperties()"));
-        $("#node-input-"+asset).append($("<option>")
-            .prop('value',"")
-            .prop('default',"")
-            .text("Select "+single_asset));
-
-        for (var i in assetsIds) {
-            let assetId = assetsIds[i][single_asset];
-            $("#node-input-"+asset).append($("<option>")
-                .prop('value',assetId)
-                .text(assetId));
-        }
-
-        // Assign preiously set value
-        if (values[asset]) {
-          $("#node-input-"+asset+" option[value='"+values[asset]+"']").prop('selected',true);
-          getProperties();
-        }
-    }
-
-    function getProperties() {
-        assetId = $("#node-input-"+asset).val();
-
-        $.getJSON("assets/"+asset+"/"+assetId+"/properties")
-          .done(function(json) {
-              paintProperties(json);
-          })
-    }
-
-    function paintProperties(json) {
-        assetId = $("#node-input-"+asset).val();
-
-        $("#node-input-property").replaceWith($("<select>")
-            .prop('id',"node-input-property")
-            .prop('style',"width:70%; !important"));
-        $("#node-input-property").append($("<option>")
-            .prop('value',"")
-            .prop('default',"")
-            .text("Select property"));
-        for (var i in json) {
-            let property = json[i]["property"];
-            $("#node-input-property").append($("<option>")
-                .prop('value',property)
-                .text(property));
-        }
-
-        // Assign previously set value
-        if (values["property"]) {
-          $("#node-input-property option[value='"+values["property"]+"']").prop('selected',true);
-        }
-    }
 
     RED.nodes.registerType('property-read', {
         category: 'thinger',
@@ -65,9 +7,7 @@
         defaults: {
             name: {value:""},
             asset: {value: ""},
-            devices: {value: ""},
-            types: {value: ""},
-            groups: {value: ""},
+            assetId: {value: ""},
             property: {value: ""},
             server: {type:"thinger-server", required:true}
         },
@@ -80,37 +20,63 @@
         },
         oneditprepare: function() {
 
-            // Saving original values to set them into de dynamic fields
-            var node = this;
-            values = [];
-
-            for (var field in node._def.defaults) {
-              values[field] = node[field];
-            }
-
-            // Save original property field to restore in case of asset change
-            var originalProperty = $("#node-input-property")[0].outerHTML;
+            // Save original assetId row to restore in case of asset change
+            var originalAssetId = $(".node-row-assetId")[0].outerHTML;
+            var originalProperty = $(".node-row-property")[0].outerHTML;
+            var firstTime = true;
 
             $("#node-input-asset").change(function(e) {
-
-                // Hide all dynamic fields and restore fields before showing the selected one
-                $("#node-input-asset option").each(function() {
-                    if ($(this).val()) {
-                        $(".node-row-"+$(this).val()).hide();
-                    }
-                });
-                $("#node-input-property").replaceWith(originalProperty);
-
-                var val = $(this).val();
-                $(".node-row-"+val).show();
-
-                // Endpoint call and set dynamic fields
-                if ($(this).val()) {
-                    asset = $("#node-input-asset").val();
-                    $.getJSON("assets/"+asset, function(json){
-                      paintAssets(json);
-                    });
+                // Restore form values if not previously set
+                if (!firstTime) {
+                    $(".node-row-assetId").replaceWith(originalAssetId);
+                    $(".node-row-property").replaceWith(originalProperty);
                 }
+                firstTime = false;
+
+                // Remove previously set handlers or the will acumulate
+                $('#node-input-assetId').off('click');
+                $('#node-input-property').off('click');
+
+                var asset = $(this).val();
+                var assets = asset+"s";
+
+                if (asset) {
+                    // Field appearance
+                    if (typeof changeAssetIdIcon === "function") {
+                        changeAssetIdIcon(asset);
+                    }
+
+                    // Options and filtering
+                    $("#node-input-assetId").click(function(e) {
+                        if (!$(".red-form-options").length) {
+                            $.getJSON("assets/"+assets, function(json){
+                              createOptions(json,"assetId");
+                          });
+                        }
+                    });
+
+                  // Properties
+                  $('#node-input-property').click(function(e) {
+                      var assetId = $("#node-input-assetId").val();
+                      if (assetId) {
+                          if (!$(".red-form-options").length) {
+                            $.getJSON("assets/"+assets+"/"+assetId+"/properties", function(json) {
+                              createOptions(json,"property");
+                            });
+                          }
+                      }
+                  });
+
+                }
+            });
+
+            // Load static scripts, also needed for stylesheets
+            console.log("Loading stating scripts");
+            $.getScript('thinger-server/js/thinger-server/thinger.js')
+            .fail(function(jqxhr, settings, exception ) {
+              console.log("failed");
+              console.log(exception);
+              console.log(exception.stack);
             });
 
         }
@@ -118,6 +84,11 @@
 </script>
 
 <script type="text/x-red" data-template-name="property-read">
+    <!-- Add thinger styling -->
+    <div>
+        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
+    </div>
+
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -128,37 +99,25 @@
             <label for="node-input-asset"><i class="fa fa-building"></i> Asset</label>
             <select id="node-input-asset" style="width:70%; !important">
                 <option value="" default>Select Asset</option>
-                <option value="devices">devices</option>
-                <option value="types">types</option>
-                <option value="groups">groups</option>
+                <option value="device">device</option>
+                <option value="type">type</option>
+                <option value="group">group</option>
             </select>
         </div>
     </div>
 
-    <div class="node-row-devices" style="display: none;">
+    <div class="node-row-assetId">
          <div class="form-row">
-            <label for="node-input-devices"><i class="fa fa-rocket"></i> Device</label>
-            <input type="text" id="node-input-devices" placeholder="Device ID">
+            <label for="node-input-assetId"><i class="fa fa-home"></i> Asset Id</label>
+            <input type="text" id="node-input-assetId" placeholder="Select an asset or insert a new one">
         </div>
     </div>
 
-    <div class="node-row-types" style="display: none;">
-         <div class="form-row">
-            <label for="node-input-types"><i class="fa fa-list-ul"></i> Type</label>
-            <input type="text" id="node-input-types" placeholder="Type ID">
+    <div class="node-row-property">
+        <div class="form-row">
+            <label for="node-input-property"><i class="fa fa-pencil-square-o"></i> Property</label>
+            <input type="text" id="node-input-property" placeholder="Select a property or insert a new one">
         </div>
-    </div>
-
-    <div class="node-row-groups" style="display: none;">
-         <div class="form-row">
-            <label for="node-input-groups"><i class="fa fa-th"></i> Group</label>
-            <input type="text" id="node-input-groups" placeholder="Group ID">
-        </div>
-    </div>
-
-    <div class="form-row">
-        <label for="node-input-property"><i class="fa fa-pencil-square-o"></i> Property</label>
-        <input type="text" id="node-input-property" placeholder="Property Identifier">
     </div>
 
     <div class="form-row">
@@ -169,5 +128,7 @@
 
 <script type="text/x-red" data-help-name="property-read">
   <p>Node that reads a property from either a device, type of devices or group of devices.</p>
-  <p>If you leave asset, device or property blank they must be set by using the <code>msg.asset</code>, <code>msg.assetId</code> and <code>msg.property</code> properties in every message sent to the node.</p>
+  <p>If you leave asset, asset id or property blank they must be set by using the <code>msg.asset</code>, <code>msg.assetId</code> and <code>msg.property</code> properties in every message sent to the node.</p>
+  <p>Notice that <code>msg.asset<code> only allows three possible values: <pre>device</pre>, <pre>type</pre> and <pre>group</pre>.</p>
+  <p>Regarding the fields <code>msg.assetId</code> and <code>msg.property</code>, the must exists in the Thinger platform, otherwise the flow will fail.</p>
 </script>

@@ -11,11 +11,11 @@ module.exports = function(RED) {
 
         // call property read on input
         node.on("input",function(msg) {
-            let assetType = config.asset || msg.asset;
-            let assetId = config[config.asset] || msg.assetId;
+            let asset = (config.asset || msg.asset)+"s";
+            let assetId = config.assetId || msg.assetId;
             let property = config.property || msg.property;
 
-            server.readProperty(assetType, assetId, property, function(error, response, body) {
+            server.readProperty(asset, assetId, property, function(error, response, body) {
               node.send({payload: body});
             });
         });
