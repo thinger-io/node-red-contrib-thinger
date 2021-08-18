@@ -153,6 +153,41 @@ module.exports = function(RED) {
             }, handler);
         };
 
+        node.writeProperty = function(assetType, assetId, propertyId, data){
+            const apiVersion = (assetType == "devices" ? "v3" : "v1");
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + assetType + "/" + assetId + "/properties/" + propertyId + "?authorization=" + token;
+
+            // Check if property exists if not create it
+            request({
+                url: url,
+                method: "GET",
+                json: true,
+            }, function(error, response, body){
+                if (response && response.statusCode == 404) {
+                    request({
+                        url: url.replace("/"+propertyId,""),
+                        method: "POST",
+                        json: true,
+                        body: JSON.parse('{"property":"'+propertyId+'","value":'+data+'}')
+                    }, function(error1, response1, body1) {
+                        node.log(JSON.stringify(error1));
+                        node.log(JSON.stringify(response1));
+                    });
+                } else {
+                    request({
+                        url: url,
+                        method: "PUT",
+                        json: true,
+                        body: JSON.parse('{"value":'+data+'}')
+                        //body: JSON.parse(data)
+                    }, function(error2, response2, body2) {
+                        node.log(JSON.stringify(error2));
+                        node.log(JSON.stringify(response2));
+                    });
+                }
+            });
+        };
+
         node.unRegisterDeviceResourceListener = function (deviceId, resourceId, node){
             // check the device exists
             let device = devices[deviceId];
@@ -434,6 +469,35 @@ module.exports = function(RED) {
             res.sendStatus(500);
             node.error(RED._("properties.failed",{error:err.toString()}));
         }
+    });
+
+    RED.httpAdmin.get("/assets/:asset/:asset_id/properties/:property_id", RED.auth.needsPermission('properties.write'), function(req,res) {
+        const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
+        try {
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/properties/" + req.params.property_id + "?authorization=" + token;
+            request({
+              url: url,
+              method: "GET",
+              json: true,
+            }, function (error, response, body){
+              res.json(body);
+            });
+        } catch(err) {
+            res.sendStatus(500);
+            node.error(RED._("properties.failed",{error:err.toString()}));
+        }
+    });
+
+        RED.httpAdmin.get('/thinger-server/js/*', function(req, res){
+        var options = {
+            root: __dirname + '/static/',
+            dotfiles: 'deny'
+        };
+
+        res.sendFile(req.params[0], options);
+
+        // var filename = path.join(__dirname , 'static', req.params[0]);
+        // res.sendfile(filename);
     });
 
 };

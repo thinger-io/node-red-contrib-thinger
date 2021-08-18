@@ -22,6 +22,7 @@
 			"endpoint-call": "endpoint-call.js",
 			"bucket-write": "bucket-write.js",
 			"property-read": "property-read.js",
+			"property-write": "property-write.js",
 			"device-write": "device-write.js",
 			"server-events": "server-events.js"
 		}

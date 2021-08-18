@@ -1,0 +1,173 @@
+<script type="text/javascript">
+
+    RED.nodes.registerType('property-write', {
+        category: 'thinger',
+        color: '#74b9ff',
+        defaults: {
+            name: {value:""},
+            asset: {value: ""},
+            assetId: {value: ""},
+            property: {value: ""},
+            value: {value: ""},
+            server: {type:"thinger-server", required:true}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 1,
+        outputs: 1,
+        align: 'left',
+        label: function() {
+            return this.name || (this.property ? this.property : "property write");
+        },
+        oneditprepare: function() {
+            // Prepare editor
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-value-editor',
+                mode: 'ace/mode/json',
+                value: this.value
+            });
+
+            var editor = this.editor;
+            if (editor.getValue()) {
+                var editor_value = JSON.parse(editor.getValue());
+                editor.setValue(JSON.stringify(editor_value,null,'\t'));
+            }
+
+            // Save original assetId row to restore in case of asset change
+            var originalAssetId = $(".node-row-assetId")[0].outerHTML;
+            var originalProperty = $(".node-row-property")[0].outerHTML;
+            var firstTime = true;
+
+            $("#node-input-asset").change(function(e) {
+                // Restore form values if not previously set
+                if (!firstTime) {
+                    $(".node-row-assetId").replaceWith(originalAssetId);
+                    $(".node-row-property").replaceWith(originalProperty);
+                    editor.setValue("");
+                }
+                firstTime = false;
+
+                // Remove previously set handlers or the will acumulate
+                $('#node-input-assetId').off('click');
+                $('#node-input-property').off('click');
+                $('#node-input-property').off('input');
+
+                var asset = $(this).val();
+                var assets = asset+"s";
+
+                if (asset) {
+                    // Field appearance
+                    if (typeof changeAssetIdIcon === "function") {
+                        changeAssetIdIcon(asset);
+                    }
+
+                    // Options and filtering
+                    $("#node-input-assetId").click(function(e) {
+                        if (!$(".red-form-options").length) {
+                            $.getJSON("assets/"+assets, function(json){
+                              createOptions(json,"assetId");
+                          });
+                        }
+                    });
+
+                  // Properties
+                  $('#node-input-property').click(function(e) {
+                      var assetId = $("#node-input-assetId").val();
+                      if (assetId) {
+                          if (!$(".red-form-options").length) {
+                            $.getJSON("assets/"+assets+"/"+assetId+"/properties", function(json) {
+                                createOptions(json,"property");
+                                for (var i in json) {
+                                    $("#node-input-property").change(function() {
+                                        if ($("#node-input-property").val() == json[i].property) {
+                                            editor.setValue(JSON.stringify(json[i].value,null,'\t'));
+                                        }
+                                    });
+                                }
+                            });
+                          }
+                      }
+                  });
+
+                }
+            });
+
+            // Load static scripts, also needed for stylesheets
+            console.log("Loading stating scripts");
+            $.getScript('thinger-server/js/thinger-server/thinger.js')
+            .fail(function(jqxhr, settings, exception ) {
+              console.log("failed");
+              console.log(exception);
+              console.log(exception.stack);
+            });
+
+        },
+        oneditsave: function() {
+            // remove pretty characters and save
+            var editor_value = JSON.parse(this.editor.getValue());
+            this.value = JSON.stringify(editor_value);
+            this.editor.destroy();
+            delete this.editor;
+        },
+        oneditcancel: function() {
+            this.editor.destroy();
+            delete this.editor;
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="property-write">
+    <!-- Add thinger styling -->
+    <div>
+        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="node-row-asset">
+        <div class="form-row">
+            <label for="node-input-asset"><i class="fa fa-building"></i> Asset</label>
+            <select id="node-input-asset" style="width:70%; !important">
+                <option value="" default>Select Asset</option>
+                <option value="device">device</option>
+                <option value="type">type</option>
+                <option value="group">group</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-assetId">
+         <div class="form-row">
+            <label for="node-input-assetId"><i class="fa fa-home"></i> Asset Id</label>
+            <input type="text" id="node-input-assetId" placeholder="Select an asset or insert a new one">
+        </div>
+    </div>
+
+    <div class="node-row-property">
+        <div class="form-row">
+            <label for="node-input-property"><i class="fa fa-pencil-square-o"></i> Property</label>
+            <input type="text" id="node-input-property" placeholder="Property Identifier">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-value" style="vertical-align: top;"><i class="fa fa-pencil-square"></i> Value</label>
+        <div id="node-input-value-editor" class="node-text-editor" style="height:125px; width:70%; display:inline-block;"></div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="property-write">
+  <p>Node that writes a property to either a device, type of devices or group of devices.</p>
+  <p>If you leave asset, asset id, property name or property value blank they must be set by using the <code>msg.asset</code>, <code>msg.assetId</code>, <code>msg.property</code> or <code>msg.value</code> properties in every message sent to the node.</p>
+  <p>Notice that <code>msg.asset<code> only allows three possible values: <pre>device</pre>, <pre>type</pre> and <pre>group</pre>.</p>
+  <p>Regarding the field <code>msg.assetId</code>, it must exists in the Thinger platform, otherwise the flow will fail.</p>
+  <p>By contrast, the fields <code>msg.property</code> or <code>msg.value</code> may not exist in the Thinger platform, as they will be created on write.</p>
+</script>
