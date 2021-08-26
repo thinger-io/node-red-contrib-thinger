@@ -21,6 +21,7 @@
 			"device-stream": "device-stream.js",
 			"endpoint-call": "endpoint-call.js",
 			"bucket-write": "bucket-write.js",
+			"bucket-read": "bucket-read.js",
 			"property-read": "property-read.js",
 			"property-write": "property-write.js",
 			"device-write": "device-write.js",

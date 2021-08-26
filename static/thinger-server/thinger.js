@@ -95,7 +95,10 @@ function activateOption(obj,field) {
  */
 function fillOptions(json,field) {
     var fieldValue = $("#node-input-"+field).val();
-    var asset = $("#node-input-asset").val();
+    var asset = field;
+    if (field == "assetId") {
+        var asset = $("#node-input-asset").val();
+    }
 
     // For each option from the json response create a new field and assign the corresponding values and icons
     for (var i in json) {
@@ -108,9 +111,10 @@ function fillOptions(json,field) {
         }
 
         var icon = $("<i>");
-        if (json[i].hasOwnProperty('connection')) {
+        if (json[i].hasOwnProperty('connection') || json[i].hasOwnProperty('enabled')) {
             icon.addClass("fa fa-circle");
-            if (json[i].connection.active) {
+            if ((json[i].hasOwnProperty('connection') && json[i].connection.active)
+                 || (json[i].hasOwnProperty('enabled') && json[i].enabled)) {
                 icon.addClass("icon-connected");
             } else {
                 icon.addClass("icon-disconnected");
@@ -167,5 +171,7 @@ function createOptions(json,field) {
 
 
 $(window).ready(function () {
-  changeAssetIdIcon($("#node-input-asset").val());
+  if ($("#node-input-asset").length && $("#node-input-asset").val()) {
+      changeAssetIdIcon($("#node-input-asset").val());
+  }
 });

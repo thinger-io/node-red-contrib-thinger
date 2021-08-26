@@ -35,10 +35,14 @@
     background-color: #f5f5f5;
 }
 
-.icon-disconnected {
+.icon-disconnected, .icon-connected {
     margin-right: 5px;
 }
 
 .icon-disconnected {
     color: #f05050;
+}
+
+.icon-connected {
+    color: #27c24c;
 }

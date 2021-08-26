@@ -109,6 +109,31 @@ module.exports = function(RED) {
             });
         };
 
+        node.readBucket = function(bucketId, queryParameters){
+            // Query parameters to string
+            var queryParametersString = "";
+            queryParameters.forEach(function(value,key) {
+                if (value) {
+                    queryParametersString += "&"+key+"="+value;
+                }
+            });
+
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/buckets/" + bucketId + "/data?authorization=" + token + queryParametersString;
+            return new Promise(function(resolve, reject) {
+                request({
+                    url: url,
+                    method: "GET",
+                    json: true,
+                }, function(error, response, body) {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(response);
+                    }
+                });
+            });
+        };
+
         node.writeBucket = function(bucketId, data){
             const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/buckets/" + bucketId + "/data?authorization=" + token;
             request({
@@ -488,7 +513,7 @@ module.exports = function(RED) {
         }
     });
 
-        RED.httpAdmin.get('/thinger-server/js/*', function(req, res){
+    RED.httpAdmin.get('/thinger-server/js/*', function(req, res){
         var options = {
             root: __dirname + '/static/',
             dotfiles: 'deny'
