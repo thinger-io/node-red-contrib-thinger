@@ -464,8 +464,13 @@ module.exports = function(RED) {
     *  Admin Endpoints
     */
     RED.httpAdmin.get("/assets/:asset", RED.auth.needsPermission('assets.read'), function(req,res) {
+        var filter = "";
+        if (req.query.name) {
+            filter = "&name="+req.query.name;
+        }
+
         try {
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/" + req.params.asset + "?authorization=" + token;
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/" + req.params.asset + "?authorization=" + token + filter;
             request({
               url: url,
               method: "GET",
@@ -481,8 +486,14 @@ module.exports = function(RED) {
 
     RED.httpAdmin.get("/assets/:asset/:asset_id/properties", RED.auth.needsPermission('properties.read'), function(req,res) {
         const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
+
+        var filter = "";
+        if (req.query.name) {
+            filter = "&name="+req.query.name;
+        }
+
         try {
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/properties" + "?authorization=" + token;
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/properties" + "?authorization=" + token + filter;
             request({
               url: url,
               method: "GET",
@@ -498,8 +509,14 @@ module.exports = function(RED) {
 
     RED.httpAdmin.get("/assets/:asset/:asset_id/properties/:property_id", RED.auth.needsPermission('properties.write'), function(req,res) {
         const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
+
+        var filter = "";
+        if (req.query.name) {
+            filter = "&name="+req.query.name;
+        }
+
         try {
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/properties/" + req.params.property_id + "?authorization=" + token;
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/properties/" + req.params.property_id + "?authorization=" + token + filter;
             request({
               url: url,
               method: "GET",
@@ -520,9 +537,6 @@ module.exports = function(RED) {
         };
 
         res.sendFile(req.params[0], options);
-
-        // var filename = path.join(__dirname , 'static', req.params[0]);
-        // res.sendfile(filename);
     });
 
 };

@@ -100,6 +100,7 @@ function fillOptions(json,field) {
         var asset = $("#node-input-asset").val();
     }
 
+    let elements = $(); // may create slack but will remove flickering
     // For each option from the json response create a new field and assign the corresponding values and icons
     for (var i in json) {
         let option = $("<span>");
@@ -127,7 +128,7 @@ function fillOptions(json,field) {
         let separator = json[i].name ? " - ":"";
 
         option.append(icon,id,separator,name);
-        $(".red-form-options").append(option);
+        elements = elements.add(option);
 
         // Event handler for each option
         option.click(function() {
@@ -136,14 +137,26 @@ function fillOptions(json,field) {
 
     }
 
+    $(".red-form-option").remove();
+    $(".red-form-option-active").remove();
+    $(".red-form-options").append(elements);
+
+    // Set the first option as active
+    if (!$(".red-form-option-active").length) {
+        let first = $(".red-form-options span:first-child");
+        first.addClass("red-form-option-active");
+        first.removeClass("red-form-option");
+    }
+
 }
 
 /**
  * Creates the options div for the field pass as argument given the options in json format
- * @param {JSON} json The response from the API call with the data
+ * @param {string} url The url from where to retrieve the data and the filtering
  * @param {String} field The name of the field from which the options div needs to be generated. Like node-input-<field>
+ * @param {function} callback Function to execute with the JSON response from the inside queries
  */
-function createOptions(json,field) {
+function createOptions(url,field,callback) {
 
     // Container
     $("<div>").insertAfter("#node-input-"+field)
@@ -159,13 +172,55 @@ function createOptions(json,field) {
     });
 
     // Filtering event handler
-    $("#node-input-"+field).on("keyup",function() {
-        filterOptions($(this));
+    $("#node-input-"+field).on("keyup",function(e) {
+        switch (e.key) {
+            case "Enter":
+                activateOption($(".red-form-option-active"), field);
+                break;
+            case "ArrowUp": {
+                let selected = $(".red-form-option-active");
+                let prev = selected.prev();
+                if (prev.length) {
+                  selected.removeClass("red-form-option-active");
+                  selected.addClass("red-form-option");
+                  prev.removeClass("red-form-option");
+                  prev.addClass("red-form-option-active");
+                }
+                break;
+            }
+            case "ArrowDown": {
+                let selected = $(".red-form-option-active");
+                let next = selected.next();
+                if (next.length) {
+                  selected.removeClass("red-form-option-active");
+                  selected.addClass("red-form-option");
+                  next.removeClass("red-form-option");
+                  next.addClass("red-form-option-active");
+                }
+                break;
+            }
+            default:
+                if (field == "property") { // TODO: remove once search over properties is implemented in the server
+                    filterOptions($(this));
+                } else {
+                    $.getJSON(url+"?name="+$(this).val().toLowerCase(), function(json) {
+                      fillOptions(json,field);
+                        if (typeof callback === "function") {
+                          callback(json);
+                        }
+                    });
+                }
+        }
     });
 
 
     // Fill with options
-    fillOptions(json,field);
+    $.getJSON(url, function(json) {
+        fillOptions(json,field);
+        if (typeof callback === "function") {
+            callback(json);
+        }
+    });
 
 }
 

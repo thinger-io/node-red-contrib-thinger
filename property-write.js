@@ -14,7 +14,7 @@ module.exports = function(RED) {
             let asset = (config.asset || msg.asset)+"s";
             let assetId = config.assetId || msg.assetId;
             let property = config.property || msg.property;
-            var value = config.value || msg.value;
+            var value = config.value || msg.payload || msg.value;
             if (typeof(value) === 'object') {
                 value = JSON.stringify(value);
             }

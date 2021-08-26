@@ -49,9 +49,7 @@
                     // Options and filtering
                     $("#node-input-assetId").click(function(e) {
                         if (!$(".red-form-options").length) {
-                            $.getJSON("assets/"+assets, function(json){
-                              createOptions(json,"assetId");
-                          });
+                            createOptions("assets/"+assets,"assetId");
                         }
                     });
 
@@ -60,9 +58,7 @@
                       var assetId = $("#node-input-assetId").val();
                       if (assetId) {
                           if (!$(".red-form-options").length) {
-                            $.getJSON("assets/"+assets+"/"+assetId+"/properties", function(json) {
-                              createOptions(json,"property");
-                            });
+                              createOptions("assets/"+assets+"/"+assetId+"/properties","property");
                           }
                       }
                   });
@@ -129,6 +125,6 @@
 <script type="text/x-red" data-help-name="property-read">
   <p>Node that reads a property from either a device, type of devices or group of devices.</p>
   <p>If you leave asset, asset id or property blank they must be set by using the <code>msg.asset</code>, <code>msg.assetId</code> and <code>msg.property</code> properties in every message sent to the node.</p>
-  <p>Notice that <code>msg.asset<code> only allows three possible values: <pre>device</pre>, <pre>type</pre> and <pre>group</pre>.</p>
+  <p>Notice that <code>msg.asset</code> only allows three possible values: <samp>device</samp>, <samp>type</samp> and <samp>group</samp>.</p>
   <p>Regarding the fields <code>msg.assetId</code> and <code>msg.property</code>, the must exists in the Thinger platform, otherwise the flow will fail.</p>
 </script>

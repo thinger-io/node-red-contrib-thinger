@@ -63,9 +63,7 @@
                     // Options and filtering
                     $("#node-input-assetId").click(function(e) {
                         if (!$(".red-form-options").length) {
-                            $.getJSON("assets/"+assets, function(json){
-                              createOptions(json,"assetId");
-                          });
+                            createOptions("assets/"+assets,"assetId",null);
                         }
                     });
 
@@ -74,15 +72,15 @@
                       var assetId = $("#node-input-assetId").val();
                       if (assetId) {
                           if (!$(".red-form-options").length) {
-                            $.getJSON("assets/"+assets+"/"+assetId+"/properties", function(json) {
-                                createOptions(json,"property");
-                                for (var i in json) {
-                                    $("#node-input-property").change(function() {
+                            createOptions("assets/"+assets+"/"+assetId+"/properties","property",function(json) {
+                                $("#node-input-property").off("change");
+                                $("#node-input-property").change(function() {
+                                    for (var i in json) {
                                         if ($("#node-input-property").val() == json[i].property) {
                                             editor.setValue(JSON.stringify(json[i].value,null,'\t'));
                                         }
-                                    });
-                                }
+                                    }
+                                });
                             });
                           }
                       }
@@ -166,8 +164,8 @@
 
 <script type="text/x-red" data-help-name="property-write">
   <p>Node that writes a property to either a device, type of devices or group of devices.</p>
-  <p>If you leave asset, asset id, property name or property value blank they must be set by using the <code>msg.asset</code>, <code>msg.assetId</code>, <code>msg.property</code> or <code>msg.value</code> properties in every message sent to the node.</p>
-  <p>Notice that <code>msg.asset<code> only allows three possible values: <pre>device</pre>, <pre>type</pre> and <pre>group</pre>.</p>
+  <p>If you leave asset, asset id, property name or property value blank they must be set by using the <code>msg.asset</code>, <code>msg.assetId</code>, <code>msg.property</code> or <code>msg.value</code>/<code>msg.payload</code> properties in every message sent to the node.</p>
+  <p>Notice that <code>msg.asset</code> only allows three possible values: <samp>device</samp>, <samp>type</samp> and <samp>group</samp>.</p>
   <p>Regarding the field <code>msg.assetId</code>, it must exists in the Thinger platform, otherwise the flow will fail.</p>
-  <p>By contrast, the fields <code>msg.property</code> or <code>msg.value</code> may not exist in the Thinger platform, as they will be created on write.</p>
+  <p>By contrast, the fields <code>msg.property</code> or <code>msg.value</code>/<code>msg.payload</code> may not exist in the Thinger platform, as they will be created on write.</p>
 </script>
