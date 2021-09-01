@@ -1,0 +1,321 @@
+<script type="text/javascript">
+
+    function loadDateField(ts,field) {
+        if (ts) {
+          var date = new Date(ts);
+          $("#node-input-"+field+"date").val(
+            date.getFullYear()+"-"+
+            (date.getMonth()+1).toString().padStart(2,'0')+"-"+
+            date.getDate().toString().padStart(2,'0'));
+          $("#node-input-"+field+"time").val(
+            date.getHours().toString().padStart(2,'0')+":"+
+            date.getMinutes().toString().padStart(2,'0'));
+      }
+    }
+
+    function showRelative() {
+        $(".node-row-relative").show();
+        if (!$("#node-input-timespanSequence").val()) { // assuming that if one is set all three are set
+            $("#node-input-timespanSequence").val("latest");
+            $("#node-input-timespanValue").val("6");
+            $("#node-input-timespanUnits").val("h");
+        }
+    }
+
+    function hideRelative() {
+        $(".node-row-relative").hide();
+        $("#node-input-timespanSequence").val("");
+        $("#node-input-timespanValue").val("");
+        $("#node-input-timespanUnits").val("");
+    }
+
+    function hideAbsolute() {
+        $(".node-row-absolute").hide();
+        $("#node-input-startdate").val("");
+        $("#node-input-starttime").val("");
+        $("#node-input-enddate").val("");
+        $("#node-input-endtime").val("");
+    }
+
+    function showSimple() {
+        $(".node-row-simple").show();
+        if (!$("#node-input-items").val()) {
+            $("#node-input-items").val("1000");
+        }
+    }
+
+    function hideSimple() {
+        $(".node-row-simple").hide();
+        $("#node-input-items").val("");
+    }
+
+    function hideAggregation() {
+        $(".node-row-aggregation").hide();
+        $("#node-input-aggregation").val("");
+        $("#node-input-aggregationType").hide();
+        $("#node-input-aggregationType").val("");
+    }
+
+    RED.nodes.registerType('bucket-read', {
+        category: 'thinger',
+        color: '#74b9ff',
+        defaults: {
+            name: {value:""},
+            bucket: {value: ""},
+            filter: {value: ""},
+            timespanSequence: {value: ""},
+            timespanValue: {value: ""},
+            timespanUnits: {value: ""},
+            maxTs: {value: ""},
+            minTs: {value: ""},
+            items: {value: ""},
+            limit: {value: ""},
+            aggregation: {value: ""}, //1m, 5h, 1w
+            aggregationType: {value: ""}, // mean, median, 
+            sort: {value: ""},
+            server: {type:"thinger-server", required:true}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 1,
+        outputs: 1,
+        inputLabels: "event",
+        align: 'left',
+        label: function() {
+            return this.name || (this.bucket ? this.bucket : "bucket read");
+        },
+        oneditprepare: function() {
+
+            // Defaults set on prepare instead of properties to allow for configuration on input message
+            $("#node-input-sort").val(this.sort || "asc");
+            loadDateField(this.minTs,"start");
+            loadDateField(this.maxTs,"end");
+            var aggregationType = this.aggregationType;
+
+            // Event handlers and requests
+            $("#node-input-bucket").click(function() {
+                if (!$(".red-form-options").length) {
+                    createOptions("assets/buckets","bucket")
+                }
+            });
+
+            $("#node-input-bucket").change(function() {
+                if ($(this).val()) {
+                    $(".node-row-aggregation").show();
+                } else {
+                    hideAggregation();
+                }
+            });
+
+            $("#node-input-filter").change(function() {
+                if ($(this).val() == "relative") {
+                    showRelative();
+                    hideAbsolute();
+                    hideSimple();
+                    $(".node-row-limit").show();
+                } else if ($(this).val() == "absolute") {
+                    $(".node-row-absolute").show();
+                    hideRelative();
+                    hideSimple();
+                    $(".node-row-limit").show();
+                } else if ($(this).val() == "simple") {
+                    showSimple(); 
+                    hideRelative();
+                    hideAbsolute();
+                    $(".node-row-limit").hide();
+                    $("#node-input-limit").val("");
+                } else {
+                    hideRelative();
+                    hideAbsolute();
+                    hideSimple();
+                    $(".node-row-limit").hide();
+                    $("#node-input-limit").val("");
+                }
+
+            });
+
+            $("#node-input-aggregation").change(function() {
+                if ($(this).val()) {
+                    $("#node-input-aggregationType").show();
+                    $("#node-input-aggregationType").val(aggregationType || "mean");
+                } else {
+                    aggregationType = "";
+                    $("#node-input-aggregationType").val(aggregationType);
+                    $("#node-input-aggregationType").hide();
+                }
+            });
+
+            $("#node-input-startdate").change(function() {
+                if ($(this).val() && !$("#node-input-starttime").val()) {
+                    $("#node-input-starttime").val("00:00");
+                }
+            });
+
+            $("#node-input-enddate").change(function() {
+                if ($(this).val() && !$("#node-input-endtime").val()) {
+                    $("#node-input-endtime").val("00:00");
+                }
+            });
+
+            // Load static scripts, also needed for stylesheets
+            console.log("Loading starting scripts");
+            $.getScript('thinger-server/js/thinger-server/thinger.js')
+            .fail(function(jqxhr, settings, exception ) {
+              console.log("failed");
+              console.log(exception);
+              console.log(exception.stack);
+            });
+        },
+        oneditsave: function() {
+          // Save max ts and min ts in case of absolute
+          if ($("#node-input-filter").val() == "absolute") {
+              this.minTs = new Date($("#node-input-startdate").val()+"T"+$("#node-input-starttime").val()).toISOString();
+              this.maxTs = new Date($("#node-input-enddate").val()+"T"+$("#node-input-endtime").val()).toISOString();
+          } else {
+              this.minTs = "";
+              this.maxTs = "";
+          }
+
+          // Remove timespan
+          if (!$("#node-input-timespanValue").val()) {
+              this.timespanSequence = "";
+              this.timespanUnits = "";
+          }
+
+          // Remove aggregationType
+          if (!$("#node-input-aggregation").val()) {
+              this.aggregationType = "";
+          }
+
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="bucket-read">
+    <!-- Add thinger styling -->
+    <div>
+        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-bucket"><i class="fa fa-database"></i> Bucket</label>
+        <input type="text" id="node-input-bucket" placeholder="Bucket Identifier">
+    </div>
+
+    <div class="node-row-filter">
+        <div class="form-row">
+            <label for="node-input-filter"><i class="fa fa-filter"></i> Filter</label>
+            <select id="node-input-filter" style="width:70%; !important">
+                <option value="" default>Select Filter</option>
+                <option value="relative">relative timeframe</option>
+                <option value="absolute">absolute timeframe</option>
+                <option value="simple">last N items</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-relative" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-timespan"><i class="fa fa-clock-o"></i> Time Period</label>
+            <select id="node-input-timespanSequence" style="width:20%; !important">
+                <option value="latest" default>latest</option>
+                <option value="previous">previous</option>
+            </select>
+            <input type="number" id="node-input-timespanValue" placeholder="Specify the timespan of the data to display" style="width:28%; !important" value=6>
+            <select id="node-input-timespanUnits" style="width:20%; !important">
+                <option value="s">seconds</option>
+                <option value="m">minutes</option>
+                <option value="h" default>hours</option>
+                <option value="d">days</option>
+                <option value="w">weeks</option>
+                <option value="m">months</option>
+                <option value="y">years</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-absolute" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-startdate"><i class="fa fa-calendar"></i> Start Date</label>
+            <input type="date" id="node-input-startdate" placeholder="" style="width: 35%; !important">
+            <input type="time" id="node-input-starttime" placeholder="" style="width: 34%; !important">
+        </div>
+
+        <div class="form-row">
+            <label for="node-input-enddate"><i class="fa fa-calendar"></i> End Date</label>
+            <input type="date" id="node-input-enddate" placeholder="" style="width: 35%; !important">
+            <input type="time" id="node-input-endtime" placeholder="" style="width: 34%; !important">
+        </div>
+    </div>
+
+    <div class="node-row-simple" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-items"><i class="fa fa-arrow-left"></i> Items</label>
+            <input type="number" id="node-input-items" min="0" placeholder="Specify the number of last items to select">
+        </div>
+    </div>
+
+    <div class="node-row-limit" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-limit"><i class="fa fa-sort-numeric-asc"></i> Limit</label>
+            <input type="number" id="node-input-limit" min="-1" placeholder="Specify the number of registries to return">
+        </div>
+    </div>
+
+    <div class="node-row-aggregation" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-aggregation"><i class="fa fa-bar-chart"></i> Aggregation</label>
+            <select id="node-input-aggregation" style="width:35%; !important">
+                <option value="" default>None</option>
+                <option value="5m">5 min</option>
+                <option value="15m">15 min</option>
+                <option value="30m">30 min</option>
+                <option value="1h">1 hour</option>
+                <option value="3h">3 hour</option>
+                <option value="6h">6 hour</option>
+                <option value="12h">12 hour</option>
+                <option value="1d">1 day</option>
+                <option value="1w">1 week</option>
+            </select>
+            <select id="node-input-aggregationType" style="display: none; width:34%; !important">
+                <option value="median">median</option>
+                <option value="mean" default>mean</option>
+                <option value="median">median</option>
+                <option value="max">max</option>
+                <option value="min">min</option>
+                <option value="count">count</option>
+                <option value="sum">sum</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-sort"><i class="fa fa-sort"></i> Sort</label>
+        <select id="node-input-sort" style="width: 70%; !important">
+            <option value="asc" default>ascending</option>
+            <option value="desc">descending</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="bucket-read">
+  <p>Node that reads the data from a data bucket.</p>
+  <p>If any of the properties of the node are left blank, the must be set by using an input message. The bucket will be indicated with <code>msg.bucket</code> alongside the filter type of which there are different possible combinations combinations:</p>
+  <ul>
+    <li><strong>Relative timeframe</strong>: <code>msg.filter</code> needs to be set to 'relative', and the following fields also need to be present; <code>msg.timespanSequence</code> (latest or previous), <code>msg.timespanValue</code> and <code>msg.timespanUnits</code> (s for seconds, m for minutes and so on). The number of items to retrieve can be restricted with <code>msg.limit</code></li>
+    <li><strong>Absolute timeframe</strong>: <code>msg.filter</code> needs to be set to 'absolute', alongside two additional fields; <code>msg.minTs</code> and <code>msg.maxTs</code> that will represent the dates or timestamps of the time period. The allowed values are any string which javascript Date objects can interpret, find more info <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#several_ways_to_create_a_date_object">here</a>. We recommend using Epoch timestamp or UTC date for clarity. The number of items to retrieve can be restricted with <code>msg.limit</code></li>
+    <li><strong>Last N items</strong>: <code>msg.filter</code> will need to be set to 'simple' and an additional field <code>msg.items</code> be set to indicate the number os last items to retrieve.</li>
+  </ul>
+  <p>Additionally, the sorting method can be configured with <code>msg.sort</code> with the values 'asc' for ascending and 'desc' for descending, as well as the aggregation type, with <code>msg.aggregation</code> and a value indicating the time period, '1d' for one day for example, and <code>msg.aggregationType</code> with a value indicating the type (median, mean, max, min, count or sum).</p>
+
+</script>
+
