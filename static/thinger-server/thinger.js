@@ -98,6 +98,10 @@ function fillOptions(json,field) {
     var asset = field;
     if (field == "assetId") {
         var asset = $("#node-input-asset").val();
+    } else if (field == "assetType") {
+        var asset = "type";
+    } else if (field == "assetGroup") {
+        var asset = "group";
     }
 
     let elements = $(); // may create slack but will remove flickering
@@ -122,7 +126,12 @@ function fillOptions(json,field) {
             }
         }
 
-        let id = $("<strong>").text(json[i][asset] ? json[i][asset] : json[i].property);
+        let id;
+        if (json[i].hasOwnProperty('fn') && json[i].fn == 3) { // device resources
+            id = $("<strong>").text(i);
+        } else {
+            id = $("<strong>").text(json[i][asset] ? json[i][asset] : json[i].property);
+        }
 
         let name = $("<small>").text(json[i].name);
         let separator = json[i].name ? " - ":"";
@@ -200,7 +209,7 @@ function createOptions(url,field,callback) {
                 break;
             }
             default:
-                if (field == "property") { // TODO: remove once search over properties is implemented in the server
+                if (field == "property" || field == "resource") { // TODO: remove once search over properties and or resources is implemented in the server
                     filterOptions($(this));
                 } else {
                     $.getJSON(url+"?name="+$(this).val().toLowerCase(), function(json) {

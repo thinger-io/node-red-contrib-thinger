@@ -109,6 +109,16 @@ module.exports = function(RED) {
             });
         };
 
+        node.createBucket = function(data, handler){
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/buckets?authorization=" + token;
+            request({
+                url: url,
+                method: "POST",
+                json: true,
+                body: data
+            }, handler);
+        };
+
         node.readBucket = function(bucketId, queryParameters){
             // Query parameters to string
             var queryParametersString = "";
@@ -484,7 +494,7 @@ module.exports = function(RED) {
         }
     });
 
-    RED.httpAdmin.get("/assets/:asset/:asset_id/properties", RED.auth.needsPermission('properties.read'), function(req,res) {
+    RED.httpAdmin.get("/assets/:asset/:asset_id/:properties", RED.auth.needsPermission('properties.read'), function(req,res) {
         const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
 
         var filter = "";
@@ -493,7 +503,7 @@ module.exports = function(RED) {
         }
 
         try {
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/properties" + "?authorization=" + token + filter;
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/" + req.params.properties + "?authorization=" + token + filter;
             request({
               url: url,
               method: "GET",
@@ -507,7 +517,7 @@ module.exports = function(RED) {
         }
     });
 
-    RED.httpAdmin.get("/assets/:asset/:asset_id/properties/:property_id", RED.auth.needsPermission('properties.write'), function(req,res) {
+    RED.httpAdmin.get("/assets/:asset/:asset_id/:properties/:property_id", RED.auth.needsPermission('properties.write'), function(req,res) {
         const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
 
         var filter = "";
@@ -516,7 +526,7 @@ module.exports = function(RED) {
         }
 
         try {
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/properties/" + req.params.property_id + "?authorization=" + token + filter;
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/" + req.params.properties + req.params.property_id + "?authorization=" + token + filter;
             request({
               url: url,
               method: "GET",
