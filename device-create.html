@@ -1,0 +1,164 @@
+<script type="text/javascript">
+
+    function hideSources() {
+        $(".node-row-device").hide();
+        $(".node-row-resource").hide();
+        $(".node-row-update").hide();
+        $(".node-row-topic").hide();
+        $("#node-input-device").val("");
+        $("#node-input-resource").val("");
+        $("#node-input-update").val("");
+        $("#node-input-topic").val("");
+    }
+
+    RED.nodes.registerType('device-create', {
+        category: 'thinger',
+        color: '#74b9ff',
+        credentials: {
+            deviceCredentials: {type: "password"}
+        },
+        defaults: {
+            name: {value:""},
+            deviceType: {value: ""},
+            deviceId: {value: ""},
+            deviceCredentials: {type: "password"},
+            deviceName: {value: ""},
+            description: {value: ""},
+            assetType: {value: ""},
+            assetGroup: {value: ""},
+            server: {type:"thinger-server", required:true}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 1,
+        outputs: 1,
+        inputLabels: "event",
+        align: 'left',
+        label: function() {
+            return this.name || (this.device ? this.device : "device create");
+        },
+        oneditprepare: function() {
+
+            var firstTime = true;
+
+            // Event listeners
+            $("#node-input-deviceType").change(function() {
+                if ($(this).val() == "HTTP") {
+                    $(".node-row-deviceCredentials").hide();
+                } else {
+                    $(".node-row-deviceCredentials").show();
+                    $("#node-input-deviceCredentials").val("");
+                }
+            });
+
+            $("#node-input-random").click(function() {
+                $("#node-input-deviceCredentials").val(generateCredentials());
+            });
+
+            $("#node-input-resource").click(function() {
+                if (!$(".red-form-options").length) {
+                    let deviceId = $("#node-input-device").val();
+                    createOptions("assets/devices/"+deviceId+"/resources","resource");
+                }
+            });
+
+            $("#node-input-assetType").click(function() {
+                if (!$(".red-form-options").length) {
+                    createOptions("assets/types","assetType");
+                }
+            });
+
+            $("#node-input-assetGroup").click(function() {
+                if (!$(".red-form-options").length) {
+                    createOptions("assets/groups","assetGroup");
+                }
+            });
+
+            // Load static scripts, also needed for stylesheets
+            console.log("Loading starting scripts");
+            $.getScript('thinger-server/js/thinger-server/thinger.js')
+            .fail(function(jqxhr, settings, exception ) {
+              console.log("failed");
+              console.log(exception);
+              console.log(exception.stack);
+            });
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="device-create">
+    <!-- Add thinger styling -->
+    <div>
+        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="node-row-deviceType">
+        <div class="form-row">
+            <label for="node-input-deviceType"><i class="fa fa-folder-open"></i> Device Type</label>
+            <select id="node-input-deviceType" style="width:70%; !important">
+                <option value="" default>Select a device type</option>
+                <option value="Generic">Generic Thinger Device (WiFi, Ethernet, GSM)</option>
+                <option value="HTTP">HTTP Device (Sigfox, Lora, cURL)</option>
+                <option value="MQTT">MQTT Device</option>
+                <!--option value="NB-IoT">NB-IoT</option-->
+            </select>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-deviceId"><i class="fa fa-database"></i> Device Id</label>
+        <input type="text" id="node-input-deviceId" placeholder="Enter device indentifier">
+    </div>
+
+    <div class="node-row-deviceCredentials">
+        <div class="form-row">
+            <label for="node-input-deviceCredentials"><i class="fa fa-key"></i> Credentials</label>
+            <input type="text" id="node-input-deviceCredentials" placeholder="Enter device credentials" style="width: 50%; !important">
+            <button class="red-ui-button" id="node-input-random" style="width: 18%; height: 34px;"><i class="fa fa-random" aria-hidden="true"></i>Random</button>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-deviceName"><i class="fa fa-user"></i> Device Name</label>
+        <input type="text" id="node-input-deviceName" placeholder="Optional device name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-description"><i class="fa fa-comment"></i> Description</label>
+        <input type="text" id="node-input-description" placeholder="Optional device description">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-assetType"><i class="fa fa-list-ul"></i> Asset Type</label>
+        <input type="text" id="node-input-assetType" placeholder="Select Type...">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-assetGroup"><i class="fa fa-th"></i> Asset Group</label>
+        <input type="text" id="node-input-assetGroup" placeholder="Select Group...">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="device-create">
+  <p>Node that creates a device given the configuration.</p>
+  <p>If any of the properties of the node are left blank, the must be set by using an input message. Below you can find and explanation of the input fields allowed and further configuration:</p>
+  <ul>
+    <li><strong>Device type</strong>: <code>msg.type</code>. Can have three different values: <samp>Generic</samp> for a Generic Thinger Device over WiFi, Ethernet of GSM; <samp>HTTP</samp> for an HTTP device with Sigfox, LoRa or cURL; and <samp>MQTT</samp> for a device over MQTT. In the case of using a Generic, or HTTP device, and additional field for credentials is required in order to be able to connect to the thinger platform</li>
+    <li><strong>Device id</strong>: <code>msg.device</code></li>
+    <li><strong>Device credentials</strong>: <code>msg.credentials</code>. Used if device type is Generic or HTTP. Has to be of 16 chars of length and can contain <samp>A-Z</samp>,<samp>a-z</samp>,<samp>0-9</samp> and <samp>!@#$%^&*()</samp></li>
+    <li><strong>Device name</strong>: <code>msg.name</code></li>
+    <li><strong>Device description</strong>: <code>msg.description</code></li>
+    <li><strong>Asset type</strong>: <code>msg.assetType</code></li>
+    <li><strong>Asset group</strong>: <code>msg.assetGroup</code></li>
+  </ul>
+</script>
+

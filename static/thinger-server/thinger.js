@@ -233,6 +233,23 @@ function createOptions(url,field,callback) {
 
 }
 
+/**
+ * Generates a random password or credential of 16 characters of length. Used for device credentials
+ */
+function generateCredentials() {
+
+    let chars = "0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let length = 15;
+    let password = "";
+
+    for (var i = 0; i <= length; i++) {
+        var randomNumber = Math.floor(Math.random() * chars.length);
+        password += chars.substring(randomNumber, randomNumber +1);
+    }
+
+    return password;
+}
+
 
 $(window).ready(function () {
   if ($("#node-input-asset").length && $("#node-input-asset").val()) {

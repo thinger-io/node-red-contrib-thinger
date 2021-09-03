@@ -2,7 +2,6 @@ const WebSocket = require('ws');
 const request = require('request');
 const jwt = require('jsonwebtoken');
 
-
 module.exports = function(RED) {
 
     const RECONNECT_TIMEOUT_MS = 10000;
@@ -154,6 +153,16 @@ module.exports = function(RED) {
             }, function (error, response, body){
                 node.log(response);
             });
+        };
+
+        node.createDevice = function(data, handler){
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/devices?authorization=" + token;
+            request({
+                url: url,
+                method: "POST",
+                json: true,
+                body: data
+            }, handler);
         };
 
         node.readDevice = function(deviceId, resourceId, handler){
