@@ -81,7 +81,7 @@
         inputLabels: "event",
         align: 'left',
         label: function() {
-            return this.name || (this.bucket ? this.bucket : "bucket read");
+            return this.name || (this.bucket ? this.bucket + "("+this.sort+")" : "bucket read");
         },
         oneditprepare: function() {
 
