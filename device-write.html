@@ -55,8 +55,12 @@
         },
         oneditsave: function() {
             // remove pretty characters and save
-            var editor_value = JSON.parse(this.editor.getValue());
-            this.value = JSON.stringify(editor_value);
+            if (this.editor.getValue()) {
+                var editor_value = JSON.parse(this.editor.getValue());
+                this.value = JSON.stringify(editor_value);
+            } else {
+                this.value = this.editor.getValue();
+            }
             this.editor.destroy();
             delete this.editor;
         },
