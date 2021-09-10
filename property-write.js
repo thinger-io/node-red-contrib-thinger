@@ -12,7 +12,7 @@ module.exports = function(RED) {
         // call property read on input
         node.on("input",function(msg) {
             let asset = (config.asset || msg.asset)+"s";
-            let assetId = config.assetId || msg.assetId;
+            let assetId = config.assetId || msg.asset_id;
             let property = config.property || msg.property;
             var value = config.value || msg.payload || msg.value;
             if (typeof(value) === 'object') {

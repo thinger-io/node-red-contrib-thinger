@@ -68,7 +68,8 @@ module.exports = function(RED) {
              }
              return result;
 
-         });
+         })
+        .catch((error) => {reject(error)});
      }
 
     function BucketReadNode(config) {
@@ -89,7 +90,7 @@ module.exports = function(RED) {
             const queryParameters = new Map();
             queryParameters.set('items',config.items || msg.items);
             queryParameters.set('agg',config.aggregation || msg.aggregation);
-            queryParameters.set('agg_type',config.aggregationType || msg.aggregationType);
+            queryParameters.set('agg_type',config.aggregationType || msg.aggregation_type);
             queryParameters.set('sort',config.sort || msg.sort);
 
 
@@ -102,9 +103,9 @@ module.exports = function(RED) {
 
             switch(filter) {
                 case "relative":
-                    let timeframeSeq = config.timespanSequence || msg.timespanSequence;
-                    let timeframeValue = config.timespanValue || msg.timespanValue;
-                    let timeframeUnits = config.timespanUnits || msg.timespanUnits;
+                    let timeframeSeq = config.timespanSequence || msg.timespan_sequence;
+                    let timeframeValue = config.timespanValue || msg.timespan_value;
+                    let timeframeUnits = config.timespanUnits || msg.timespan_units;
 
                     minTs = new Date();
                     maxTs = minTs.getTime();
@@ -121,8 +122,8 @@ module.exports = function(RED) {
 
                     break;
                 case "absolute":
-                    maxTs = new Date(config.maxTs || msg.maxTs).getTime();
-                    minTs = new Date(config.minTs || msg.minTs).getTime();
+                    maxTs = new Date(config.maxTs || msg.max_ts).getTime();
+                    minTs = new Date(config.minTs || msg.min_ts).getTime();
                     break;
                 case "simple":
                     //if selection of last N items, the query will be done as desc and sorted to asc after
@@ -157,6 +158,7 @@ module.exports = function(RED) {
                 }
                 node.send({payload: result});
               })
+              .catch((error) => {reject(error)});
 
           });
     }

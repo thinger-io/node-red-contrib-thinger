@@ -46,11 +46,11 @@ module.exports = function(RED) {
             } else {
                 json.enabled = config.enabled;
             }
-            let type = config.assetType || msg.assetType;
+            let type = config.assetType || msg.asset_type;
             if (type) {
                 json.asset_type = type;
             }
-            let group = config.assetGroup || msg.assetGroup;
+            let group = config.assetGroup || msg.asset_group;
             if (group) {
                 json.asset_group = group;
             }
@@ -59,7 +59,7 @@ module.exports = function(RED) {
             let source = config.source || msg.source;
             jsonConfig.source = source;
             if (source == "device") {
-                jsonConfig.device = config.extraSource || msg.extraSource || msg.device;
+                jsonConfig.device = config.extraSource || msg.extra_source || msg.device;
                 jsonConfig.resource = config.resource || msg.resource;
                 let update = config.update || msg.update;
                 if (update == "interval" || update == "events") {
@@ -74,7 +74,7 @@ module.exports = function(RED) {
                     }
                 }
             } else if (source == "mqtt") {
-                jsonConfig.topic = config.extraSource || msg.extraSource || msg.topic;
+                jsonConfig.topic = config.extraSource || msg.extra_source || msg.topic;
             }
             json.config = jsonConfig;
 
