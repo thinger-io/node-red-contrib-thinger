@@ -16,19 +16,19 @@
 	],
 	"node-red": {
 		"nodes": {
-			"thinger-server": "thinger-server.js",
+			"bucket-create": "bucket-create.js",
+			"bucket-read": "bucket-read.js",
+			"bucket-write": "bucket-write.js",
+			"device-callback": "device-callback.js",
+			"device-create": "device-create.js",
 			"device-read": "device-read.js",
 			"device-stream": "device-stream.js",
+			"device-write": "device-write.js",
 			"endpoint-call": "endpoint-call.js",
-			"bucket-write": "bucket-write.js",
-			"bucket-read": "bucket-read.js",
-			"bucket-create": "bucket-create.js",
 			"property-read": "property-read.js",
 			"property-write": "property-write.js",
-			"device-write": "device-write.js",
-			"device-create": "device-create.js",
-			"device-callback": "device-callback.js",
-			"server-events": "server-events.js"
+			"server-events": "server-events.js",
+			"thinger-server": "thinger-server.js"
 		}
 	}
 }

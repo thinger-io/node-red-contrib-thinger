@@ -15,6 +15,9 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Endpoint call node now returns the output of the call
 - Standardized node technincal documentation for help dialog
+- Endpoint call has now output
+- Device write has now output
+- Ordered nodes in palette
 
 ## [1.0.2] - 2020-07-10
 ### Added
