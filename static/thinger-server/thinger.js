@@ -108,6 +108,11 @@ function fillOptions(json,field,action) {
     let elements = $(); // may create slack but will remove flickering
     // For each option from the json response create a new field and assign the corresponding values and icons
     for (var i in json) {
+        // skip OTA resource
+        if (i === "$ota") {
+            continue;
+        }
+
         // skip device resources accordingly
         if (field === "resource" && (json[i].fn != action && json[i].fn != 4)) {
             continue;
