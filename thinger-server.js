@@ -96,16 +96,14 @@ module.exports = function(RED) {
             return wss;
         };
 
-        node.callEndpoint = function(endpointId, data){
+        node.callEndpoint = function(endpointId, data, handler){
             const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/endpoints/" + endpointId + "/call?authorization=" + token;
             request({
                 url: url,
                 method: "POST",
                 json: true,
                 body: data
-            }, function (error, response, body){
-                node.log(response);
-            });
+            }, handler);
         };
 
         node.createBucket = function(data, handler){
@@ -150,7 +148,7 @@ module.exports = function(RED) {
                 method: "POST",
                 json: true,
                 body: data
-            }, function (error, response, body){
+            }, function(error, response, body) {
                 node.log(response);
             });
         };
@@ -175,15 +173,15 @@ module.exports = function(RED) {
             }, handler);
         };
 
-        node.writeDevice = function(deviceId, resourceId, data){
+        node.writeDevice = function(deviceId, resourceId, data, handler){
             const url = (config.ssl ? 'https://' : "http://") + config.host + "/v3/users/" + config.username + "/devices/" + deviceId + "/resources/" + resourceId + "?authorization=" + token;
             request({
                 url: url,
                 method: "POST",
                 json: true,
                 body: {in : data}
-            }, function (error, response, body){
-                node.log(response);
+            }, handler);
+        };
 
         node.callbackDevice = function(device, assetType, assetGroup, prefix, data, handler){
             const url = (config.ssl ? 'https://' : "http://") + config.host + "/v3/users/" + config.username + "/devices/" + device + "/callback";
@@ -269,7 +267,7 @@ module.exports = function(RED) {
             }, handler);
         };
 
-        node.writeProperty = function(assetType, assetId, propertyId, data){
+        node.writeProperty = function(assetType, assetId, propertyId, data, handler){
             const apiVersion = (assetType == "devices" ? "v3" : "v1");
             const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + assetType + "/" + assetId + "/properties/" + propertyId + "?authorization=" + token;
 
@@ -285,10 +283,7 @@ module.exports = function(RED) {
                         method: "POST",
                         json: true,
                         body: JSON.parse('{"property":"'+propertyId+'","value":'+data+'}')
-                    }, function(error1, response1, body1) {
-                        node.log(JSON.stringify(error1));
-                        node.log(JSON.stringify(response1));
-                    });
+                    }, handler);
                 } else {
                     request({
                         url: url,
@@ -296,10 +291,7 @@ module.exports = function(RED) {
                         json: true,
                         body: JSON.parse('{"value":'+data+'}')
                         //body: JSON.parse(data)
-                    }, function(error2, response2, body2) {
-                        node.log(JSON.stringify(error2));
-                        node.log(JSON.stringify(response2));
-                    });
+                    }, handler);
                 }
             });
         };
