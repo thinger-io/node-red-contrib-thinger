@@ -66,7 +66,7 @@
             $("#node-input-resource").click(function() {
                 if (!$(".red-form-options").length) {
                     let deviceId = $("#node-input-device").val();
-                    createOptions("assets/devices/"+deviceId+"/resources","resource");
+                    createOptions("assets/devices/"+deviceId+"/resources","resource",3);
                 }
             });
 
@@ -195,7 +195,7 @@
 
     <div class="node-row-resource" style="display: none;">
         <div class="form-row">
-            <label for="node-input-resource"><i class="fa fa-cogs"></i> Resource</label>
+            <label for="node-input-resource"><i class="fa fa-cog"></i> Resource</label>
             <input type="text" id="node-input-resource" placeholder="Select or Enter a Device Resource...">
         </div>
     </div>

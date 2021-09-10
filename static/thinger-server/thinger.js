@@ -92,8 +92,9 @@ function activateOption(obj,field) {
  * Fills the options div with the options given in json format
  * @param {JSON} json The json object from the createOptions function
  * @param {String} field The name of the field from which the options div generated. Like node-input-<fiel>
+ * @param {int} action The value of the action that executes, only needed for resources, allowed value 2 -> "in", 3 -> "out", 4 -> "in_out"
  */
-function fillOptions(json,field) {
+function fillOptions(json,field,action) {
     var fieldValue = $("#node-input-"+field).val();
     var asset = field;
     if (field == "assetId") {
@@ -107,6 +108,11 @@ function fillOptions(json,field) {
     let elements = $(); // may create slack but will remove flickering
     // For each option from the json response create a new field and assign the corresponding values and icons
     for (var i in json) {
+        // skip device resources accordingly
+        if (field === "resource" && (json[i].fn != action && json[i].fn != 4)) {
+            continue;
+        }
+
         let option = $("<span>");
         if (fieldValue && (fieldValue == json[i].name
             || fieldValue == json[i][asset] || fieldValue == json[i].property)) {
@@ -127,7 +133,7 @@ function fillOptions(json,field) {
         }
 
         let id;
-        if (json[i].hasOwnProperty('fn') && json[i].fn == 3) { // device resources
+        if (json[i].hasOwnProperty('fn')) { // device resources
             id = $("<strong>").text(i);
         } else {
             id = $("<strong>").text(json[i][asset] ? json[i][asset] : json[i].property);
@@ -161,11 +167,12 @@ function fillOptions(json,field) {
 
 /**
  * Creates the options div for the field pass as argument given the options in json format
- * @param {string} url The url from where to retrieve the data and the filtering
+ * @param {String} url The url from where to retrieve the data and the filtering
  * @param {String} field The name of the field from which the options div needs to be generated. Like node-input-<field>
+ * @param {int} action The value of the action that executes, only needed for resources, allowed value 2 -> "in", 3 -> "out", 4 -> "in_out"
  * @param {function} callback Function to execute with the JSON response from the inside queries
  */
-function createOptions(url,field,callback) {
+function createOptions(url,field,action,callback) {
 
     // Container
     $("<div>").insertAfter("#node-input-"+field)
@@ -213,7 +220,7 @@ function createOptions(url,field,callback) {
                     filterOptions($(this));
                 } else {
                     $.getJSON(url+"?name="+$(this).val().toLowerCase(), function(json) {
-                      fillOptions(json,field);
+                      fillOptions(json,field,action); // action added in case above TODO is implemented for resource
                         if (typeof callback === "function") {
                           callback(json);
                         }
@@ -225,7 +232,7 @@ function createOptions(url,field,callback) {
 
     // Fill with options
     $.getJSON(url, function(json) {
-        fillOptions(json,field);
+        fillOptions(json,field,action);
         if (typeof callback === "function") {
             callback(json);
         }
