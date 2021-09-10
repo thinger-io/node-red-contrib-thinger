@@ -246,20 +246,79 @@
 </script>
 
 <script type="text/x-red" data-help-name="bucket-create">
-  <p>Node that creates a data bucket given the configuration.</p>
-  <p>If any of the properties of the node are left blank, the must be set by using an input message. Below you can find and explanation of the input fields allowed and further configuration:</p>
-  <ul>
-    <li><strong>Bucket id</strong>: <code>msg.id</code></li>
-    <li><strong>Bucket name</strong>: <code>msg.name</code></li>
-    <li><strong>Bucket description</strong>: <code>msg.description</code></li>
-    <li><strong>Enabled</strong>: <code>msg.enabled</code> with possible values <samp>true</samp> or <samp>false</samp>. If is passed as input as well as by configuration, the input value will have precedence</li>
-    <li><strong>Data source</strong>: <code>msg.source</code>. The available values are <samp>device</samp> for 'From Device Resource'; <samp>write</samp> for 'From Device Write Call'; <samp>api</samp> for 'From API Request'; and <samp>mqtt</samp> for 'From MQTT Topic'. In case that <samp>device</samp> or <samp>mqtt</samp> are selected, additional fields may be needed</li>
-    <li><strong>Extra source</strong>: the field <code>msg.extraSource</code> needs to be set in the case that <samp>device</samp> has been selected indicating the desired device from which to obtain the resource, or with the MQTT Topic for the case of <samp>mqtt</samp>. Also, <code>msg.device</code> or <code>msg.topic</code> will work for the previous sources accordingly.</li>
-    <li><strong>Resource</strong>: after indicating a device in the previous field, <code>msg.resource</code> will need to be set with the resource selected</li>
-    <li><strong>Refresh mode</strong>: the update mode, <code>msg.update</code> will only be neccesary in case of having selected 'From Device Resource' in the Data Source field. The available values are: <samp>interval</samp> for 'Sampling Interval', which will also need an additional field <code>msg.interval</code> indicating the interval as '1d' for one day, '1m' for one minute and so on; <samp>events</samp> for selecting 'Stream by Device'; and <samp>none</samp> to not set a updating mode</li>
-    <li><strong>Asset type</strong>: <code>msg.assetType</code></li>
-    <li><strong>Asset group</strong>: <code>msg.assetGroup</code></li>
-  </ul>
+    <p>Creates a new data bucket.</p>
 
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>bucket <span class="property-type">string</span></dt>
+        <dd> the id of the bucket to create.</dd>
+        <dt class="optional">name <span class="property-type">string</span></dt>
+        <dd> the name of the bucket to create.</dd>
+        <dt class="optional">description <span class="property-type">string</span></dt>
+        <dd> the description of the bucket to create.</dd>
+        <dt>enabled <span class="property-type">boolean</span></dt>
+        <dd> the status of the bucket on creation.</dd>
+        <dt>source <span class="property-type">string</span></dt>
+        <dd> the data source of the bucket (<samp>device</samp>, <samp>write</samp>, <samp>api</samp> or <samp>mqtt</samp>).</dd>
+        <dt class="optional">extra_source <span class="property-type">string</span></dt>
+        <dd> the device in case of a device source or MQTT topic in case of mqtt source.</dd>
+        <dt class="optional">resource <span class="property-type">string</span></dt>
+        <dd> the device resource in case of a device source.</dd>
+        <dt class="optional">update <span class="property-type">string</span></dt>
+        <dd> the refresh mode for <samp>device</samp> source (<samp>interval</samp>, <samp>events</samp> or <samp>none</samp>).</dd>
+        <dt class="optional">interval <span class="property-type">string</span></dt>
+        <dd> the time interval for when source is <samp>device</samp> (1d for 1 day, 1w for 1w and so on).</dd>
+        <dt class="optional">asset_type <span class="property-type">string</span></dt>
+        <dd> the type of thinger asset.</dd>
+        <dt class="optional">asset_group <span class="property-type">string</span></dt>
+        <dd> the type of thinger group.</dd>
+    </dl>
+
+     <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li -->
+     </ol>
+
+    <h3>Details</h3>
+    <p>The node allows the configuration via the edit dialog or through an input message.
+    The values assigned through the dialog will have priority over the message, with the exception the <code>msg.enabled</code>.</p>
+
+    <p>Each <code>msg.source</code> will retrieve the data one way or another:
+       <ul>
+          <li><a href="https://docs.thinger.io/features/buckets#from-device-resource">From Device Resource</a>: <samp>device</samp></li>
+          <li><a href="https://docs.thinger.io/features/buckets#from-device-write-call">From Device Write Call</a>: <samp>write</samp></li>
+          <li><a href="https://docs.thinger.io/features/buckets#from-api-request-for-3rd-parties">From API Request</a>: <samp>api</samp></li>
+          <li><a href="https://docs.thinger.io/features/buckets#from-mqtt-topic">From MQTT Topic</a>: <samp>mqtt</samp></li>
+      </ul>
+    </p>
+
+    <p>The field <code>msg.extra_source</code> is only needed when selecting <samp>From device resource</samp> or <samp>From MQTT topic</samp> in <code>msg.source</code>. The node also accepts <code>msg.device</code> in case of <samp>device</samp> and <code>msg.topic</code> in case of <samp>mqtt</samp> as replacement of the field <code>msg.extra_source</code></p>
+
+    <p>The field <code>msg.update</code> represents the Refresh mode when <code>msg.source</code> is <samp>device</samp>. The possible values are explained below:
+      <ul>
+        <li><strong>Sampling Interval</strong>: retrieves data form the device resource in a specific timing. It needs an additional field, <code>msg.interval</code> indicating the interval as '1d' for one day, '1m' as one minute and so on.</li>
+        <li><strong>Stream by Device</strong>: allows the device to stream the information when required.</li>
+        <li><strong>None</strong>: to not set a refresh mode.</li>
+      </ul>
+    </p>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
+    </ul>
 </script>
 

@@ -163,9 +163,49 @@
 </script>
 
 <script type="text/x-red" data-help-name="property-write">
-  <p>Node that writes a property to either a device, type of devices or group of devices.</p>
-  <p>If you leave asset, asset id, property name or property value blank they must be set by using the <code>msg.asset</code>, <code>msg.assetId</code>, <code>msg.property</code> or <code>msg.value</code>/<code>msg.payload</code> properties in every message sent to the node.</p>
-  <p>Notice that <code>msg.asset</code> only allows three possible values: <samp>device</samp>, <samp>type</samp> and <samp>group</samp>.</p>
-  <p>Regarding the field <code>msg.assetId</code>, it must exists in the Thinger platform, otherwise the flow will fail.</p>
-  <p>By contrast, the fields <code>msg.property</code> or <code>msg.value</code>/<code>msg.payload</code> may not exist in the Thinger platform, as they will be created on write.</p>
+    <p>Writes or modifies a property to either a device, type or group.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>asset <span class="property-type">string</span></dt>
+        <dd> the type of asset (<samp>device</samp>, <samp>type</samp> or <samp>group</samp>).</dd>
+        <dt>asset_id <span class="property-type">string</span></dt>
+        <dd> the id of the asset to read the property from.</dd>
+        <dt>property <span class="property-type">string</span></dt>
+        <dd> the name of the property to read its value.</dd>
+        <dt>payload <span class="property-type">string</span></dt>
+        <dd> the payload of the value of the property.</dd>
+    </dl>
+
+     <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li -->
+     </ol>
+
+    <h3>Details</h3>
+    <p>The node allows the configuration via the edit dialog or through an input message.
+    The values assigned through the dialog will have priority over the message.</p>
+
+    <p>The values of the field <code>msg.asset_id</code> must exist in the Thinger platform, otherwise the flow will fail</p>
+
+    <p>The values of the fields <code>msg.property</code> and <code>msg.payload</code> may not exist in the Thinger platform, as they will be created on write.</p>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
+    </ul>
 </script>

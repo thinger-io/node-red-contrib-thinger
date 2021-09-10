@@ -149,16 +149,62 @@
 </script>
 
 <script type="text/x-red" data-help-name="device-create">
-  <p>Node that creates a device given the configuration.</p>
-  <p>If any of the properties of the node are left blank, the must be set by using an input message. Below you can find and explanation of the input fields allowed and further configuration:</p>
-  <ul>
-    <li><strong>Device type</strong>: <code>msg.type</code>. Can have three different values: <samp>Generic</samp> for a Generic Thinger Device over WiFi, Ethernet of GSM; <samp>HTTP</samp> for an HTTP device with Sigfox, LoRa or cURL; and <samp>MQTT</samp> for a device over MQTT. In the case of using a Generic, or HTTP device, and additional field for credentials is required in order to be able to connect to the thinger platform</li>
-    <li><strong>Device id</strong>: <code>msg.device</code></li>
-    <li><strong>Device credentials</strong>: <code>msg.credentials</code>. Used if device type is Generic or HTTP. Has to be of 16 chars of length and can contain <samp>A-Z</samp>,<samp>a-z</samp>,<samp>0-9</samp> and <samp>!@#$%^&*()</samp></li>
-    <li><strong>Device name</strong>: <code>msg.name</code></li>
-    <li><strong>Device description</strong>: <code>msg.description</code></li>
-    <li><strong>Asset type</strong>: <code>msg.assetType</code></li>
-    <li><strong>Asset group</strong>: <code>msg.assetGroup</code></li>
-  </ul>
+    <p>Creates a device given the configuration.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>type <span class="property-type">string</span></dt>
+        <dd> the type of the device to create (<samp>Generic</samp>, <samp>HTTP</samp> or <samp>MQTT</samp>).</dd>
+        <dt>device <span class="property-type">string</span></dt>
+        <dd> the id of the device to create.</dd>
+        <dt>credentials <span class="property-type">string</span></dt>
+        <dd> the credentials to authenticate the device.</dd>
+        <dt class="optional">name <span class="property-type">string</span></dt>
+        <dd> the name of the device to create.</dd>
+        <dt class="optional">description <span class="property-type">string</span></dt>
+        <dd> the description of the device to create.</dd>
+        <dt class="optional">asset_type <span class="property-type">string</span></dt>
+        <dd> the type of thinger asset.</dd>
+        <dt class="optional">asset_group <span class="property-type">string</span></dt>
+        <dd> the type of thinger group.</dd>
+    </dl>
+
+     <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li -->
+     </ol>
+
+    <h3>Details</h3>
+    <p>The node allows the configuration via the edit dialog or through an input message.
+    The values assigned through the dialog will have priority over the message.</p>
+
+    <p>The field <code>msg.type</code> allows different values depending on the desired device. Find and explanation of each one below:
+      <ul>
+        <li><strong>Generic device</strong>: devices with Thinger.io software client in it (WiFi, Ethernet or GSM).</li>
+        <li><strong>HTTP device</strong>: allows creating a virtual device to integrate data via REST API Callback (Sigfox, LoRa or cURL).</li>
+        <li><strong>MQTT devices</strong>: for MQTT devices that will work with the Thinger.io embedded broker.</li>
+      </ul>
+    </p>
+
+    <p> The field <code>msg.credentials</code> is used if device type is Generic or HTTP. Has to be of 16 chars of length and can contain <samp>A-Z</samp>,<samp>a-z</samp>,<samp>0-9</samp> and <samp>!@#$%^&*()</samp></p>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
+    </ul>
 </script>
 

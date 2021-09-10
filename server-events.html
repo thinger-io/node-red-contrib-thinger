@@ -89,5 +89,44 @@
 </script>
 
 <script type="text/x-red" data-help-name="server-events">
-    <p>Node that receives server events</p>
+    <p>Node that receives server events.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>event <span class="property-type">string</span></dt>
+        <dd> the type of event to detect.</dd>
+        <dt>filter <span class="property-type">string</span></dt>
+        <dd> the asset filter.</dd>
+        <dt>state <span class="property-type">string</span></dt>
+        <dd> the connection status of the asset.</dd>
+    </dl>
+
+     <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li -->
+     </ol>
+
+    <h3>Details</h3>
+    <p>The node only allows the configuration via the edit dialog.</p>
+
+    <p>The asset filter field, either <samp>device</samp>, <samp>bucket</samp> or <samp>endpoint</samp> allows wildcards and regex matching.</p>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
+    </ul>
 </script>

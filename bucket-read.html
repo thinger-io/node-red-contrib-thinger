@@ -308,14 +308,72 @@
 </script>
 
 <script type="text/x-red" data-help-name="bucket-read">
-  <p>Node that reads the data from a data bucket.</p>
-  <p>If any of the properties of the node are left blank, the must be set by using an input message. The bucket will be indicated with <code>msg.bucket</code> alongside the filter type of which there are different possible combinations combinations:</p>
-  <ul>
-    <li><strong>Relative timeframe</strong>: <code>msg.filter</code> needs to be set to 'relative', and the following fields also need to be present; <code>msg.timespanSequence</code> (latest or previous), <code>msg.timespanValue</code> and <code>msg.timespanUnits</code> (s for seconds, m for minutes and so on). The number of items to retrieve can be restricted with <code>msg.limit</code></li>
-    <li><strong>Absolute timeframe</strong>: <code>msg.filter</code> needs to be set to 'absolute', alongside two additional fields; <code>msg.minTs</code> and <code>msg.maxTs</code> that will represent the dates or timestamps of the time period. The allowed values are any string which javascript Date objects can interpret, find more info <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#several_ways_to_create_a_date_object">here</a>. We recommend using Epoch timestamp or UTC date for clarity. The number of items to retrieve can be restricted with <code>msg.limit</code></li>
-    <li><strong>Last N items</strong>: <code>msg.filter</code> will need to be set to 'simple' and an additional field <code>msg.items</code> be set to indicate the number os last items to retrieve.</li>
-  </ul>
-  <p>Additionally, the sorting method can be configured with <code>msg.sort</code> with the values 'asc' for ascending and 'desc' for descending, as well as the aggregation type, with <code>msg.aggregation</code> and a value indicating the time period, '1d' for one day for example, and <code>msg.aggregationType</code> with a value indicating the type (median, mean, max, min, count or sum).</p>
+    <p>Reads data from a data bucket.</p>
 
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>bucket <span class="property-type">string</span></dt>
+        <dd> the id of the bucket to read from.</dd>
+        <dt>filter <span class="property-type">string</span></dt>
+        <dd> the type of filter to apply the to the read operation (<samp>relative</samp>, <samp>absolute</samp> or <samp>simple</samp>).</dd>
+        <dt class="optional">timespan_sequence <span class="property-type">string</span></dt>
+        <dd> the sequence for <samp>relative</samp> filter (<samp>latest</samp> or <samp>previous</samp>).</dd>
+        <dt class="optional">timespan_value <span class="property-type">int</span></dt>
+        <dd> the value for <samp>relative</samp> filter.</dd>
+        <dt class="optional">timespan_units <span class="property-type">char</span></dt>
+        <dd> the time units for <samp>relative</samp> filter (s for seconds, m for minutes and so on; h, d, w, m, y).</dd>
+        <dt class="optional">min_ts <span class="property-type">Date</span></dt>
+        <dd> the minimun data or timestamp of the time period for <samp>absolute</samp> time filter.</dd>
+        <dt class="optional">max_ts <span class="property-type">Date</span></dt>
+        <dd> the maximum date or timestamp of the time period for <samp>absolute</samp> time filter.</dd>
+        <dt class="optional">limit <span class="property-type">int</span></dt>
+        <dd> the number of items to retrieve when filter is <samp>relative</samp> or <samp>absolute</samp>.</dd>
+        <dt class="optional">items <span class="property-type">int</span></dt>
+        <dd> the number of last items to retrieve when filter is <samp>simple</samp>.</dd>
+        <dt>sort <span class="property-type">string</span></dt>
+        <dd> the sorting order for the retrieved items (<samp>asc</samp> or <samp>desc</samp>).</dd>
+        <dt class="optional">aggregation <span class="property-type">string</span></dt>
+        <dd> the value for aggregating the retrieved data (<samp>1d</samp> for 1 day and so on).</dd>
+        <dt class="optional">aggregation_type <span class="property-type">string</span></dt>
+        <dd> the type of aggregation to apply over the data (<samp>median</samp>, <samp>mean</samp>, <samp>max</samp>, <samp>min</samp>, <samp>count</samp> or <samp>sum</samp>).</dd>
+    </dl>
+
+     <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li -->
+     </ol>
+
+    <h3>Details</h3>
+    <p>The node allows the configuration via the edit dialog or through an input message.
+    The values assigned through the dialog will have priority over the message.</p>
+
+    <p>Each <code>msg.filter</code> will retrieve the data one way or another:
+       <ul>
+          <li><strong>Relative</strong>: based on relative time with lastest or previous to a date value. Ex.: previous 3 days.</li>
+          <li><strong>Absolute</strong>: based of abolute times. Ex.: from 2021/01/01 to 2021/12/31.</li>
+          <li><strong>Simple</strong>: last N items.</li>
+      </ul>
+    </p>
+
+    <p>The fields <code>msg.max_ts</code> and <code>msg.min_ts</code> allow any string which javascript Date objects can interpret, find more info <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#several_ways_to_create_a_date_object">here</a>. It is recommended to use Epoch timestamp or UTC date for clarity.</p>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
+    </ul>
 </script>
 

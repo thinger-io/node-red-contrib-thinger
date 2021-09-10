@@ -33,5 +33,42 @@
 </script>
 
 <script type="text/x-red" data-help-name="endpoint-call">
-    <p>Node for calling a server endpoint with the supplied input payload</p>
+    <p>Calls a server endpoint with the supplied input payload.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>device <span class="property-type">string</span></dt>
+        <dd> the id of the endpoint to call.</dd>
+        <dt>payload <span class="property-type">string</span></dt>
+        <dd> the payload of the message to send.</dd>
+    </dl>
+
+     <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li -->
+     </ol>
+
+    <h3>Details</h3>
+    <p>The node allows the configuration of the endpoint via the edit dialog or through an input message.
+    The values assigned through the dialog will have priority over the message.</p>
+    <p>The input <code>msg.payload</code> is not available through the edit dialog and can only be passed through the input.</p>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
+    </ul>
 </script>
