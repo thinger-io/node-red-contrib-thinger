@@ -2,11 +2,6 @@
 	"name": "node-red-contrib-thinger",
 	"version": "0.0.9",
 	"description": "Node-Red library for Thinger.io Platform",
-	"dependencies": {
-		"request": ">=2.72.0",
-		"ws": ">=0.8.1",
-		"jsonwebtoken": ">=8.3.0"
-	},
 	"keywords": [
 		"node-red",
 		"thinger.io",
@@ -14,6 +9,17 @@
 		"arduino",
 		"raspberry"
 	],
+	"homepage": "https://docs.thinger.io/plugins/node-red",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/thinger-io/Node-RED"
+	},
+	"dependencies": {
+		"request": ">=2.72.0",
+		"ws": ">=0.8.1",
+		"jsonwebtoken": ">=8.3.0"
+	},
 	"node-red": {
 		"nodes": {
 			"bucket-create": "bucket-create.js",
