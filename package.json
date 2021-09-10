@@ -27,6 +27,7 @@
 			"property-write": "property-write.js",
 			"device-write": "device-write.js",
 			"device-create": "device-create.js",
+			"device-callback": "device-callback.js",
 			"server-events": "server-events.js"
 		}
 	}

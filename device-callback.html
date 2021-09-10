@@ -1,0 +1,136 @@
+<script type="text/javascript">
+    RED.nodes.registerType('device-callback', {
+        category: 'thinger',
+        color: '#74b9ff',
+        defaults: {
+            name: {value:""},
+            device: {value: ""},
+            body: {value: ""},
+            server: {type:"thinger-server", required:true}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 1,
+        outputs: 1,
+        align: 'left',
+        label: function() {
+            return this.name || (this.device ? this.device : "device callback");
+        },
+        oneditprepare: function() {
+            // Prepare editor
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-body-editor',
+                mode: 'ace/mode/json',
+                body: this.body
+            });
+
+            var editor = this.editor;
+            if (editor.getValue()) {
+                var editor_value = JSON.parse(editor.getValue());
+                editor.setValue(JSON.stringify(editor_value,null,'\t'));
+            }
+
+            // Event listeners
+            $("#node-input-device").click(function() {
+                if (!$(".red-form-options").length) {
+                    createOptions("assets/devices","device");
+                }
+            });
+
+
+            // Load static scripts, also needed for stylesheets
+            console.log("Loading starting scripts");
+            $.getScript('thinger-server/js/thinger-server/thinger.js')
+            .fail(function(jqxhr, settings, exception ) {
+              console.log("failed");
+              console.log(exception);
+              console.log(exception.stack);
+            });
+
+        },
+        oneditsave: function() {
+            // remove pretty characters and save
+            var editor_value = JSON.parse(this.editor.getValue());
+            this.body = JSON.stringify(editor_value);
+            this.editor.destroy();
+            delete this.editor;
+        },
+        oneditcancel: function() {
+            this.editor.destroy();
+            delete this.editor;
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="device-callback">
+    <!-- Add thinger styling -->
+    <div>
+        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-device"><i class="fa fa-rocket"></i> Device</label>
+        <input type="text" id="node-input-device" placeholder="Device Identifier">
+    </div>
+    <div class="form-row">
+        <label for="node-input-body" style="vertical-align: top;"><i class="fa fa-pencil-square"></i> Value</label>
+        <div id="node-input-body-editor" class="node-text-editor" style="height:125px; width:70%; display:inline-block;"></div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="device-callback">
+    <p>Calls the callback endpoint of an HTTP device.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>device <span class="property-type">string</span></dt>
+        <dd> the id of the device to call.</dd>
+        <dt class="optional">prefix <span class="property-type">string</span></dt>
+        <dd> the prefix for the id of the device and bucket on auto provisioning.</dd>
+        <dt class="optional">asset_type <span class="property-type">string</span></dt>
+        <dd> the type of thinger asset on autoprovisiong.</dd>
+        <dt class="optional">asset_group <span class="property-type">string</span></dt>
+        <dd> the type of thinger group on auto provisioning.</dd>
+    </dl>
+
+     <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li -->
+     </ol>
+
+    <h3>Details</h3>
+    <p>The node allows the configuration via the edit dialog or through an input message.
+    The values assigned through the dialog will have priority over the message.</p>
+
+    <p>In case the device does not exist it will be autoprovisioned, as well as a data bucket with the same id as the device. After, the call to the callback will execute.</p>
+
+    <p>The fields <code>msg.prefix</code>, <code>msg.asset_type</code> and <code>msg.asset_group</code> are only available through the input message and used only in the case of autoprivisioning.
+    The default value for prefix on autoprovisoning if no value is passed is <samp>NR_</samp>.</p>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
+    </ul>
+</script>

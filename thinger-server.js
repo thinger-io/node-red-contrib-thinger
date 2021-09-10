@@ -184,6 +184,78 @@ module.exports = function(RED) {
                 body: {in : data}
             }, function (error, response, body){
                 node.log(response);
+
+        node.callbackDevice = function(device, assetType, assetGroup, prefix, data, handler){
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v3/users/" + config.username + "/devices/" + device + "/callback";
+            // Check if device exists if not autoprovision resources
+            request({
+                url: url + "/data?authorization=" + token,
+                method: "GET",
+                json: true,
+            }, function(error, response, body) {
+                if (response && response.statusCode == 200) {
+                    request({
+                        url: url + "/data?authorization=" + token,
+                        method: "POST",
+                        json: true,
+                        body: data
+                    }, handler);
+                } else {
+                    // TODO: clean once we introduce https library or axios
+                    let json = {};
+
+                    // create auto provisioned device
+                    json.type = "HTTP";
+                    json.device = prefix+device;
+                    json.name = device;
+                    json.description = "Auto provisioned Node-RED Device"
+                    if (assetType) {
+                        json.asset_type = assetType;
+                    }
+                    if (assetGroup) {
+                        json.asset_group = assetGroup;
+                    }
+                    node.createDevice(json, function(error, response, body) {
+                        node.log(response);
+
+                        // create auto provisioned bucket
+                        json = {};
+                        json.bucket = prefix+device;
+                        json.name = device;
+                        json.description = "Auto provisioned Node-RED Bucket";
+                        json.enabled = true;
+                        json.config = {"source": "api"}
+                        if (assetType) {
+                            json.asset_type = assetType;
+                        }
+                        if (assetGroup) {
+                            json.asset_group = assetGroup;
+                        }
+                        node.createBucket(json, function(error, response, body) {});
+
+                        // set write bucket action
+                        request({
+                          url: url + "?authorization=" + token, // we need to remove '/data' from the url
+                          method: "PUT",
+                          json: true,
+                          body: {
+                            "actions": {
+                                "write_bucket": device
+                            }
+                          }
+                        }, function(error, response, body) {
+                            node.log(response);
+
+                            // callback device
+                            request({
+                              url: url+"/data?authorization="+token,
+                              method: "POST",
+                              json: true,
+                              body: {in : data}
+                            }, handler);
+                        });
+                    });
+                }
             });
         };
 
