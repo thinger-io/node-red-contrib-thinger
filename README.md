@@ -4,7 +4,7 @@
 
 ![Node-RED and Thinger.io Integration](./images/frontend.png "Thinger.io web console with Node-RED plugin and ad-hoc nodes")
 
-Nodes to assist with the integration, automation and communication of [Node-RED](https://nodered.org/) and IoT devices with [Thinger.io}(https://thinger.io/)
+Nodes to assist with the integration, automation and communication of [Node-RED](https://nodered.org/) and IoT devices with [Thinger.io](https://thinger.io/)
 
 ## Getting Started
 
