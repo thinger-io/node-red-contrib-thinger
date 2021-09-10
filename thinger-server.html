@@ -11,11 +11,26 @@
         },
         label: function() {
             return this.name || this.host;
+        },
+        oneditprepare: function() {
+            // Load static scripts, also needed for stylesheets
+            console.log("Loading starting scripts");
+            $.getScript('thinger-server/js/thinger-server/thinger.js')
+            .fail(function(jqxhr, settings, exception ) {
+              console.log("failed");
+              console.log(exception);
+              console.log(exception.stack);
+            });
         }
     });
 </script>
 
 <script type="text/x-red" data-template-name="thinger-server">
+    <!-- Add thinger styling -->
+    <div>
+        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
+    </div>
+
     <div class="form-row">
         <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-config-input-name" placeholder="Optional name to identify the server">
@@ -25,8 +40,11 @@
         <input type="text" id="node-config-input-host" placeholder="API Host">
     </div>
     <div class="form-row">
-        <label for="node-config-input-ssl"><i class="fa fa-lock"></i> SSL</label>
-        <input type="checkbox" id="node-config-input-ssl">
+        <label for="node-config-input-ssl" style="vertical-align: bottom; margin-bottom: 0px;"><i class="fa fa-lock"></i> SSL</label>
+        <label class="switch">
+          <input type="checkbox" id="node-config-input-ssl">
+          <div class="slider round"></div>
+        </label>
     </div>
     <div class="form-row">
         <label for="node-config-input-token"><i class="fa fa-lock"></i> Token</label>

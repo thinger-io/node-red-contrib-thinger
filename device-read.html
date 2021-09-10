@@ -4,8 +4,8 @@
         color: '#74b9ff',
         defaults: {
             name: {value: ""},
-            device: {value: "", required:true},
-            resource: {value: "", required:true},
+            device: {value: ""},
+            resource: {value: ""},
             server: {type:"thinger-server", required:true}
         },
         icon:"thinger_logo_white.png",
@@ -14,11 +14,41 @@
         inputLabels: "event",
         label: function() {
             return this.name || ((this.device && this.resource) ? (this.device + "/" + this.resource) : "device read");
+        },
+        oneditprepare: function() {
+
+            // Event listeners
+            $("#node-input-device").click(function() {
+                if (!$(".red-form-options").length) {
+                    createOptions("assets/devices","device");
+                }
+            });
+
+            $("#node-input-resource").click(function() {
+                if (!$(".red-form-options").length) {
+                    let deviceId = $("#node-input-device").val();
+                    createOptions("assets/devices/"+deviceId+"/resources","resource",3);
+                }
+            });
+
+            // Load static scripts, also needed for stylesheets
+            console.log("Loading starting scripts");
+            $.getScript('thinger-server/js/thinger-server/thinger.js')
+            .fail(function(jqxhr, settings, exception ) {
+              console.log("failed");
+              console.log(exception);
+              console.log(exception.stack);
+            });
         }
     });
 </script>
 
 <script type="text/x-red" data-template-name="device-read">
+    <!-- Add thinger styling -->
+    <div>
+        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
+    </div>
+
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">

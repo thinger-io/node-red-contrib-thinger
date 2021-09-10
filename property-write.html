@@ -37,6 +37,7 @@
             var originalProperty = $(".node-row-property")[0].outerHTML;
             var firstTime = true;
 
+            // Event listeners
             $("#node-input-asset").change(function(e) {
                 // Restore form values if not previously set
                 if (!firstTime) {
@@ -63,7 +64,7 @@
                     // Options and filtering
                     $("#node-input-assetId").click(function(e) {
                         if (!$(".red-form-options").length) {
-                            createOptions("assets/"+assets,"assetId",null);
+                            createOptions("assets/"+assets,"assetId");
                         }
                     });
 
@@ -72,7 +73,7 @@
                       var assetId = $("#node-input-assetId").val();
                       if (assetId) {
                           if (!$(".red-form-options").length) {
-                            createOptions("assets/"+assets+"/"+assetId+"/properties","property",function(json) {
+                            createOptions("assets/"+assets+"/"+assetId+"/properties","property",null,function(json) {
                                 $("#node-input-property").off("change");
                                 $("#node-input-property").change(function() {
                                     for (var i in json) {
