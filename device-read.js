@@ -15,9 +15,10 @@ module.exports = function(RED) {
             let device = config.device || msg.device;
             let resource = config.resource || msg.resource;
 
-            server.readDevice(device, resource, function(error, response, body){
-                node.send({payload: body});
-            });
+            server.readDevice(device, resource, function(res){
+                node.send({payload: res});
+            })
+            .catch(console.log);
         });
     }
 

@@ -78,9 +78,10 @@ module.exports = function(RED) {
             }
             json.config = jsonConfig;
 
-            server.createBucket(json, function(error, response, body) {
-              node.send({payload: body});
-            });
+            server.createBucket(json, function(res) {
+              node.send({payload: res});
+            })
+            .catch(console.log);
         });
     }
 

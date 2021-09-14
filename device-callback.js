@@ -34,9 +34,10 @@ module.exports = function(RED) {
                 body = JSON.parse(body);
             }
 
-            server.callbackDevice(device, assetType, assetGroup, prefix, body, function(error, response, body) {
-                node.send({payload: body});
-            });
+            server.callbackDevice(device, assetType, assetGroup, prefix, body, function(res) {
+                node.send({payload: res});
+            })
+            .catch(console.log);
         });
     }
 

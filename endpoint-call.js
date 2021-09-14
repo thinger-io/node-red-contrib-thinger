@@ -14,9 +14,10 @@ module.exports = function(RED) {
 
             let endpoint = config.endpoint || msg.endpoint;
 
-            server.callEndpoint(endpoint, msg.payload, function(error, response, body) {
-                node.send({payload: body});
-            });
+            server.callEndpoint(endpoint, msg.payload, function(res) {
+                node.send({payload: res});
+            })
+            .catch(console.log);
         });
     }
 

@@ -45,9 +45,10 @@ module.exports = function(RED) {
                 json.asset_group = group;
             }
 
-            server.createDevice(json, function(error, response, body) {
-              node.send({payload: body});
-            });
+            server.createDevice(json, function(res) {
+              node.send({payload: res});
+            })
+            .catch(console.log);
         });
     }
 

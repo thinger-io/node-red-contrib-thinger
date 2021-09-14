@@ -15,9 +15,10 @@ module.exports = function(RED) {
             let assetId = config.assetId || msg.asset_id;
             let property = config.property || msg.property;
 
-            server.readProperty(asset, assetId, property, function(error, response, body) {
-              node.send({payload: body});
-            });
+            server.readProperty(asset, assetId, property, function(res) {
+              node.send({payload: res});
+            })
+            .catch(console.log);
         });
     }
 

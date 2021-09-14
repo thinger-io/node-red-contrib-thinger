@@ -46,21 +46,21 @@ module.exports = function(RED) {
 
         // Recursive call to readBucket until done
         return server.readBucket(bucket, queryParameters)
-        .then(function(response) {
+        .then(function(res) {
             if (!result) {
                 result = [];
             }
-            result = result.concat(response.body);
+            result = result.concat(res);
 
-            limit = (response.body.length > 0 ? limit - response.body.length : 0);
+            limit = (res.length > 0 ? limit - res.length : 0);
 
-            if (limit != 0 && response.body.length == 1000) { // There is more
+            if (limit != 0 && res.length == 1000) { // There is more
                 switch (queryParameters.get("sort")) {
                     case "asc":
-                        queryParameters.set("min_ts",response.body[999].ts-1);
+                        queryParameters.set("min_ts",res[999].ts-1);
                         break;
                      case "desc":
-                        queryParameters.set("max_ts",response.body[999].ts-1);
+                        queryParameters.set("max_ts",res[999].ts-1);
                         break;
                  }
 
@@ -69,7 +69,7 @@ module.exports = function(RED) {
              return result;
 
          })
-        .catch((error) => {reject(error)});
+         .catch(console.log);
      }
 
     function BucketReadNode(config) {
@@ -158,7 +158,7 @@ module.exports = function(RED) {
                 }
                 node.send({payload: result});
               })
-              .catch((error) => {reject(error)});
+              .catch(console.log);
 
           });
     }

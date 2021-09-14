@@ -19,9 +19,10 @@ module.exports = function(RED) {
                 value = JSON.parse(value);
             }
 
-            server.writeDevice(device, resource, value, function(error, response, body) {
-                node.send({payload: body});
-            });
+            server.writeDevice(device, resource, value, function(res) {
+                node.send({payload: res});
+            })
+            .catch(console.log);
         });
     }
 

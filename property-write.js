@@ -19,9 +19,10 @@ module.exports = function(RED) {
                 value = JSON.stringify(value);
             }
 
-            server.writeProperty(asset, assetId, property, value, function(error, response, body) {
-              node.send({payload: body});
-            });
+            server.writeProperty(asset, assetId, property, value, function(res) {
+              node.send({payload: res});
+            })
+            .catch(console.log);
         });
     }
 

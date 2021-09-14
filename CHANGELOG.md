@@ -19,6 +19,9 @@ All notable changes to this project will be documented in this file.
 - Device write has now output
 - Ordered nodes in palette
 
+### Security
+- Migrated deprecated requests dependency to internal http/https
+
 ## [1.0.2] - 2020-07-10
 ### Added
 - New bucket and endpoint events for server events node
