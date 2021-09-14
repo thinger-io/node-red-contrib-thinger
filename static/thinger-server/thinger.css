@@ -1,16 +1,15 @@
 /* assets options div */
 .red-form-options {
-    /*min-height: 75px;*/
+    max-height: 350px;
     width: 64%; /* not quite */
     z-index: 10;
     margin-left: 104px; /* not quite */
     border-radius: 2px;
     box-shadow: 0 2px 6px rgba(0,0,0,.1);
     border: 1px solid rgba(0,0,0,.1);
-    // temporal
-    height: 75px;
     position: absolute;
     background-color: white;
+    overflow-y: auto;
 }
 
 .red-form-option, .red-form-option-active {

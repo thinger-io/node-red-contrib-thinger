@@ -15,12 +15,15 @@
         label: function() {
             return this.name || (this.device ? this.device : "device callback");
         },
+        paletteLabel: function() {
+            return "device callback";
+        },
         oneditprepare: function() {
             // Prepare editor
             this.editor = RED.editor.createEditor({
                 id: 'node-input-body-editor',
                 mode: 'ace/mode/json',
-                body: this.body
+                value: this.body
             });
 
             var editor = this.editor;
@@ -51,9 +54,9 @@
             // remove pretty characters and save
             if (this.editor.getValue()) {
                 var editor_value = JSON.parse(this.editor.getValue());
-                this.value = JSON.stringify(editor_value);
+                this.body = JSON.stringify(editor_value);
             } else {
-                this.value = this.editor.getValue();
+                this.body = this.editor.getValue();
             }
             this.editor.destroy();
             delete this.editor;

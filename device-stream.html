@@ -15,6 +15,9 @@
         label: function() {
             return this.name || ((this.device && this.resource) ? (this.device + "/" + this.resource + " ("  + this.interval + "s)") : "device stream");
         },
+        paletteLabel: function() {
+            return "device stream";
+        },
         oneditprepare: function() {
 
             // Event listeners

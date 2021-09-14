@@ -18,9 +18,10 @@ All notable changes to this project will be documented in this file.
 - Endpoint call has now output
 - Device write has now output
 - Ordered nodes in palette
+- Added paletteLabel to nodes
 
 ### Security
-- Migrated deprecated requests dependency to internal http/https
+- Migrated deprecated request dependency to internal http/https
 
 ## [1.0.2] - 2020-07-10
 ### Added

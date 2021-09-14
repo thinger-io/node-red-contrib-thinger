@@ -15,6 +15,9 @@
         label: function() {
             return this.name || (this.bucket ? this.bucket : "bucket write");
         },
+        paletteLabel: function() {
+            return "bucket write";
+        },
         oneditprepare: function() {
             // Prepare editor
             this.editor = RED.editor.createEditor({

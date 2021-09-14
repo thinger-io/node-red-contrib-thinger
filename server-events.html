@@ -17,6 +17,9 @@
         label: function() {
             return this.name || this.event || "server events";
         },
+        paletteLabel: function() {
+            return "server events";
+        },
         oneditprepare: function() {
             $("#node-input-event").change(function(e) {
                 var val = $(this).val();

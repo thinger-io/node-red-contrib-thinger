@@ -18,6 +18,9 @@
         label: function() {
             return this.name || (this.assetId && this.property ? this.assetId +"/"+ this.property : "property write");
         },
+        paletteLabel: function() {
+            return "property write";
+        },
         oneditprepare: function() {
             // Prepare editor
             this.editor = RED.editor.createEditor({

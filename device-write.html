@@ -16,6 +16,9 @@
         label: function() {
             return this.name || (this.device ? (this.device + "/" + this.resource) : "device write");
         },
+        paletteLabel: function() {
+            return "device write";
+        },
         oneditprepare: function() {
             // Prepare editor
             this.editor = RED.editor.createEditor({

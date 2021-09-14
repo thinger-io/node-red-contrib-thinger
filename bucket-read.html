@@ -83,6 +83,9 @@
         label: function() {
             return this.name || (this.bucket ? this.bucket + "("+this.sort+")" : "bucket read");
         },
+        paletteLabel: function() {
+            return "bucket read";
+        },
         oneditprepare: function() {
 
             // Defaults set on prepare instead of properties to allow for configuration on input message
