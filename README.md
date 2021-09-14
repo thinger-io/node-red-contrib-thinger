@@ -1,10 +1,12 @@
 # node-red-contrib-thinger
 
-[![NPM Version](https://img.shields.io/static/v1?label=npm&message=v0.0.9&color=blue&style=flat)](https://www.npmjs.com/package/node-red-contrib-thinger)
+[![NPM Version](https://img.shields.io/static/v1?label=npm&message=v1.1.0&color=blue&style=flat)](https://www.npmjs.com/package/node-red-contrib-thinger)
 
 ![Node-RED and Thinger.io Integration](https://gblobscdn.gitbook.com/assets%2F-LpXqB3J1BMD5s4OpYSg%2F-LqolIqYDvSBb7V2MiNj%2F-LqpE9l6dUWZx6GQe8NQ%2Fimage.png?alt=media&token=35ce9cca-cec8-45db-b298-d973f2bb7f9b "Thinger.io web console with Node-RED plugin and ad-hoc nodes")
 
 Nodes to assist with the integration, automation and communication of [Node-RED](https://nodered.org/) and IoT devices with [Thinger.io](https://thinger.io/)
+
+To see what has changed in recent versions, have a look a the project's [Changelog](https://github.com/thinger-io/Node-RED/blob/master/CHANGELOG.md).
 
 ## Getting Started
 
@@ -18,7 +20,7 @@ Have a valid [Thinger.io](https://thinger.io/) cloud [instance](https://pricing.
 #### Local
 Have a local instance of [Node-RED](https://nodered.org/) with the following characteristics:
 - [Node.js](https://nodejs.org) - v12.0 or newer
-- [Node-RED](https://NodeRED.org) - v1.X.X
+- [Node-RED](https://NodeRED.org) - v1.0.0 or newer
 
 ### Installation
 
