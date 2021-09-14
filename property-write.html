@@ -1,0 +1,219 @@
+<script type="text/javascript">
+
+    RED.nodes.registerType('property-write', {
+        category: 'thinger',
+        color: '#74b9ff',
+        defaults: {
+            name: {value:""},
+            asset: {value: ""},
+            assetId: {value: ""},
+            property: {value: ""},
+            value: {value: ""},
+            server: {type:"thinger-server", required:true}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 1,
+        outputs: 1,
+        align: 'left',
+        label: function() {
+            return this.name || (this.assetId && this.property ? this.assetId +"/"+ this.property : "property write");
+        },
+        paletteLabel: function() {
+            return "property write";
+        },
+        oneditprepare: function() {
+            // Prepare editor
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-value-editor',
+                mode: 'ace/mode/json',
+                value: this.value
+            });
+
+            var editor = this.editor;
+            if (editor.getValue()) {
+                var editor_value = JSON.parse(editor.getValue());
+                editor.setValue(JSON.stringify(editor_value,null,'\t'));
+            }
+
+            // Save original assetId row to restore in case of asset change
+            var originalAssetId = $(".node-row-assetId")[0].outerHTML;
+            var originalProperty = $(".node-row-property")[0].outerHTML;
+            var firstTime = true;
+
+            // Event listeners
+            $("#node-input-asset").change(function(e) {
+                // Restore form values if not previously set
+                if (!firstTime) {
+                    $(".node-row-assetId").replaceWith(originalAssetId);
+                    $(".node-row-property").replaceWith(originalProperty);
+                    editor.setValue("");
+                }
+                firstTime = false;
+
+                // Remove previously set handlers or the will acumulate
+                $('#node-input-assetId').off('click');
+                $('#node-input-property').off('click');
+                $('#node-input-property').off('input');
+
+                var asset = $(this).val();
+                var assets = asset+"s";
+
+                if (asset) {
+                    // Field appearance
+                    if (typeof changeAssetIdIcon === "function") {
+                        changeAssetIdIcon(asset);
+                    }
+
+                    // Options and filtering
+                    $("#node-input-assetId").click(function(e) {
+                        if (!$(".red-form-options").length) {
+                            createOptions("assets/"+assets,"assetId");
+                        }
+                    });
+
+                  // Properties
+                  $('#node-input-property').click(function(e) {
+                      var assetId = $("#node-input-assetId").val();
+                      if (assetId) {
+                          if (!$(".red-form-options").length) {
+                            createOptions("assets/"+assets+"/"+assetId+"/properties","property",null,function(json) {
+                                $("#node-input-property").off("change");
+                                $("#node-input-property").change(function() {
+                                    for (var i in json) {
+                                        if ($("#node-input-property").val() == json[i].property) {
+                                            editor.setValue(JSON.stringify(json[i].value,null,'\t'));
+                                        }
+                                    }
+                                });
+                            });
+                          }
+                      }
+                  });
+
+                }
+            });
+
+            // Load static scripts, also needed for stylesheets
+            console.log("Loading starting scripts");
+            $.getScript('thinger-server/js/thinger-server/thinger.js')
+            .fail(function(jqxhr, settings, exception ) {
+              console.log("failed");
+              console.log(exception);
+              console.log(exception.stack);
+            });
+
+        },
+        oneditsave: function() {
+            // remove pretty characters and save
+            if (this.editor.getValue()) {
+                var editor_value = JSON.parse(this.editor.getValue());
+                this.value = JSON.stringify(editor_value);
+            } else {
+                this.value = this.editor.getValue();
+            }
+            this.editor.destroy();
+            delete this.editor;
+        },
+        oneditcancel: function() {
+            this.editor.destroy();
+            delete this.editor;
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="property-write">
+    <!-- Add thinger styling -->
+    <div>
+        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="node-row-asset">
+        <div class="form-row">
+            <label for="node-input-asset"><i class="fa fa-building"></i> Asset</label>
+            <select id="node-input-asset" style="width:70%; !important">
+                <option value="" default>Select Asset</option>
+                <option value="device">device</option>
+                <option value="type">type</option>
+                <option value="group">group</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-assetId">
+         <div class="form-row">
+            <label for="node-input-assetId"><i class="fa fa-home"></i> Asset Id</label>
+            <input type="text" id="node-input-assetId" placeholder="Select an asset or insert a new one">
+        </div>
+    </div>
+
+    <div class="node-row-property">
+        <div class="form-row">
+            <label for="node-input-property"><i class="fa fa-pencil-square-o"></i> Property</label>
+            <input type="text" id="node-input-property" placeholder="Property Identifier">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-value" style="vertical-align: top;"><i class="fa fa-pencil-square"></i> Value</label>
+        <div id="node-input-value-editor" class="node-text-editor" style="height:125px; width:70%; display:inline-block;"></div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="property-write">
+    <p>Writes or modifies a property to either a device, type or group.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>asset <span class="property-type">string</span></dt>
+        <dd> the type of asset (<samp>device</samp>, <samp>type</samp> or <samp>group</samp>).</dd>
+        <dt>asset_id <span class="property-type">string</span></dt>
+        <dd> the id of the asset to read the property from.</dd>
+        <dt>property <span class="property-type">string</span></dt>
+        <dd> the name of the property to read its value.</dd>
+        <dt>payload <span class="property-type">string</span></dt>
+        <dd> the payload of the value of the property.</dd>
+    </dl>
+
+     <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li -->
+     </ol>
+
+    <h3>Details</h3>
+    <p>The node allows the configuration via the edit dialog or through an input message.
+    The values assigned through the dialog will have priority over the message.</p>
+
+    <p>The values of the field <code>msg.asset_id</code> must exist in the Thinger platform, otherwise the flow will fail</p>
+
+    <p>The values of the fields <code>msg.property</code> and <code>msg.payload</code> may not exist in the Thinger platform, as they will be created on write.</p>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
+    </ul>
+</script>

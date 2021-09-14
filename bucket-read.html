@@ -1,0 +1,382 @@
+<script type="text/javascript">
+
+    function loadDateField(ts,field) {
+        if (ts) {
+          var date = new Date(ts);
+          $("#node-input-"+field+"date").val(
+            date.getFullYear()+"-"+
+            (date.getMonth()+1).toString().padStart(2,'0')+"-"+
+            date.getDate().toString().padStart(2,'0'));
+          $("#node-input-"+field+"time").val(
+            date.getHours().toString().padStart(2,'0')+":"+
+            date.getMinutes().toString().padStart(2,'0'));
+      }
+    }
+
+    function showRelative() {
+        $(".node-row-relative").show();
+        if (!$("#node-input-timespanSequence").val()) { // assuming that if one is set all three are set
+            $("#node-input-timespanSequence").val("latest");
+            $("#node-input-timespanValue").val("6");
+            $("#node-input-timespanUnits").val("h");
+        }
+    }
+
+    function hideRelative() {
+        $(".node-row-relative").hide();
+        $("#node-input-timespanSequence").val("");
+        $("#node-input-timespanValue").val("");
+        $("#node-input-timespanUnits").val("");
+    }
+
+    function hideAbsolute() {
+        $(".node-row-absolute").hide();
+        $("#node-input-startdate").val("");
+        $("#node-input-starttime").val("");
+        $("#node-input-enddate").val("");
+        $("#node-input-endtime").val("");
+    }
+
+    function showSimple() {
+        $(".node-row-simple").show();
+        if (!$("#node-input-items").val()) {
+            $("#node-input-items").val("1000");
+        }
+    }
+
+    function hideSimple() {
+        $(".node-row-simple").hide();
+        $("#node-input-items").val("");
+    }
+
+    function hideAggregation() {
+        $(".node-row-aggregation").hide();
+        $("#node-input-aggregation").val("");
+        $("#node-input-aggregationType").hide();
+        $("#node-input-aggregationType").val("");
+    }
+
+    RED.nodes.registerType('bucket-read', {
+        category: 'thinger',
+        color: '#74b9ff',
+        defaults: {
+            name: {value:""},
+            bucket: {value: ""},
+            filter: {value: ""},
+            timespanSequence: {value: ""},
+            timespanValue: {value: ""},
+            timespanUnits: {value: ""},
+            maxTs: {value: ""},
+            minTs: {value: ""},
+            items: {value: ""},
+            limit: {value: ""},
+            aggregation: {value: ""}, //1m, 5h, 1w
+            aggregationType: {value: ""}, // mean, median, 
+            sort: {value: ""},
+            server: {type:"thinger-server", required:true}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 1,
+        outputs: 1,
+        inputLabels: "event",
+        align: 'left',
+        label: function() {
+            return this.name || (this.bucket ? this.bucket + "("+this.sort+")" : "bucket read");
+        },
+        paletteLabel: function() {
+            return "bucket read";
+        },
+        oneditprepare: function() {
+
+            // Defaults set on prepare instead of properties to allow for configuration on input message
+            $("#node-input-sort").val(this.sort || "asc");
+            loadDateField(this.minTs,"start");
+            loadDateField(this.maxTs,"end");
+            var aggregationType = this.aggregationType;
+
+            // Event handlers and requests
+            $("#node-input-bucket").click(function() {
+                if (!$(".red-form-options").length) {
+                    createOptions("assets/buckets","bucket")
+                }
+            });
+
+            $("#node-input-bucket").change(function() {
+                if ($(this).val()) {
+                    $(".node-row-aggregation").show();
+                } else {
+                    hideAggregation();
+                }
+            });
+
+            $("#node-input-filter").change(function() {
+                if ($(this).val() == "relative") {
+                    showRelative();
+                    hideAbsolute();
+                    hideSimple();
+                    $(".node-row-limit").show();
+                } else if ($(this).val() == "absolute") {
+                    $(".node-row-absolute").show();
+                    hideRelative();
+                    hideSimple();
+                    $(".node-row-limit").show();
+                } else if ($(this).val() == "simple") {
+                    showSimple(); 
+                    hideRelative();
+                    hideAbsolute();
+                    $(".node-row-limit").hide();
+                    $("#node-input-limit").val("");
+                } else {
+                    hideRelative();
+                    hideAbsolute();
+                    hideSimple();
+                    $(".node-row-limit").hide();
+                    $("#node-input-limit").val("");
+                }
+
+            });
+
+            $("#node-input-aggregation").change(function() {
+                if ($(this).val()) {
+                    $("#node-input-aggregationType").show();
+                    $("#node-input-aggregationType").val(aggregationType || "mean");
+                } else {
+                    aggregationType = "";
+                    $("#node-input-aggregationType").val(aggregationType);
+                    $("#node-input-aggregationType").hide();
+                }
+            });
+
+            $("#node-input-startdate").change(function() {
+                if ($(this).val() && !$("#node-input-starttime").val()) {
+                    $("#node-input-starttime").val("00:00");
+                }
+            });
+
+            $("#node-input-enddate").change(function() {
+                if ($(this).val() && !$("#node-input-endtime").val()) {
+                    $("#node-input-endtime").val("00:00");
+                }
+            });
+
+            // Load static scripts, also needed for stylesheets
+            console.log("Loading starting scripts");
+            $.getScript('thinger-server/js/thinger-server/thinger.js')
+            .fail(function(jqxhr, settings, exception ) {
+              console.log("failed");
+              console.log(exception);
+              console.log(exception.stack);
+            });
+        },
+        oneditsave: function() {
+          // Save max ts and min ts in case of absolute
+          if ($("#node-input-filter").val() == "absolute") {
+              this.minTs = new Date($("#node-input-startdate").val()+"T"+$("#node-input-starttime").val()).toISOString();
+              this.maxTs = new Date($("#node-input-enddate").val()+"T"+$("#node-input-endtime").val()).toISOString();
+          } else {
+              this.minTs = "";
+              this.maxTs = "";
+          }
+
+          // Remove timespan
+          if (!$("#node-input-timespanValue").val()) {
+              this.timespanSequence = "";
+              this.timespanUnits = "";
+          }
+
+          // Remove aggregationType
+          if (!$("#node-input-aggregation").val()) {
+              this.aggregationType = "";
+          }
+
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="bucket-read">
+    <!-- Add thinger styling -->
+    <div>
+        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-bucket"><i class="fa fa-database"></i> Bucket</label>
+        <input type="text" id="node-input-bucket" placeholder="Bucket Identifier">
+    </div>
+
+    <div class="node-row-filter">
+        <div class="form-row">
+            <label for="node-input-filter"><i class="fa fa-filter"></i> Filter</label>
+            <select id="node-input-filter" style="width:70%; !important">
+                <option value="" default>Select Filter</option>
+                <option value="relative">relative timeframe</option>
+                <option value="absolute">absolute timeframe</option>
+                <option value="simple">last N items</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-relative" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-timespan"><i class="fa fa-clock-o"></i> Time Period</label>
+            <select id="node-input-timespanSequence" style="width:20%; !important">
+                <option value="latest" default>latest</option>
+                <option value="previous">previous</option>
+            </select>
+            <input type="number" id="node-input-timespanValue" placeholder="Specify the timespan of the data to display" style="width:28%; !important" value=6>
+            <select id="node-input-timespanUnits" style="width:20%; !important">
+                <option value="s">seconds</option>
+                <option value="m">minutes</option>
+                <option value="h" default>hours</option>
+                <option value="d">days</option>
+                <option value="w">weeks</option>
+                <option value="m">months</option>
+                <option value="y">years</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-absolute" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-startdate"><i class="fa fa-calendar"></i> Start Date</label>
+            <input type="date" id="node-input-startdate" placeholder="" style="width: 35%; !important">
+            <input type="time" id="node-input-starttime" placeholder="" style="width: 34%; !important">
+        </div>
+
+        <div class="form-row">
+            <label for="node-input-enddate"><i class="fa fa-calendar"></i> End Date</label>
+            <input type="date" id="node-input-enddate" placeholder="" style="width: 35%; !important">
+            <input type="time" id="node-input-endtime" placeholder="" style="width: 34%; !important">
+        </div>
+    </div>
+
+    <div class="node-row-simple" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-items"><i class="fa fa-arrow-left"></i> Items</label>
+            <input type="number" id="node-input-items" min="0" placeholder="Specify the number of last items to select">
+        </div>
+    </div>
+
+    <div class="node-row-limit" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-limit"><i class="fa fa-sort-numeric-asc"></i> Limit</label>
+            <input type="number" id="node-input-limit" min="-1" placeholder="Specify the number of registries to return">
+        </div>
+    </div>
+
+    <div class="node-row-aggregation" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-aggregation"><i class="fa fa-bar-chart"></i> Aggregation</label>
+            <select id="node-input-aggregation" style="width:35%; !important">
+                <option value="" default>None</option>
+                <option value="5m">5 min</option>
+                <option value="15m">15 min</option>
+                <option value="30m">30 min</option>
+                <option value="1h">1 hour</option>
+                <option value="3h">3 hour</option>
+                <option value="6h">6 hour</option>
+                <option value="12h">12 hour</option>
+                <option value="1d">1 day</option>
+                <option value="1w">1 week</option>
+            </select>
+            <select id="node-input-aggregationType" style="display: none; width:34%; !important">
+                <option value="median">median</option>
+                <option value="mean" default>mean</option>
+                <option value="median">median</option>
+                <option value="max">max</option>
+                <option value="min">min</option>
+                <option value="count">count</option>
+                <option value="sum">sum</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-sort"><i class="fa fa-sort"></i> Sort</label>
+        <select id="node-input-sort" style="width: 70%; !important">
+            <option value="asc" default>ascending</option>
+            <option value="desc">descending</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="bucket-read">
+    <p>Reads data from a data bucket.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>bucket <span class="property-type">string</span></dt>
+        <dd> the id of the bucket to read from.</dd>
+        <dt>filter <span class="property-type">string</span></dt>
+        <dd> the type of filter to apply the to the read operation (<samp>relative</samp>, <samp>absolute</samp> or <samp>simple</samp>).</dd>
+        <dt class="optional">timespan_sequence <span class="property-type">string</span></dt>
+        <dd> the sequence for <samp>relative</samp> filter (<samp>latest</samp> or <samp>previous</samp>).</dd>
+        <dt class="optional">timespan_value <span class="property-type">int</span></dt>
+        <dd> the value for <samp>relative</samp> filter.</dd>
+        <dt class="optional">timespan_units <span class="property-type">char</span></dt>
+        <dd> the time units for <samp>relative</samp> filter (s for seconds, m for minutes and so on; h, d, w, m, y).</dd>
+        <dt class="optional">min_ts <span class="property-type">Date</span></dt>
+        <dd> the minimun data or timestamp of the time period for <samp>absolute</samp> time filter.</dd>
+        <dt class="optional">max_ts <span class="property-type">Date</span></dt>
+        <dd> the maximum date or timestamp of the time period for <samp>absolute</samp> time filter.</dd>
+        <dt class="optional">limit <span class="property-type">int</span></dt>
+        <dd> the number of items to retrieve when filter is <samp>relative</samp> or <samp>absolute</samp>.</dd>
+        <dt class="optional">items <span class="property-type">int</span></dt>
+        <dd> the number of last items to retrieve when filter is <samp>simple</samp>.</dd>
+        <dt>sort <span class="property-type">string</span></dt>
+        <dd> the sorting order for the retrieved items (<samp>asc</samp> or <samp>desc</samp>).</dd>
+        <dt class="optional">aggregation <span class="property-type">string</span></dt>
+        <dd> the value for aggregating the retrieved data (<samp>1d</samp> for 1 day and so on).</dd>
+        <dt class="optional">aggregation_type <span class="property-type">string</span></dt>
+        <dd> the type of aggregation to apply over the data (<samp>median</samp>, <samp>mean</samp>, <samp>max</samp>, <samp>min</samp>, <samp>count</samp> or <samp>sum</samp>).</dd>
+    </dl>
+
+     <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li -->
+     </ol>
+
+    <h3>Details</h3>
+    <p>The node allows the configuration via the edit dialog or through an input message.
+    The values assigned through the dialog will have priority over the message.</p>
+
+    <p>Each <code>msg.filter</code> will retrieve the data one way or another:
+       <ul>
+          <li><strong>Relative</strong>: based on relative time with lastest or previous to a date value. Ex.: previous 3 days.</li>
+          <li><strong>Absolute</strong>: based of abolute times. Ex.: from 2021/01/01 to 2021/12/31.</li>
+          <li><strong>Simple</strong>: last N items.</li>
+      </ul>
+    </p>
+
+    <p>The fields <code>msg.max_ts</code> and <code>msg.min_ts</code> allow any string which javascript Date objects can interpret, find more info <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#several_ways_to_create_a_date_object">here</a>. It is recommended to use Epoch timestamp or UTC date for clarity.</p>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
+    </ul>
+</script>
+

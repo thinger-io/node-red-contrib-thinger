@@ -10,12 +10,16 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // register listener on creation
-        server.registerDeviceResourceListener(config.device, config.resource, Number(config.interval), node);
+        let device = config.device || msg.device;
+        let resource = config.resource || msg.resource;
+        let interval = config.interval || msg.interval;
+
+        server.registerDeviceResourceListener(device, resource, Number(interval), node);
 
         // unregister listener on close
         node.on('close', function(removed, done) {
             if(removed){
-                server.unRegisterDeviceResourceListener(config.device, config.resource, node);
+                server.unRegisterDeviceResourceListener(device, resource, node);
             }
             done();
         });

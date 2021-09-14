@@ -11,9 +11,17 @@ module.exports = function(RED) {
 
         // call bucket write on message reception
         node.on("input",function(msg) {
-            server.writeBucket(config.bucket, msg.payload);
+
+            let bucket = config.bucket || msg.bucket;
+            var value = config.value || msg.payload || msg.value;
+            if (typeof(value) === 'string') {
+                value = JSON.parse(value);
+            }
+
+            server.writeBucket(bucket, value);
         });
     }
 
     RED.nodes.registerType("bucket-write", BucketWriteNode);
+
 };

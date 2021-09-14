@@ -1,7 +1,8 @@
 const WebSocket = require('ws');
-const request = require('request');
 const jwt = require('jsonwebtoken');
 
+const http = require('http');
+const https = require('https');
 
 module.exports = function(RED) {
 
@@ -30,6 +31,66 @@ module.exports = function(RED) {
                 device.wss.close();
             }
         }
+    }
+
+    async function request(url, method, data = {}) {
+
+        var adapterFor = (function() {
+            var url = require('url'),
+              adapters = {
+                'http:': require('http'),
+                'https:': require('https'),
+            };
+
+            return function(inputUrl) {
+              return adapters[url.parse(inputUrl).protocol]
+            }
+        }());
+
+        const options = {
+          method: method,
+          headers: {
+            'Authorization': 'Bearer '+token,
+            'Content-Type': 'application/json'
+          },
+          timeout: 1000, // in ms
+        };
+
+        const dataString = JSON.stringify(data);
+        if (method === "POST" || method === "PUT") {
+            options.headers['Content-Length'] = dataString.length;
+        }
+
+        return new Promise((resolve, reject) => {
+          const req = adapterFor(url).request(url, options, (res) => {
+            console.log(`${res.statusCode} ${method} ${url}`);
+            //if (res.statusCode < 200 || res.statusCode > 299) {
+            //  return reject(new Error(`HTTP status code ${res.statusCode}`));
+            //}
+
+            const body = [];
+            res.on('data', (chunk) => body.push(chunk));
+            res.on('end', () => {
+              const res = Buffer.concat(body).toString();
+              resolve(!res ? res : JSON.parse(res));
+            });
+          });
+
+          req.on('error', (err) => {
+            reject(err);
+          });
+
+          req.on('timeout', () => {
+            req.destroy();
+            reject(new Error('Request time out'));
+          });
+
+          if (method === "POST" || method === "PUT") {
+              req.write(dataString);
+          }
+
+          req.end();
+        });
     }
 
     function ThingerServerNode(configa) {
@@ -97,50 +158,138 @@ module.exports = function(RED) {
             return wss;
         };
 
-        node.callEndpoint = function(endpointId, data){
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/endpoints/" + endpointId + "/call?authorization=" + token;
-            request({
-                url: url,
-                method: "POST",
-                json: true,
-                body: data
-            }, function (error, response, body){
-                node.log(response);
+        node.callEndpoint = async function(endpointId, data, handler){
+
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/endpoints/" + endpointId + "/call";
+            const res = await request(url, 'POST', data);
+            handler(res);
+        };
+
+        node.createBucket = async function(data, handler){
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/buckets";
+            const res = await request(url, 'POST', data);
+            handler(res);
+        };
+
+        node.readBucket = function(bucketId, queryParameters){
+            // Query parameters to string
+            var queryParametersString = "";
+            queryParameters.forEach(function(value,key) {
+                if (value) {
+                    queryParametersString += key+"="+value+"&";
+                }
             });
+
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/buckets/" + bucketId + "/data?" + queryParametersString;
+            return request(url, 'GET');
         };
 
         node.writeBucket = function(bucketId, data){
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/buckets/" + bucketId + "/data?authorization=" + token;
-            request({
-                url: url,
-                method: "POST",
-                json: true,
-                body: data
-            }, function (error, response, body){
-                node.log(response);
-            });
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/buckets/" + bucketId + "/data";
+            request(url, 'POST', data);
         };
 
-        node.readDevice = function(deviceId, resourceId, handler){
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v3/users/" + config.username + "/devices/" + deviceId + "/resources/" + resourceId + "?authorization=" + token;
-            node.log(url);
-            request({
-                url: url,
-                method: "GET",
-                json: true
-            }, handler);
+        node.createDevice = async function(data, handler){
+            // It fails when no credentials are passed as expected by the backend
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/devices";
+            const res = await request(url, 'POST', data);
+            handler(res);
         };
 
-        node.writeDevice = function(deviceId, resourceId, data){
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v3/users/" + config.username + "/devices/" + deviceId + "/resources/" + resourceId + "?authorization=" + token;
-            request({
-                url: url,
-                method: "POST",
-                json: true,
-                body: {in : data}
-            }, function (error, response, body){
-                node.log(response);
-            });
+        node.readDevice = async function(deviceId, resourceId, handler){
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v3/users/" + config.username + "/devices/" + deviceId + "/resources/" + resourceId;
+            const res = await request(url, 'GET');
+            handler(res);
+        };
+
+        node.writeDevice = async function(deviceId, resourceId, data, handler){
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v3/users/" + config.username + "/devices/" + deviceId + "/resources/" + resourceId;
+            const res = await request(url, 'POST', data);
+            handler(res);
+        };
+
+        node.callbackDevice = async function(device, assetType, assetGroup, prefix, data, handler){
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v3/users/" + config.username + "/devices/" + device + "/callback";
+
+            // Check if device exists if not autoprovision resources
+            const res1 = await request(url, 'GET');
+            if ( !res1 ) {
+                let json = {};
+
+                // create auto provisioned device
+                json.type = "HTTP";
+                json.device = prefix+device;
+                json.name = device;
+                json.description = "Auto provisioned Node-RED Device"
+                if (assetType) {
+                    json.asset_type = assetType;
+                }
+                if (assetGroup) {
+                    json.asset_group = assetGroup;
+                }
+
+                await node.createDevice(json, function(res) {
+                    if ( !res ) {
+                        return new Error(`Could not create device on device callback auto provisioning`);
+                    }
+                });
+
+                // create auto provisioned bucket
+                json = {};
+                json.bucket = prefix+device;
+                json.name = device;
+                json.description = "Auto provisioned Node-RED Bucket";
+                json.enabled = true;
+                json.config = {"source": "api"}
+                if (assetType) {
+                    json.asset_type = assetType;
+                }
+                if (assetGroup) {
+                    json.asset_group = assetGroup;
+                }
+
+                await node.createBucket(json, function(res) {
+                    if ( !res ) {
+                        return new Error(`Could not create bucket on device callback auto provisioning`);
+                    }
+                });
+
+                // set write bucket action
+                const dataAction = { 
+                    "actions": {
+                        "write_bucket": device
+                    }
+                }
+                await request(url, 'PUT', dataAction); // There is no response
+            }
+
+            const res = await request(url+"/data", 'POST', data);
+            handler(res);
+        };
+
+        node.readProperty = async function(assetType, assetId, propertyId, handler){
+            const apiVersion = (assetType == "devices" ? "v3" : "v1");
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + assetType + "/" + assetId + "/properties/" + propertyId;
+            const res = await request(url, 'GET');
+            handler(res);
+        };
+
+        node.writeProperty = async function(assetType, assetId, propertyId, data, handler){
+            const apiVersion = (assetType == "devices" ? "v3" : "v1");
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + assetType + "/" + assetId + "/properties/" + propertyId;
+
+            // Check if property exists if not create it
+            const res = await request(url, 'GET');
+            if ( !res ) {
+                const res1 = await request(
+                    url.replace("/"+propertyId,""),
+                    'POST',
+                    JSON.parse('{"property":"'+propertyId+'","value":'+data+'}'));
+                handler(res1);
+            } else {
+                const res1 = await request(url, 'PUT', JSON.parse('{"property":"'+propertyId+'","value":'+data+'}'));
+                handler(res1);
+            }
         };
 
         node.unRegisterDeviceResourceListener = function (deviceId, resourceId, node){
@@ -389,4 +538,66 @@ module.exports = function(RED) {
             token: {type: "text"}
         }
     });
+
+    /**
+    *  Admin Endpoints
+    */
+    RED.httpAdmin.get("/assets/:asset", RED.auth.needsPermission('assets.read'), async function(req,res) {
+        var filter = "";
+        if (req.query.name) {
+            filter = "name="+req.query.name;
+        }
+
+        try {
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/" + req.params.asset + "?" + filter;
+            res.json(await request(url, 'GET'));
+        } catch(err) {
+            res.sendStatus(500);
+            node.error(RED._("assets.failed",{error:err.toString()}));
+        }
+    });
+
+    RED.httpAdmin.get("/assets/:asset/:asset_id/:properties", RED.auth.needsPermission('properties.read'), async function(req,res) {
+        const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
+
+        var filter = "";
+        if (req.query.name) {
+            filter = "name="+req.query.name;
+        }
+
+        try {
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/" + req.params.properties + "?" + filter;
+            res.json(await request(url, 'GET'));
+        } catch(err) {
+            res.sendStatus(500);
+            node.error(RED._("properties.failed",{error:err.toString()}));
+        }
+    });
+
+    RED.httpAdmin.get("/assets/:asset/:asset_id/:properties/:property_id", RED.auth.needsPermission('properties.write'), async function(req,res) {
+        const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
+
+        var filter = "";
+        if (req.query.name) {
+            filter = "name="+req.query.name;
+        }
+
+        try {
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/" + req.params.properties + req.params.property_id + "?" + filter;
+            res.json(await request(url, 'GET'));
+        } catch(err) {
+            res.sendStatus(500);
+            node.error(RED._("properties.failed",{error:err.toString()}));
+        }
+    });
+
+    RED.httpAdmin.get('/thinger-server/js/*', function(req, res){
+        var options = {
+            root: __dirname + '/static/',
+            dotfiles: 'deny'
+        };
+
+        res.sendFile(req.params[0], options);
+    });
+
 };

@@ -1,0 +1,327 @@
+<script type="text/javascript">
+
+    function hideSources() {
+        $(".node-row-device").hide();
+        $(".node-row-resource").hide();
+        $(".node-row-update").hide();
+        $(".node-row-topic").hide();
+        $("#node-input-device").val("");
+        $("#node-input-resource").val("");
+        $("#node-input-update").val("");
+        $("#node-input-topic").val("");
+    }
+
+    RED.nodes.registerType('bucket-create', {
+        category: 'thinger',
+        color: '#74b9ff',
+        defaults: {
+            name: {value:""},
+            bucketId: {value: ""},
+            bucket: {value: ""},
+            description: {value: ""},
+            enabled: {value: ""},
+            source: {value: ""},
+            extraSource: {value: ""}, // mqtt topic or device
+            resource: {value: ""},
+            update: {value: ""},
+            interval: {value: ""},
+            assetType: {value: ""},
+            assetGroup: {value: ""},
+            server: {type:"thinger-server", required:true}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 1,
+        outputs: 1,
+        inputLabels: "event",
+        align: 'left',
+        label: function() {
+            return this.name || (this.bucket ? this.bucket : "bucket create");
+        },
+        paletteLabel: function() {
+            return "bucket create";
+        },
+        oneditprepare: function() {
+
+            var firstTime = true;
+
+            // Event listeners
+            $("#node-input-source").change(function() {
+                if (!firstTime) {
+                    hideSources();
+                }
+                firstTime = false;
+
+                if ($(this).val() == "device") {
+                    $(".node-row-device").show();
+                    $(".node-row-resource").show();
+                    $(".node-row-update").show();
+                } else if ($(this).val() == "mqtt") {
+                    $(".node-row-topic").show();
+                }
+            });
+
+            $("#node-input-device").click(function() {
+                if (!$(".red-form-options").length) {
+                    createOptions("assets/devices","device");
+                }
+            });
+
+            $("#node-input-resource").click(function() {
+                if (!$(".red-form-options").length) {
+                    let deviceId = $("#node-input-device").val();
+                    createOptions("assets/devices/"+deviceId+"/resources","resource",3);
+                }
+            });
+
+            $("#node-input-update").change(function() {
+                if ($(this).val() === "interval") {
+                    $("#node-input-intervalValue").show();
+                    $("#node-input-intervalUnits").show();
+                    if (!$("#node-input-intervalValue").val()) {
+                        $("#node-input-intervalValue").val("5");
+                    }
+                } else {
+                    $("#node-input-intervalValue").hide();
+                    $("#node-input-intervalUnits").hide();
+                    $("#node-input-intervalValue").val("");
+                    $("#node-input-intervalUnits").val("m");
+                }
+            });
+
+            $("#node-input-assetType").click(function() {
+                if (!$(".red-form-options").length) {
+                    createOptions("assets/types","assetType");
+                }
+            });
+
+            $("#node-input-assetGroup").click(function() {
+                if (!$(".red-form-options").length) {
+                    createOptions("assets/groups","assetGroup");
+                }
+            });
+
+            // Load values into fields
+            if ($("#node-input-source").val() == "device") {
+                $("#node-input-device").val(this.extraSource);
+                if (this.interval) {
+                    $("#node-input-intervalValue").val(this.interval.slice(0,-1));
+                    $("#node-input-intervalUnits").val(this.interval.slice(-1));
+                }
+            } else if ($("#node-input-source").val() == "mqtt") {
+                $("#node-input-topic").val(this.extraSource);
+            }
+            if (this.enabled === "") {
+                $("#node-input-enabled").prop("checked", true)
+            }
+
+            // Load static scripts, also needed for stylesheets
+            console.log("Loading starting scripts");
+            $.getScript('thinger-server/js/thinger-server/thinger.js')
+            .fail(function(jqxhr, settings, exception ) {
+              console.log("failed");
+              console.log(exception);
+              console.log(exception.stack);
+            });
+        },
+        oneditsave: function() {
+            if ($("#node-input-source").val() == "device") {
+                this.extraSource = $("#node-input-device").val();
+                if ($("#node-input-update").val() == "interval") {
+                    this.interval = $("#node-input-intervalValue").val()+$("#node-input-intervalUnits").val();
+                } else {
+                    this.interval = "";
+                }
+            } else {
+                this.extraSource = "";
+            }
+
+            if ($("#node-input-source").val()  == "mqtt") {
+                this.extraSource = $("#node-input-topic").val();
+            }
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="bucket-create">
+    <!-- Add thinger styling -->
+    <div>
+        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-bucketId"><i class="fa fa-database"></i> Bucket Id</label>
+        <input type="text" id="node-input-bucketId" placeholder="Bucket Identifier">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-bucket"><i class="fa fa-user"></i> Bucket Name</label>
+        <input type="text" id="node-input-bucket" placeholder="Bucket Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-description"><i class="fa fa-comment"></i> Description</label>
+        <input type="text" id="node-input-description" placeholder="Bucket Description">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-enabled" style="vertical-align: bottom; margin-bottom: 0px;"><i class="fa fa-power-off"></i> Enabled</label>
+        <label class="switch">
+          <input type="checkbox" id="node-input-enabled" checked>
+          <div class="slider round"></div>
+        </label>
+    </div>
+
+    <div class="node-row-source">
+        <div class="form-row">
+            <label for="node-input-source"><i class="fa fa-folder-open"></i> Data Source</label>
+            <select id="node-input-source" style="width:70%; !important">
+                <option value="" default>Select Data Source</option>
+                <option value="device">From Device Resource</option>
+                <option value="write">From Device Write Call</option>
+                <option value="api">From API Request</option>
+                <option value="mqtt">From MQTT Topic</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-device" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-device"><i class="fa fa-rocket"></i> Device</label>
+            <input type="text" id="node-input-device" placeholder="Select Device...">
+        </div>
+    </div>
+
+    <div class="node-row-resource" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-resource"><i class="fa fa-cog"></i> Resource</label>
+            <input type="text" id="node-input-resource" placeholder="Select or Enter a Device Resource...">
+        </div>
+    </div>
+
+    <div class="node-row-update" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-update"><i class="fa fa-folder-open"></i> Data Source</label>
+            <select id="node-input-update" style="width:36%; !important">
+                <option value="" default>Select Refresh Mode</option>
+                <option value="interval">Sampling Interval</option>
+                <option value="events">Stream by Device</option>
+                <option value="none">None</option>
+            </select>
+            <input type="number" id="node-input-intervalValue" placeholder="Specify the value of the sampling interval" style="display: none; width:13%; !important" value=5>
+            <select id="node-input-intervalUnits" style="display: none; width:19%; !important">
+                <option value="s">seconds</option>
+                <option value="m" selected>minutes</option>
+                <option value="h">hours</option>
+                <option value="d">days</option>
+                <option value="w">weeks</option>
+                <option value="m">months</option>
+                <option value="y">years</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-topic" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-topic"><i class="fa fa-commenting-o"></i> MQTT Topic</label>
+            <input type="text" id="node-input-topic" placeholder="Enter MQTT Topic">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-assetType"><i class="fa fa-list-ul"></i> Asset Type</label>
+        <input type="text" id="node-input-assetType" placeholder="Select Type...">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-assetGroup"><i class="fa fa-th"></i> Asset Group</label>
+        <input type="text" id="node-input-assetGroup" placeholder="Select Group...">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="bucket-create">
+    <p>Creates a new data bucket.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>bucket <span class="property-type">string</span></dt>
+        <dd> the id of the bucket to create.</dd>
+        <dt class="optional">name <span class="property-type">string</span></dt>
+        <dd> the name of the bucket to create.</dd>
+        <dt class="optional">description <span class="property-type">string</span></dt>
+        <dd> the description of the bucket to create.</dd>
+        <dt>enabled <span class="property-type">boolean</span></dt>
+        <dd> the status of the bucket on creation.</dd>
+        <dt>source <span class="property-type">string</span></dt>
+        <dd> the data source of the bucket (<samp>device</samp>, <samp>write</samp>, <samp>api</samp> or <samp>mqtt</samp>).</dd>
+        <dt class="optional">extra_source <span class="property-type">string</span></dt>
+        <dd> the device in case of a device source or MQTT topic in case of mqtt source.</dd>
+        <dt class="optional">resource <span class="property-type">string</span></dt>
+        <dd> the device resource in case of a device source.</dd>
+        <dt class="optional">update <span class="property-type">string</span></dt>
+        <dd> the refresh mode for <samp>device</samp> source (<samp>interval</samp>, <samp>events</samp> or <samp>none</samp>).</dd>
+        <dt class="optional">interval <span class="property-type">string</span></dt>
+        <dd> the time interval for when source is <samp>device</samp> (1d for 1 day, 1w for 1w and so on).</dd>
+        <dt class="optional">asset_type <span class="property-type">string</span></dt>
+        <dd> the type of thinger asset.</dd>
+        <dt class="optional">asset_group <span class="property-type">string</span></dt>
+        <dd> the type of thinger group.</dd>
+    </dl>
+
+     <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li -->
+     </ol>
+
+    <h3>Details</h3>
+    <p>The node allows the configuration via the edit dialog or through an input message.
+    The values assigned through the dialog will have priority over the message, with the exception the <code>msg.enabled</code>.</p>
+
+    <p>Each <code>msg.source</code> will retrieve the data one way or another:
+       <ul>
+          <li><a href="https://docs.thinger.io/features/buckets#from-device-resource">From Device Resource</a>: <samp>device</samp></li>
+          <li><a href="https://docs.thinger.io/features/buckets#from-device-write-call">From Device Write Call</a>: <samp>write</samp></li>
+          <li><a href="https://docs.thinger.io/features/buckets#from-api-request-for-3rd-parties">From API Request</a>: <samp>api</samp></li>
+          <li><a href="https://docs.thinger.io/features/buckets#from-mqtt-topic">From MQTT Topic</a>: <samp>mqtt</samp></li>
+      </ul>
+    </p>
+
+    <p>The field <code>msg.extra_source</code> is only needed when selecting <samp>From device resource</samp> or <samp>From MQTT topic</samp> in <code>msg.source</code>. The node also accepts <code>msg.device</code> in case of <samp>device</samp> and <code>msg.topic</code> in case of <samp>mqtt</samp> as replacement of the field <code>msg.extra_source</code></p>
+
+    <p>The field <code>msg.update</code> represents the Refresh mode when <code>msg.source</code> is <samp>device</samp>. The possible values are explained below:
+      <ul>
+        <li><strong>Sampling Interval</strong>: retrieves data form the device resource in a specific timing. It needs an additional field, <code>msg.interval</code> indicating the interval as '1d' for one day, '1m' as one minute and so on.</li>
+        <li><strong>Stream by Device</strong>: allows the device to stream the information when required.</li>
+        <li><strong>None</strong>: to not set a refresh mode.</li>
+      </ul>
+    </p>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
+    </ul>
+</script>
+

@@ -11,11 +11,26 @@
         },
         label: function() {
             return this.name || this.host;
+        },
+        oneditprepare: function() {
+            // Load static scripts, also needed for stylesheets
+            console.log("Loading starting scripts");
+            $.getScript('thinger-server/js/thinger-server/thinger.js')
+            .fail(function(jqxhr, settings, exception ) {
+              console.log("failed");
+              console.log(exception);
+              console.log(exception.stack);
+            });
         }
     });
 </script>
 
 <script type="text/x-red" data-template-name="thinger-server">
+    <!-- Add thinger styling -->
+    <div>
+        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
+    </div>
+
     <div class="form-row">
         <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-config-input-name" placeholder="Optional name to identify the server">
@@ -25,8 +40,11 @@
         <input type="text" id="node-config-input-host" placeholder="API Host">
     </div>
     <div class="form-row">
-        <label for="node-config-input-ssl"><i class="fa fa-lock"></i> SSL</label>
-        <input type="checkbox" id="node-config-input-ssl">
+        <label for="node-config-input-ssl" style="vertical-align: bottom; margin-bottom: 0px;"><i class="fa fa-lock"></i> SSL</label>
+        <label class="switch">
+          <input type="checkbox" id="node-config-input-ssl">
+          <div class="slider round"></div>
+        </label>
     </div>
     <div class="form-row">
         <label for="node-config-input-token"><i class="fa fa-lock"></i> Token</label>
@@ -35,12 +53,44 @@
 </script>
 
 <script type="text/x-red" data-help-name="thinger-server">
-    <p>Configuration node for setting Thinger.io Host and Access Tokens
-    <h3>Thinger.io Plugin</h3>
-    When running Node-RED from a Thinger.io plugin, use the following Node configuration:
+    <p>Configuration settings of the Thinger.io Host and Access Tokens.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>host <span class="property-type">string</span></dt>
+        <dd> the host of the Thinger.io platform to connect to.</dd>
+        <dt>ssl <span class="property-type">boolean</span></dt>
+        <dd> the status of the SSL verification.</dd>
+        <dt>access_token <span class="property-type">string</span></dt>
+        <dd> the access token for the Thinger.io platform to connect to.</dd>
+    </dl>
+
+     <!-- h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li>
+     </ol -->
+
+    <h3>Details</h3>
+    <p>The node only allows the configuration via the edit dialog.</p>
+
+    <p>If working with the same Thinger.io server that is hosting the plugin, it is only necessary to include $(THINGER_HOST) into "Host" box and $(THINGER_TOKEN_NODE_RED_PLUGIN) in the "Token" box, then you can disable SSL communication, as all messages are going to run into the same computer.
+
+    <h3>References</h3>
     <ul>
-        <li>Host: $(THINGER_HOST)</li>
-        <li>SSL: Disabled (Not required in local connection)</li>
-        <li>Access Token: $(THINGER_TOKEN_NODE_RED_PLUGIN)</li>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
     </ul>
 </script>

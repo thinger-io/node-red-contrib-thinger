@@ -11,7 +11,18 @@ module.exports = function(RED) {
 
         // call bucket write on message reception
         node.on("input",function(msg) {
-            server.writeDevice(config.device, config.resource, msg.payload);
+
+            let device = config.device || msg.device;
+            let resource = config.resource || msg.resource;
+            var value = config.value || msg.payload || msg.value;
+            if (typeof(value) === 'string') {
+                value = JSON.parse(value);
+            }
+
+            server.writeDevice(device, resource, value, function(res) {
+                node.send({payload: res});
+            })
+            .catch(console.log);
         });
     }
 

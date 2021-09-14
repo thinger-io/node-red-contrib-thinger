@@ -11,7 +11,13 @@ module.exports = function(RED) {
 
         // call endpoint on message reception
         node.on("input",function(msg) {
-            server.callEndpoint(config.endpoint, msg.payload);
+
+            let endpoint = config.endpoint || msg.endpoint;
+
+            server.callEndpoint(endpoint, msg.payload, function(res) {
+                node.send({payload: res});
+            })
+            .catch(console.log);
         });
     }
 
