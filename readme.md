@@ -1,1 +1,0 @@
-Thinger.io Library for Node-RED.
