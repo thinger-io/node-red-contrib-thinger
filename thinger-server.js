@@ -591,6 +591,26 @@ module.exports = function(RED) {
         }
     });
 
+    RED.httpAdmin.get("/users/user", RED.auth.needsPermission('users.read'), async function(req,res) {
+        try {
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/"+config.username;
+            res.json(await request(url, 'GET'));
+        } catch(err) {
+            res.sendStatus(500);
+            node.error(RED._("users.failed",{error:err.toString()}));
+        }
+    });
+
+    RED.httpAdmin.get("/server/events", RED.auth.needsPermission('server.read'), async function(req,res) {
+        try {
+            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/server/events";
+            res.json(await request(url, 'GET'));
+        } catch(err) {
+            res.sendStatus(500);
+            node.error(RED._("server.failed",{error:err.toString()}));
+        }
+    });
+
     RED.httpAdmin.get('/thinger-server/js/*', function(req, res){
         var options = {
             root: __dirname + '/static/',

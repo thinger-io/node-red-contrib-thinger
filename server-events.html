@@ -21,29 +21,104 @@
             return "server events";
         },
         oneditprepare: function() {
-            $("#node-input-event").change(function(e) {
+            /*$("#node-input-event").change(function(e) {
                 var val = $(this).val();
                 $(".node-row-bucket").toggle(val && val.startsWith("bucket"));
                 $(".node-row-device").toggle(val && val.startsWith("device"));
                 $(".node-row-endpoint").toggle(val && val.startsWith("endpoint"));
                 $(".node-row-device-state").toggle(val === "device_state_change");
             });
+            */
+
+            // DESDE Aqui
+            // Save original filter row to restore in case of asset change
+            var originalFilter = $(".node-row-filter")[0].outerHTML;
+
+            // Event listeners
+            $("#node-input-asset").click(function() {
+                if (!$(".red-form-options").length) {
+                    createOptions("server/events","asset");
+                }
+
+            });
+
+            // change filter icon
+            $("#node-input-asset").change(function() {
+                if ($(".red-form-options").length <= 1 && $(this).val() !== "") {
+                    if (typeof changeFieldIcon === "function") {
+                        changeFieldIcon($(this).val(),"filter");
+                    }
+                }
+            });
+
+            // restore filter field when empty
+            $("#node-input-asset").on('input', function() {
+                if ($(this).val() === "") {
+                    $(".node-row-filter").replaceWith(originalFilter);
+                }
+            });
+
+            $("#node-input-event").click(function() {
+                if (!$(".red-form-options").length) {
+                    createOptions("server/events","event",undefined,undefined,["Any"]);
+                }
+            });
+
+            $("#node-input-event").change(function() {
+            });
+
+            // Load static scripts, also needed for stylesheets
+            console.log("Loading starting scripts");
+            $.getScript('thinger-server/js/thinger-server/thinger.js')
+            .fail(function(jqxhr, settings, exception ) {
+              console.log("failed");
+              console.log(exception);
+              console.log(exception.stack);
+            });
         }
     });
 </script>
 
 <script type="text/x-red" data-template-name="server-events">
+    <!-- Add thinger styling -->
+    <div>
+        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
+    </div>
+
     <div class="form-row">
         <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 
+    <div class="node-row-asset">
+        <div class="form-row">
+            <label for="node-input-asset"><i class="fa fa-building"></i> Asset</label>
+            <input type="text" id="node-input-asset" placeholder="Select Asset...">
+        </div>
+    </div>
+
+    <div class="node-row-event">
+        <div class="form-row">
+            <label for="node-input-event"><i class="fa fa-bolt"></i> Event</label>
+            <input type="text" id="node-input-event" placeholder="Select Event...">
+        </div>
+    </div>
+
+    <div class="node-row-filter">
+        <div class="form-row">
+            <label for="node-input-filter"><i class="fa fa-filter"></i> Filter</label>
+            <input type="text" id="node-input-filter" placeholder="Filter">
+        </div>
+    </div>
+
+<!--
     <div class="node-row-device-event">
         <div class="form-row">
             <label for="node-input-event"><i class="fa fa-bolt"></i> Event</label>
             <select id="node-input-event" style="width:70%; !important">
                 <option value="" default>Select Event</option>
                 <option value="bucket_write">bucket_write</option>
+                <option value="device_create">device_create</option>
                 <option value="device_state_change">device_state_change</option>
                 <option value="device_callback_call">device_callback_call</option>
                 <option value="device_property_update">device_property_update</option>
@@ -89,6 +164,7 @@
         <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
         <input type="text" id="node-input-server" placeholder="Select Server">
     </div>
+-->
 </script>
 
 <script type="text/x-red" data-help-name="server-events">
