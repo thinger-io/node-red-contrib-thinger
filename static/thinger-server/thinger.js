@@ -1,4 +1,7 @@
 
+// Global variables
+var userRole;
+
 // Extended jquery functions
 $.fn.removeClassStartingWith = function (filter) {
     $(this).removeClass(function (index, className) {
@@ -12,31 +15,39 @@ $.fn.removeClassStartingWith = function (filter) {
 /**
  * Changes the icon of the asset selected for the input field node-row-assetId
  * @param {String} asset The asset desired to set the icon, can be device, type or group
+ * @param {String} field The field name to change the icon of
  */
-function changeAssetIdIcon(asset) {
-    var assetIdIcon = $(".node-row-assetId > div > label > i");
-    var assetIdLabel = $(".node-row-assetId > div > label");
-    var assetIdInput = $(".node-row-assetId > div > input");
-    var placeholder = "Select a X or insert a new one";
+function changeFieldIcon(asset,field="assetId") {
+    var fieldIcon = $(".node-row-"+field+" > div > label > i");
+    var fieldLabel = $(".node-row-"+field+" > div > label");
+    var fieldInput = $(".node-row-"+field+" > div > input");
+    var placeholder = field === "assetId" ? "Select a X or insert a new one" : "X Filter";
+    fieldIcon.removeClassStartingWith("fa-").removeClass("fa fas");
 
-    assetIdIcon.removeClassStartingWith("fa-");
-
-    switch (asset) {
-        case 'device':
-            assetIdIcon.addClass("fa-rocket");
-            break;
-        case 'type':
-            assetIdIcon.addClass("fa-list-ul");
-            break;
-        case 'group':
-            assetIdIcon.addClass("fa-th");
-            break;
+    switch (asset) { // TODO: update icons once Node-RED updates from v4.7: https://nodered.org/docs/creating-nodes/appearance#font-awesome-icon
+        case 'brand':     fieldIcon.addClass("fa fa-paint-brush");      break;
+        case 'bucket':    fieldIcon.addClass("fa fa-database");         break;
+        case 'dashboard': fieldIcon.addClass("fa fa-tachometer");       break;
+        case 'device':    fieldIcon.addClass("fa fa-rocket");           break;
+        case 'domain':    fieldIcon.addClass("fa fa-at");               break;
+        case 'endpoint':  fieldIcon.addClass("fa fa-server");           break;
+        case 'group':     fieldIcon.addClass("fa fa-th");               break;
+        case 'host':      fieldIcon.addClass("fa fa-laptop");           break;
+        case 'mqtt':      fieldIcon.addClass("fa fa-wifi");             break;
+        case 'oauth':     fieldIcon.addClass("fa fa-window-maximize");  break;
+        case 'plugin':    fieldIcon.addClass("fa fa-cube");             break;
+        case 'product':   fieldIcon.addClass("fa fa-shopping-bag");     break;
+        case 'project':   fieldIcon.addClass("fa fa-folder");           break;
+        case 'storage':   fieldIcon.addClass("fa fa-hdd-o");            break;
+        case 'token':     fieldIcon.addClass("fa fa-lock");             break;
+        case 'type':      fieldIcon.addClass("fa fa-list-ul");          break;
+        case 'user':      fieldIcon.addClass("fa fa-users");            break;
     }
 
-    assetIdLabel.empty();
-    assetIdLabel.append(assetIdIcon);
-    assetIdLabel.append(" ").append(asset.replace(/^\w/, (c) => c.toUpperCase()));
-    assetIdInput.prop("placeholder",placeholder.replace("X",asset));
+    fieldLabel.empty();
+    fieldLabel.append(fieldIcon);
+    fieldLabel.append(" ").append(asset.replace(/^\w/, (c) => c.toUpperCase()));
+    fieldInput.prop("placeholder",placeholder.replace("X",asset.replace(/^\w/, (c) => c.toUpperCase())));
 }
 
 /**
@@ -93,11 +104,12 @@ function activateOption(obj,field) {
  * @param {JSON} json The json object from the createOptions function
  * @param {String} field The name of the field from which the options div generated. Like node-input-<fiel>
  * @param {int} action The value of the action that executes, only needed for resources, allowed value 2 -> "in", 3 -> "out", 4 -> "in_out"
+ * @param {Array} extraOps Extra options to fill into the options div at the beginning
  */
-function fillOptions(json,field,action) {
+function fillOptions(json,field,action,extraOps) {
     var fieldValue = $("#node-input-"+field).val();
     var asset = field;
-    if (field == "assetId") {
+    if (field == "assetId" || field === "event") {
         var asset = $("#node-input-asset").val();
     } else if (field == "assetType") {
         var asset = "type";
@@ -105,7 +117,24 @@ function fillOptions(json,field,action) {
         var asset = "group";
     }
 
+
     let elements = $(); // may create slack but will remove flickering
+    let eventFields = []; // only used for server events
+
+    for (var i in extraOps) {
+        let option = $("<span>");
+        let icon = $("<i>");
+        let op = $("<strong>").text(extraOps[i]);
+
+        option.addClass("red-form-option");
+        option.append(icon,op);
+        elements = elements.add(option);
+
+        option.click(function() {
+            activateOption($(this),field);
+        });
+    }
+
     // For each option from the json response create a new field and assign the corresponding values and icons
     for (var i in json) {
         // skip OTA resource
@@ -140,6 +169,19 @@ function fillOptions(json,field,action) {
         let id;
         if (json[i].hasOwnProperty('fn')) { // device resources
             id = $("<strong>").text(i);
+        } else if (json[i].hasOwnProperty('event')) { // server events
+            let evento = json[i]["event"];
+            if (field === "asset") {
+                evento = evento.slice(0, evento.indexOf("_"));
+            } else if (field === "event") {
+                evento = evento.startsWith(asset) ? evento : "";
+            }
+
+            if (evento !== "" && eventFields.indexOf(evento) == -1
+                && (userRole === "admin" || json[i]["role"] === userRole)) {
+                eventFields.push(evento);
+                id = $("<strong>").text(evento);
+            } else { continue; } // skip adding of option
         } else {
             id = $("<strong>").text(json[i][asset] ? json[i][asset] : json[i].property);
         }
@@ -176,8 +218,9 @@ function fillOptions(json,field,action) {
  * @param {String} field The name of the field from which the options div needs to be generated. Like node-input-<field>
  * @param {int} action The value of the action that executes, only needed for resources, allowed value 2 -> "in", 3 -> "out", 4 -> "in_out"
  * @param {function} callback Function to execute with the JSON response from the inside queries
+ * @param {Array} extraOps Extra options to fill into the options div at the beginning
  */
-function createOptions(url,field,action,callback) {
+function createOptions(url,field,action,callback,extraOps) {
 
     // Container
     $("<div>").insertAfter("#node-input-"+field)
@@ -221,11 +264,11 @@ function createOptions(url,field,action,callback) {
                 break;
             }
             default:
-                if (field == "property" || field == "resource") { // TODO: remove once search over properties and or resources is implemented in the server
+                if (field == "property" || field == "resource" || field == "asset") { // TODO: remove once search over properties and or resources is implemented in the server, keep asset
                     filterOptions($(this));
                 } else {
                     $.getJSON(url+"?name="+$(this).val().toLowerCase(), function(json) {
-                      fillOptions(json,field,action); // action added in case above TODO is implemented for resource
+                      fillOptions(json,field,action,extraOps); // action added in case above TODO is implemented for resource
                         if (typeof callback === "function") {
                           callback(json);
                         }
@@ -237,12 +280,27 @@ function createOptions(url,field,action,callback) {
 
     // Fill with options
     $.getJSON(url, function(json) {
-        fillOptions(json,field,action);
+        fillOptions(json,field,action,extraOps);
         if (typeof callback === "function") {
             callback(json);
         }
     });
 
+}
+
+/**
+ * Retrieves and sets the role of the configured user in the backend
+ */
+function getUserRole() {
+
+    $.ajax({
+        url: "users/user",
+        async: false,
+        dataType: 'json',
+        success: function(data) {
+            userRole = data.role;
+        }
+    });
 }
 
 /**
@@ -262,9 +320,12 @@ function generateCredentials() {
     return password;
 }
 
-
 $(window).ready(function () {
-  if ($("#node-input-asset").length && $("#node-input-asset").val()) {
-      changeAssetIdIcon($("#node-input-asset").val());
-  }
+
+    // Get and set global variables
+    getUserRole();
+
+    if ($("#node-input-asset").length && $("#node-input-asset").val()) {
+        changeFieldIcon($("#node-input-asset").val(),"assetId");
+    }
 });
