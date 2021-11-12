@@ -1,7 +1,4 @@
 
-// Global variables
-var userRole;
-
 // Extended jquery functions
 $.fn.removeClassStartingWith = function (filter) {
     $(this).removeClass(function (index, className) {
@@ -17,7 +14,7 @@ $.fn.removeClassStartingWith = function (filter) {
  * @param {String} asset The asset desired to set the icon, can be device, type or group
  * @param {String} field The field name to change the icon of
  */
-function changeFieldIcon(asset,field="assetId") {
+function changeField(asset,field="assetId",changeIcon=true) {
     var fieldIcon = $(".node-row-"+field+" > div > label > i");
     var fieldLabel = $(".node-row-"+field+" > div > label");
     var fieldInput = $(".node-row-"+field+" > div > input");
@@ -71,8 +68,8 @@ function filterOptions(obj) {
     var re = new RegExp(value,'g');
 
     $("span[class^='red-form-option'").each(function() {
-        var id = $(this).children()[1].innerHTML.toLowerCase();
-        var name = $(this).children()[2].innerHTML.toLowerCase();
+        var id = $(this).children.length >= 2 ? $(this).children()[1].innerHTML.toLowerCase() : "";
+        var name = $(this).children.length >= 3 ? $(this).children()[2].innerHTML.toLowerCase() : "";
         if (id.match(re) || name.match(re)) {
             $(this).show();
         } else {
@@ -99,6 +96,50 @@ function activateOption(obj,field) {
     destroyOptions(field);
 }
 
+
+function appendToSelect(value, field, selectedValue) {
+    if ($("#node-input-"+field+" option[value='"+value+"']").length == 0) {
+        let selected = value === selectedValue;
+        $("#node-input-"+field).append($('<option>', {
+            value: value,
+            text: value,
+            selected: selected
+        }));
+    }
+}
+
+function fillSelect(url,field,selectedValue,extraOps) {
+
+    for (var i in extraOps) {
+        appendToSelect(extraOps[i], field);
+    }
+
+    let userRole = getUserRole();
+
+    // Fill with options
+    $.getJSON(url, function(json) {
+
+        for (var i in json) {
+            let option = json[i];
+            if (json[i].hasOwnProperty('event')) { // server events
+
+                // skip if user not allowed
+                if (userRole !== "admin" && json[i]["role"] === "admin") {
+                    continue;
+                }
+
+                option = json[i]["event"];
+                if (field === "asset") {
+                    option = option.slice(0, option.indexOf("_"));
+                }
+            }
+
+            appendToSelect(option, field, selectedValue);
+        }
+
+    });
+}
+
 /**
  * Fills the options div with the options given in json format
  * @param {JSON} json The json object from the createOptions function
@@ -120,8 +161,10 @@ function fillOptions(json,field,action,extraOps) {
 
     let elements = $(); // may create slack but will remove flickering
     let eventFields = []; // only used for server events
+    let userRole = getUserRole();
 
     for (var i in extraOps) {
+console.log(extraOps[i]);
         let option = $("<span>");
         let icon = $("<i>");
         let op = $("<strong>").text(extraOps[i]);
@@ -178,7 +221,7 @@ function fillOptions(json,field,action,extraOps) {
             }
 
             if (evento !== "" && eventFields.indexOf(evento) == -1
-                && (userRole === "admin" || json[i]["role"] === userRole)) {
+                && (userRole === "admin" || json[i]["role"] === "admin")) {
                 eventFields.push(evento);
                 id = $("<strong>").text(evento);
             } else { continue; } // skip adding of option
@@ -217,7 +260,7 @@ function fillOptions(json,field,action,extraOps) {
  * @param {String} url The url from where to retrieve the data and the filtering
  * @param {String} field The name of the field from which the options div needs to be generated. Like node-input-<field>
  * @param {int} action The value of the action that executes, only needed for resources, allowed value 2 -> "in", 3 -> "out", 4 -> "in_out"
- * @param {function} callback Function to execute with the JSON response from the inside queries
+ * @param {function} callback Function to execute with the JSON response from the inside queries or after the request
  * @param {Array} extraOps Extra options to fill into the options div at the beginning
  */
 function createOptions(url,field,action,callback,extraOps) {
@@ -264,7 +307,7 @@ function createOptions(url,field,action,callback,extraOps) {
                 break;
             }
             default:
-                if (field == "property" || field == "resource" || field == "asset") { // TODO: remove once search over properties and or resources is implemented in the server, keep asset
+                if (field == "property" || field == "resource" || field == "asset" || field.startsWith("filter")) { // TODO: remove once search over properties and or resources is implemented in the server, keep asset
                     filterOptions($(this));
                 } else {
                     $.getJSON(url+"?name="+$(this).val().toLowerCase(), function(json) {
@@ -279,19 +322,26 @@ function createOptions(url,field,action,callback,extraOps) {
 
 
     // Fill with options
-    $.getJSON(url, function(json) {
-        fillOptions(json,field,action,extraOps);
-        if (typeof callback === "function") {
-            callback(json);
-        }
-    });
+    if (url) {
+        $.getJSON(url, function(json) {
+            fillOptions(json,field,action,extraOps);
+            if (typeof callback === "function") {
+                callback(json);
+            }
+        });
+    } else {
+        fillOptions(null,field,action,callback,extraOps);
+    }
 
 }
 
 /**
  * Retrieves and sets the role of the configured user in the backend
+ * TODO: make asyncronous
  */
 function getUserRole() {
+
+    let userRole = "";
 
     $.ajax({
         url: "users/user",
@@ -301,6 +351,7 @@ function getUserRole() {
             userRole = data.role;
         }
     });
+    return userRole;
 }
 
 /**
@@ -320,12 +371,21 @@ function generateCredentials() {
     return password;
 }
 
+function capitalize(string) {
+    const words = string.split(" ");
+
+    return words.map((word) => {
+        return word[0].toUpperCase()+word.substring(1);
+    }).join(" ");
+
+}
+
 $(window).ready(function () {
 
     // Get and set global variables
     getUserRole();
 
     if ($("#node-input-asset").length && $("#node-input-asset").val()) {
-        changeFieldIcon($("#node-input-asset").val(),"assetId");
+        changeField($("#node-input-asset").val(),"assetId");
     }
 });

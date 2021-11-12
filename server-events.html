@@ -1,4 +1,34 @@
 <script type="text/javascript">
+    function addFilterField(filter) {
+
+        let lowerField = filter.field.replace('_',' ');
+        let capsField = capitalize(lowerField);
+        let idField = capsField.replace(' ','');
+        //let capsField = filter.field;
+
+        let html = `
+          <div class='node-row-additional-filter'>
+            <div class='form-row'>
+              <label for="node-input-filter${capsField}"><i class="fa fa-filter"></i> ${capsField}</label>
+              <input type="text" id="node-input-filter${idField}" placeholder="${capsField} Filter">
+            </div>
+          </div>
+        `;
+        $(".node-row-filter").append(html);
+
+        if (filter.hasOwnProperty("hints")) {
+            //fillOptions(filter.hints, null, "filter"+capsField.replace(' ',''));
+            //console.log(filter.hints);
+            //console.log(capsField.replace(' ',''));
+            $("#node-input-filter"+idField).click(function() {
+                if (!$(".red-form-options").length) {
+                    //createOptions("server/events","event",null,function(json) {
+                    createOptions(null, "filter"+idField,null,filter.hints.unshift("Any"));
+                }
+            });
+        }
+    }
+
     RED.nodes.registerType('server-events', {
         category: 'thinger',
         color: '#74b9ff',
@@ -31,36 +61,57 @@
             */
 
             // DESDE Aqui
+            // TODO: load User class and events
+            var assetValue = this.asset;
             // Save original filter row to restore in case of asset change
             var originalFilter = $(".node-row-filter")[0].outerHTML;
 
             // Event listeners
-            $("#node-input-asset").click(function() {
-                if (!$(".red-form-options").length) {
-                    createOptions("server/events","asset");
-                }
 
-            });
-
-            // change filter icon
+            // change field name
             $("#node-input-asset").change(function() {
+                // empty event field and change asset icon
+                $("#node-input-event").val('');
                 if ($(".red-form-options").length <= 1 && $(this).val() !== "") {
-                    if (typeof changeFieldIcon === "function") {
-                        changeFieldIcon($(this).val(),"filter");
+                    if (typeof changeField === "function") {
+                        changeField($(this).val(),"filter",false);
                     }
-                }
-            });
-
-            // restore filter field when empty
-            $("#node-input-asset").on('input', function() {
-                if ($(this).val() === "") {
+                } else {
+                    // restore filter field when empty
                     $(".node-row-filter").replaceWith(originalFilter);
                 }
             });
 
+            // restore filter field when empty
+            /*$("#node-input-asset").on('input', function() {
+                if ($(this).val() === "") {
+                    $(".node-row-filter").replaceWith(originalFilter);
+                }
+            });*/
+
             $("#node-input-event").click(function() {
                 if (!$(".red-form-options").length) {
-                    createOptions("server/events","event",undefined,undefined,["Any"]);
+                    createOptions("server/events","event",null,function(json) {
+                        $("#node-input-event").off('change');
+                        $("#node-input-event").change(function() {
+                            $(".node-row-additional-filter").remove();
+                            let evento = json.find(e=>e.event === $(this).val());
+                            for (i in evento.filters) {
+                                console.log(i);
+                                /*if (i === 0) {
+                                  console.log(i);
+                                  console.log(evento.filters[i]);
+                                  break;
+                                }*/
+                                if (evento.filters[i].field == $("#node-input-asset").val()) {
+                                    continue;
+                                }
+                                addFilterField(evento.filters[i]);
+                                //console.log(evento[i]);
+                                //console.log(evento[i].hints);
+                            }
+                        });
+                    },["Any"]);
                 }
             });
 
@@ -70,11 +121,17 @@
             // Load static scripts, also needed for stylesheets
             console.log("Loading starting scripts");
             $.getScript('thinger-server/js/thinger-server/thinger.js')
+            .done(function() {
+              // Execute function from script after load
+              fillSelect("server/events","asset",assetValue);
+            })
             .fail(function(jqxhr, settings, exception ) {
               console.log("failed");
               console.log(exception);
               console.log(exception.stack);
+
             });
+
         }
     });
 </script>
@@ -93,7 +150,9 @@
     <div class="node-row-asset">
         <div class="form-row">
             <label for="node-input-asset"><i class="fa fa-building"></i> Asset</label>
-            <input type="text" id="node-input-asset" placeholder="Select Asset...">
+            <select id="node-input-asset" style="width:70%; !important">
+                <option value="" default>Select Asset</option>
+            </select>
         </div>
     </div>
 
@@ -104,12 +163,15 @@
         </div>
     </div>
 
+    <!-- filter for default asset -->
     <div class="node-row-filter">
         <div class="form-row">
             <label for="node-input-filter"><i class="fa fa-filter"></i> Filter</label>
             <input type="text" id="node-input-filter" placeholder="Filter">
         </div>
     </div>
+
+    <!-- additional filter fields -->
 
 <!--
     <div class="node-row-device-event">
@@ -160,11 +222,13 @@
         </div>
     </div>
 
-    <div class="form-row">
-        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
-        <input type="text" id="node-input-server" placeholder="Select Server">
-    </div>
 -->
+    <div class="node-row-server">
+        <div class="form-row">
+            <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+            <input type="text" id="node-input-server" placeholder="Select Server">
+        </div>
+    </>
 </script>
 
 <script type="text/x-red" data-help-name="server-events">
