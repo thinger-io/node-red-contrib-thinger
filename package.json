@@ -21,19 +21,20 @@
 	},
 	"node-red": {
 		"nodes": {
-			"bucket-create": "bucket-create.js",
-			"bucket-read": "bucket-read.js",
-			"bucket-write": "bucket-write.js",
-			"device-callback": "device-callback.js",
-			"device-create": "device-create.js",
-			"device-read": "device-read.js",
-			"device-stream": "device-stream.js",
-			"device-write": "device-write.js",
-			"endpoint-call": "endpoint-call.js",
-			"property-read": "property-read.js",
-			"property-write": "property-write.js",
-			"server-events": "server-events.js",
-			"thinger-server": "thinger-server.js"
+			"asset-iterator": "nodes/asset-iterator.js",
+			"bucket-create": "nodes/bucket-create.js",
+			"bucket-read": "nodes/bucket-read.js",
+			"bucket-write": "nodes/bucket-write.js",
+			"device-callback": "nodes/device-callback.js",
+			"device-create": "nodes/device-create.js",
+			"device-read": "nodes/device-read.js",
+			"device-stream": "nodes/device-stream.js",
+			"device-write": "nodes/device-write.js",
+			"endpoint-call": "nodes/endpoint-call.js",
+			"property-read": "nodes/property-read.js",
+			"property-write": "nodes/property-write.js",
+			"server-events": "nodes/server-events.js",
+			"thinger-server": "nodes/thinger-server.js"
 		}
 	}
 }

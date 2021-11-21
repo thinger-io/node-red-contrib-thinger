@@ -28,7 +28,7 @@
             var originalProperty = $(".node-row-property")[0].outerHTML;
             var firstTime = true;
 
-            $("#node-input-asset").change(function(e) {
+            $("#node-input-asset").change(function() {
                 // Restore form values if not previously set
                 if (!firstTime) {
                     $(".node-row-assetId").replaceWith(originalAssetId);
@@ -37,45 +37,42 @@
                 firstTime = false;
 
                 // Remove previously set handlers or the will acumulate
-                $('#node-input-assetId').off('click');
-                $('#node-input-property').off('click');
+                $('#node-input-assetId').off('focus');
+                $('#node-input-property').off('focus');
 
-                var asset = $(this).val();
-                var assets = asset+"s";
+                const assetType = $(this).val();
 
-                if (asset) {
+                if (assetType) {
                     // Field appearance
-                    if (typeof changeAssetIdIcon === "function") {
-                        changeAssetIdIcon(asset);
-                    }
+                    ThingerDOM.changeInputField(assetType,"assetId");
+
+                    let assets = new (assetClass.get(`${assetType}s`))();
 
                     // Options and filtering
-                    $("#node-input-assetId").click(function(e) {
-                        if (!$(".red-form-options").length) {
-                            createOptions("assets/"+assets,"assetId");
-                        }
+                    $("#node-input-assetId").focus(function() {
+                        const field = "assetId";
+                        const assetId = $(this).val();
+                        assets.getAssets().then(function(data) {
+                            ThingerDOM.showOptions(field,data,assetId,function(value) {
+                                assets = new (assetClass.get(`${assetValue}s`))(value);
+                                assets.getAssets().then((data) => {ThingerDOM.showOptions(field, data)});
+                            });
+                        });
                     });
 
                   // Properties
-                  $('#node-input-property').click(function(e) {
-                      var assetId = $("#node-input-assetId").val();
+                  $('#node-input-property').focus(function() {
+                      const assetId = $("#node-input-assetId").val();
+                      const property = $(this).val();
+                      const asset = new (assetClass.get(`${assetType}`))(assetId);
                       if (assetId) {
-                          if (!$(".red-form-options").length) {
-                              createOptions("assets/"+assets+"/"+assetId+"/properties","property");
-                          }
+                          asset.getProperties().then(function(data) {
+                              ThingerDOM.showOptions("property",data,property);
+                          });
                       }
                   });
 
                 }
-            });
-
-            // Load static scripts, also needed for stylesheets
-            console.log("Loading starting scripts");
-            $.getScript('thinger-server/js/thinger-server/thinger.js')
-            .fail(function(jqxhr, settings, exception ) {
-              console.log("failed");
-              console.log(exception);
-              console.log(exception.stack);
             });
 
         }
@@ -83,10 +80,6 @@
 </script>
 
 <script type="text/x-red" data-template-name="property-read">
-    <!-- Add thinger styling -->
-    <div>
-        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
-    </div>
 
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>

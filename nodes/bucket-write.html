@@ -33,20 +33,19 @@
             }
 
             // Event handlers and requests
-            $("#node-input-bucket").click(function() {
-                if (!$(".red-form-options").length) {
-                    createOptions("assets/buckets","bucket")
-                }
+            $("#node-input-bucket").focus(function() {
+                const field = "bucket";
+                const bucket = $(this).val();
+                let buckets = new ThingerBuckets(bucket);
+                buckets.getBuckets().then(function(data) {
+                    ThingerDOM.showOptions(field, data, bucket, function(value) {
+                        // buckets filtering callback
+                        buckets = new ThingerBuckets(value);
+                        buckets.getBuckets().then((data) => {ThingerDOM.showOptions(field,data)});
+                    });
+                });
             });
 
-            // Load static scripts, also needed for stylesheets
-            console.log("Loading starting scripts");
-            $.getScript('thinger-server/js/thinger-server/thinger.js')
-            .fail(function(jqxhr, settings, exception ) {
-              console.log("failed");
-              console.log(exception);
-              console.log(exception.stack);
-            });
         },
         oneditsave: function() {
             // remove pretty characters and save
@@ -67,10 +66,6 @@
 </script>
 
 <script type="text/x-red" data-template-name="bucket-write">
-    <!-- Add thinger styling -->
-    <div>
-        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
-    </div>
 
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>

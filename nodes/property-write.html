@@ -41,7 +41,7 @@
             var firstTime = true;
 
             // Event listeners
-            $("#node-input-asset").change(function(e) {
+            $("#node-input-asset").change(function() {
                 // Restore form values if not previously set
                 if (!firstTime) {
                     $(".node-row-assetId").replaceWith(originalAssetId);
@@ -51,55 +51,47 @@
                 firstTime = false;
 
                 // Remove previously set handlers or the will acumulate
-                $('#node-input-assetId').off('click');
-                $('#node-input-property').off('click');
+                $('#node-input-assetId').off('focus');
+                $('#node-input-property').off('focus');
                 $('#node-input-property').off('input');
 
-                var asset = $(this).val();
-                var assets = asset+"s";
+                var assetType = $(this).val();
 
-                if (asset) {
-                    // Field appearance
-                    if (typeof changeAssetIdIcon === "function") {
-                        changeAssetIdIcon(asset);
-                    }
+                if (assetType) {
+                    ThingerDOM.changeInputField(assetType,"assetId");
+
+                    let assets = new (assetClass.get(`${assetType}s`))();
 
                     // Options and filtering
-                    $("#node-input-assetId").click(function(e) {
-                        if (!$(".red-form-options").length) {
-                            createOptions("assets/"+assets,"assetId");
+                    $("#node-input-assetId").focus(function() {
+                        const field = "assetId";
+                        const assetId = $(this).val();
+                        assets.getAssets().then(function(data) {
+                            ThingerDOM.showOptions(field,data,assetId,function(value) {
+                                assets = new (assetClass.get(`${assetValue}s`))(value);
+                                assets.getAssets().then((data) => {ThingerDOM.showOptions(field, data)});
+                            });
+                        });
+                    });
+
+                    // Properties
+                    $('#node-input-property').focus(function() {
+                        const assetId = $("#node-input-assetId").val();
+                        const property = $(this).val();
+                        const asset = new (assetClass.get(`${assetType}`))(assetId);
+                        if (assetId) {
+                            asset.getProperties().then(function(data) {
+                                ThingerDOM.showOptions("property",data,property);
+                                $("#node-input-property").change(function() {
+                                    let propertyValue = JSON.stringify(asset.getPropertyValue($(this).val()),null,'\t');
+                                    editor.setValue(propertyValue);
+                                });
+                            });
                         }
                     });
 
-                  // Properties
-                  $('#node-input-property').click(function(e) {
-                      var assetId = $("#node-input-assetId").val();
-                      if (assetId) {
-                          if (!$(".red-form-options").length) {
-                            createOptions("assets/"+assets+"/"+assetId+"/properties","property",null,function(json) {
-                                $("#node-input-property").off("change");
-                                $("#node-input-property").change(function() {
-                                    for (var i in json) {
-                                        if ($("#node-input-property").val() == json[i].property) {
-                                            editor.setValue(JSON.stringify(json[i].value,null,'\t'));
-                                        }
-                                    }
-                                });
-                            });
-                          }
-                      }
-                  });
 
                 }
-            });
-
-            // Load static scripts, also needed for stylesheets
-            console.log("Loading starting scripts");
-            $.getScript('thinger-server/js/thinger-server/thinger.js')
-            .fail(function(jqxhr, settings, exception ) {
-              console.log("failed");
-              console.log(exception);
-              console.log(exception.stack);
             });
 
         },
@@ -122,10 +114,6 @@
 </script>
 
 <script type="text/x-red" data-template-name="property-write">
-    <!-- Add thinger styling -->
-    <div>
-        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
-    </div>
 
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>

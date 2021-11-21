@@ -12,24 +12,29 @@
         label: function() {
             return this.name || this.host;
         },
-        oneditprepare: function() {
+        onpaletteadd: function() {
             // Load static scripts, also needed for stylesheets
             console.log("Loading starting scripts");
-            $.getScript('thinger-server/js/thinger-server/thinger.js')
-            .fail(function(jqxhr, settings, exception ) {
-              console.log("failed");
-              console.log(exception);
-              console.log(exception.stack);
-            });
+            const scripts = ["dom","user","events","assets","utils"];
+            scripts.forEach(script =>
+                $.getScript(`thinger/static/js/${script}.js`)
+                .done(function() {
+                    console.log(`loaded ${script}.js`);
+                })
+                .fail(function(jqxhr, settings, exception ) {
+                    console.log(`failed ${script}.js`);
+                    console.log(exception);
+                    console.log(exception.stack);
+                })
+              );
+
+            // Add thinger css
+            $('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', 'thinger/static/css/thinger.css') );
         }
     });
 </script>
 
 <script type="text/x-red" data-template-name="thinger-server">
-    <!-- Add thinger styling -->
-    <div>
-        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
-    </div>
 
     <div class="form-row">
         <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>

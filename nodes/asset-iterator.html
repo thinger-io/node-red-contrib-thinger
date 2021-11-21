@@ -1,0 +1,173 @@
+
+<script type="text/javascript">
+    'use strict';
+
+    RED.nodes.registerType('asset-iterator', {
+        category: 'thinger',
+        color: '#74b9ff',
+        defaults: {
+            name: {value:""},
+            asset: {value: ""},
+            filter: {value: ""}, // regex
+            assetType: {value: ""},
+            assetGroup: {value: ""},
+            server: {type:"thinger-server", required:true}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 1,
+        outputs: 1,
+        align: 'left',
+        label: function() {
+            return this.name || (this.asset ? this.asset +"/"+ this.filter : "asset iterator");
+        },
+        paletteLabel: function() {
+            return "asset iterator";
+        },
+        oneditprepare: function() {
+
+            const user = new ThingerUser();
+            const assets = new ThingerAssets(null,user.role);
+
+            let _asset = this.asset;
+
+            assets.getAssets().then((data) => {
+                ThingerDOM.fillSelect("asset",data);
+                ThingerDOM.selectOption("asset",this.asset);
+            });
+
+
+            $("#node-input-asset").change(function() {
+
+                let asset = $(this).val() !== null ? $(this).val() : _asset;
+
+                if (asset) {
+                    // Field appearance
+                    ThingerDOM.changeInputField(asset,"filter");
+
+                    if (["device", "bucket"].indexOf(asset) != -1) {
+                        $(".node-row-assetType").show();
+                        $(".node-row-assetGroup").show();
+                    } else {
+                        $(".node-row-assetType").hide();
+                        $(".node-row-assetGroup").hide();
+                    }
+
+                }
+            });
+
+
+            $("#node-input-assetType").focus(function() {
+                const field = "assetType";
+                const type = $(this).val();
+                let types = new ThingerTypes(type);
+                types.getTypes().then(function(data) {
+                    ThingerDOM.showOptions(field, data, type, function(value) {
+                        // types filtering callback
+                        types = new ThingerTypes(value);
+                        types.getTypes().then((data) => {ThingerDOM.showOptions(field,data)});
+                    });
+                });
+            });
+
+            $("#node-input-assetGroup").focus(function() {
+                const field = "assetGroup";
+                const group = $(this).val();
+                let groups = new ThingerGroups(group);
+                groups.getGroups().then(function(data) {
+                    ThingerDOM.showOptions(field, data, group, function(value) {
+                        // groups filtering callback
+                        groups = new ThingerGroups(value);
+                        groups.getGroups().then((data) => {ThingerDOM.showOptions(field,data)});
+                    });
+                });
+            });
+
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="asset-iterator">
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="node-row-asset">
+        <div class="form-row">
+            <label for="node-input-asset"><i class="fa fa-building"></i> Asset</label>
+            <select id="node-input-asset" style="width:70%; !important">
+                <option value="" default>Select Asset</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-filter"> <!-- assetId class to allow icon change -->
+         <div class="form-row">
+            <label for="node-input-filter"><i class="fa fa-home"></i> Asset Filter</label>
+            <input type="text" id="node-input-filter" placeholder="Input a filter to match assets">
+        </div>
+    </div>
+
+    <div class="node-row-assetType" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-assetType"><i class="fa fa-list-ul"></i> Asset Type</label>
+            <input type="text" id="node-input-assetType" placeholder="Select Type...">
+        </div>
+    </div>
+
+    <div class="node-row-assetGroup" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-assetGroup"><i class="fa fa-th"></i> Asset Group</label>
+            <input type="text" id="node-input-assetGroup" placeholder="Select Group...">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="asset-iterator">
+    <p>Reads and iterates over the assets that match the filters, returning one message per asset.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>asset <span class="property-type">string</span></dt>
+        <dd> the type of asset.</dd>
+        <dt>asset_filter <span class="property-type">string</span></dt>
+        <dd> ther filter of the assets to match.</dd>
+        <dt class="optional">asset_type <span class="property-type">string</span></dt>
+        <dd> the type of thinger asset.</dd>
+        <dt class="optional">asset_group <span class="property-type">string</span></dt>
+        <dd> the type of thinger group.</dd>
+    </dl>
+
+     <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li -->
+     </ol>
+
+    <h3>Details</h3>
+    <p>The values of the field <code>msg.asset_filter</code> allows basic regular expressions</p>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
+    </ul>
+</script>

@@ -1,56 +1,53 @@
 <script type="text/javascript">
-    RED.nodes.registerType('device-stream', {
+    RED.nodes.registerType('device-read', {
         category: 'thinger',
         color: '#74b9ff',
         defaults: {
-            name: {value:""},
+            name: {value: ""},
             device: {value: ""},
             resource: {value: ""},
-            interval: {value: ""},
             server: {type:"thinger-server", required:true}
         },
         icon:"thinger_logo_white.png",
-        inputs:0,
+        inputs: 1,
         outputs:1,
+        inputLabels: "event",
         label: function() {
-            return this.name || ((this.device && this.resource) ? (this.device + "/" + this.resource + " ("  + this.interval + "s)") : "device stream");
+            return this.name || ((this.device && this.resource) ? (this.device + "/" + this.resource) : "device read");
         },
         paletteLabel: function() {
-            return "device stream";
+            return "device read";
         },
         oneditprepare: function() {
 
-            // Event listeners
-            $("#node-input-device").click(function() {
-                if (!$(".red-form-options").length) {
-                    createOptions("assets/devices","device");
-                }
+            $("#node-input-device").focus(function() {
+                const field1 = "device";
+                const device1 = $(this).val();
+                let devices = new ThingerDevices(device1);
+                devices.getDevices().then(function(data) {
+                    ThingerDOM.showOptions(field1,data,device1,function(value) {
+                        // devices filtering callback
+                        devices = new ThingerDevices(value);
+                        devices.getDevices().then((data) => {ThingerDOM.showOptions(field1, data)});
+                    });
+
+                    $("#node-input-resource").off('focus');
+                    $("#node-input-resource").focus(function() {
+                        const field2 = "resource";
+                        const resource = $(this).val();
+                        const device2 = $("#node-input-device").val()
+                        devices.getDeviceOutputResources(device2).then(function(data) {
+                            ThingerDOM.showOptions(field2,data,resource);
+                        });
+                    })
+                });
             });
 
-            $("#node-input-resource").click(function() {
-                if (!$(".red-form-options").length) {
-                    let deviceId = $("#node-input-device").val();
-                    createOptions("assets/devices/"+deviceId+"/resources","resource",3);
-                }
-            });
-
-            // Load static scripts, also needed for stylesheets
-            console.log("Loading starting scripts");
-            $.getScript('thinger-server/js/thinger-server/thinger.js')
-            .fail(function(jqxhr, settings, exception ) {
-              console.log("failed");
-              console.log(exception);
-              console.log(exception.stack);
-            });
         }
     });
 </script>
 
-<script type="text/x-red" data-template-name="device-stream">
-    <!-- Add thinger styling -->
-    <div>
-        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
-    </div>
+<script type="text/x-red" data-template-name="device-read">
 
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -65,26 +62,20 @@
         <input type="text" id="node-input-resource" placeholder="Resource Name">
     </div>
     <div class="form-row">
-        <label for="node-input-interval"><i class="fa fa-clock-o"></i> Interval (s)</label>
-        <input type="text" id="node-input-interval" placeholder="Sampling Interval (s)">
-    </div>
-    <div class="form-row">
         <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
         <input type="text" id="node-input-server" placeholder="Select Server">
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="device-stream">
-    <p>Subscribes to a given device resource at periodic defined interval.</p>
+<script type="text/x-red" data-help-name="device-read">
+    <p>Reads a resource value from a connected device.</p>
 
     <h3>Inputs</h3>
     <dl class="message-properties">
-        <dt>device <span class="property-type">string</span> </dt>
+        <dt>device <span class="property-type">string</span></dt>
         <dd> the id of the device to read from.</dd>
         <dt>resource <span class="property-type">string</span></dt>
         <dd> the resource of the device to read from.</dd>
-        <dt>interval <span class="property-type">int</span></dt>
-        <dd> the interval in seconds.</dd>
     </dl>
 
      <h3>Outputs</h3>
