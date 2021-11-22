@@ -25,7 +25,7 @@ jobs:
           PACKAGE_VERSION=$(cat package.json \
             | grep version \
             | head -1 \
-            | awk -F: '{print $2 }' \
+            | cut -d' ' -f3 \
             | sed 's/[",]//g' \
             sed 's/ //g')
           PACKAGE_VERSION_NEW="$PACKAGE_VERSION"-beta.`date +"%Y%m%d-%H%M"`
