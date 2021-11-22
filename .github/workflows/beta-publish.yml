@@ -20,9 +20,12 @@ jobs:
         with:
           node-version: 12
           registry-url: https://registry.npmjs.org
+      - name: ls and find directory
+        run: \
+          find . -name 'package.json'
       - name: version change to beta
         run: \
-          PACKAGE_VERSION=$(cat package.json \
+          PACKAGE_VERSION=$(cat "$GITHUB_WORKSPACE"/package.json \
             | grep version \
             | head -1 \
             | cut -d' ' -f3 \
