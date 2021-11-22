@@ -1,0 +1,29 @@
+name: "beta-publish"
+
+on:
+  push:
+    branches:
+      - 1.2.0
+  #pull-request:
+  #  branches:
+  #    - master
+
+jobs:
+  beta-release:
+    name: beta-publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2.3.4
+      - name: node
+        uses: actions/setup-node@v2.4.0
+        with:
+          node-version: 12
+          registry-url: https://registry.npmjs.org
+      - name: version change to beta
+        run: sed/gre TODO
+      - name: publish
+        run: npm publish --tag beta
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
