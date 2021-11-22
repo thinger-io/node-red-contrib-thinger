@@ -23,11 +23,11 @@
             $("#node-input-endpoint").focus(function() {
                 const field = "endpoint";
                 const endpoint = $(this).val();
-                let endpoints = new Endpoints(endpoint);
+                let endpoints = new ThingerEndpoints(endpoint);
                 endpoints.getEndpoints().then(function(data) {
                     ThingerDOM.showOptions(field, data, endpoint, function(value) {
                         // endpoints filtering callback
-                        endpoints = new Endpoints(value);
+                        endpoints = new ThingerEndpoints(value);
                         endpoints.getEndpoints().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });
