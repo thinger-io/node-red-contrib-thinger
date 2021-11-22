@@ -82,6 +82,13 @@
                 });
             });
 
+        },
+        oneditsave: function() {
+            let asset = $("#node-input-asset").val();
+            if ( asset !== "device" && asset !== "bucket") {
+                $("#node-input-assetType").val("");
+                $("#node-input-assetGroup").val("");
+            }
         }
     });
 </script>

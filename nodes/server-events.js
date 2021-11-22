@@ -20,10 +20,11 @@ module.exports = function(RED) {
         let filters = config.filters;
 
         let subscription = {};
-        subscription[asset] = filter;
+        if (filter !== "")
+            subscription[asset] = filter;
         if (event !== "any" && event !== "")
             subscription["event"] = event;
-        else subscription["event"] = ".*";
+        else subscription["event"] = `${asset !== "" ? asset+"_.*" : ".*"}`;
         for (let key in filters) {
           if (filters[key] !== "any" && filters[key] !== "")
               subscription[key] = filters[key];
