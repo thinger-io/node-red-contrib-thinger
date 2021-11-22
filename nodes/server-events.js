@@ -23,7 +23,7 @@ module.exports = function(RED) {
         subscription[asset] = filter;
         if (event !== "any" && event !== "")
             subscription["event"] = event;
-        else subscription["event"] = `${asset}.*`;
+        else subscription["event"] = ".*";
         for (let key in filters) {
           if (filters[key] !== "any" && filters[key] !== "")
               subscription[key] = filters[key];
