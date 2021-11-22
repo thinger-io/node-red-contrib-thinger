@@ -248,18 +248,15 @@ module.exports = function(RED) {
             const count = 50;
             const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/${user}${assetType}?name=${assetFilter}&count=${count}`;
 
-            let body = [];
             let index = 0;
             let res_length = 0;
 
             do {
               const res = await Request.request(`${url}&index=${index}`, 'GET', token);
               res_length = res.length;
-              //body = body.concat(res);
               handler(res);
               index += res_length;
             } while (res_length == count);
-              //handler(body);
         };
 
         node.unRegisterDeviceResourceListener = function (deviceId, resourceId, node){
