@@ -562,8 +562,16 @@ module.exports = function(RED) {
     });
 
     RED.httpAdmin.get("/server/:resource", RED.auth.needsPermission('server.read'), async function(req,res) {
+        let host = "";
+        let ssl = true;
+        if (config === undefined) {
+            host = 'backend.thinger.io'
+        } else {
+            host = config.host;
+            ssl = config.ssl;
+        }
         try {
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/server/${req.params.resource}`;
+            const url = `${ssl ? "https://" : "http://"}${host}/v1/server/${req.params.resource}`;
             let data = await Request.request(url, 'GET', token);
             // order assets
             if (req.params.resource === "assets") {

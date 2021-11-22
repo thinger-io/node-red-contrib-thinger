@@ -15,7 +15,7 @@ class ThingerEvents {
                 for (let i in data) {
                     if (role === "admin" || data[i].role !== "admin") {
                         self.events.push(
-                          new Event(
+                          new ThingerEvent(
                             data[i].event,
                             data[i].filters
                         ));
@@ -30,7 +30,7 @@ class ThingerEvents {
 
     #addAnyEvent() {
       this.assets.forEach(asset => {
-          this.events.unshift(new Event("any", [{"field": asset}]));
+          this.events.unshift(new ThingerEvent("any", [{"field": asset}]));
       });
     }
 
