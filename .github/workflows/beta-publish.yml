@@ -21,7 +21,15 @@ jobs:
           node-version: 12
           registry-url: https://registry.npmjs.org
       - name: version change to beta
-        run: sed/gre TODO
+        run: \
+          PACKAGE_VERSION=$(cat package.json \
+            grep version \
+            head -1 \
+            awk -F: '{print $2 }' \
+            sed 's/[",]//g' \
+            sed 's/ //g')
+          PACKAGE_VERSION_NEW=$PACKAGE_VERSION-beta.`date +"%Y%m%d-%H%M"`
+          sed -i "s/$PACKAGE_VERSION/$PACKAGE_VERSION_NEW/g" package.json
       - name: publish
         run: npm publish --tag beta
         env:
