@@ -22,7 +22,7 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: version change to beta
         run: \
-          PACKAGE_VERSION=$(cat "$GITHUB_WORKSPACE"/package.json \
+          PACKAGE_VERSION=$(cat ${{ github.workspace }}/package.json \
             | grep version \
             | head -1 \
             | cut -d' ' -f3 \
