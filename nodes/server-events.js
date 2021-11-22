@@ -14,16 +14,19 @@ module.exports = function(RED) {
         let server = RED.nodes.getNode(config.server);
 
         // fill event info
-        let asset = config.asset || msg.asset;
-        let event = config.event || msg.event;
-        let filter = config.filter || msg.filter;
-        let filters = config.filters || msg.filters;
+        let asset = config.asset;
+        let event = config.event;
+        let filter = config.filter;
+        let filters = config.filters;
 
         let subscription = {};
-        subscription[asset] = filter.trim();
-        subscription["event"] = event.trim();
+        subscription[asset] = filter;
+        if (event !== "any" && event !== "")
+            subscription["event"] = event;
+        else subscription["event"] = `${asset}.*`;
         for (let key in filters) {
-          subscription[key] = filters[key];
+          if (filters[key] !== "any" && filters[key] !== "")
+              subscription[key] = filters[key];
         }
 
         function on_open(){

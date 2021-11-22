@@ -162,9 +162,11 @@
      </ol>
 
     <h3>Details</h3>
-    <p>The field <code>msg.filter</code> and in some cases also the field <code>msg.filters> allow basic regular expressions.</p>
+    <p>The field <code>filter</code> and in some cases also the field <code>filters</code> allow basic regular expressions.</p>
 
     <p>The filters field is only used in some cases where additional filters can be applied to an event. Its value will be a JSON object for which the name of the property corresponds to the filter name and the property value to the filter to apply.</p>
+
+    <p>Note that as this node is an Inject node it does not allow its configuration through and input message.</p>
 
     <h3>References</h3>
     <ul>
