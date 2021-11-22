@@ -1,0 +1,178 @@
+<script type="text/javascript">
+    'use strict';
+
+    RED.nodes.registerType('server-events', {
+        category: 'thinger',
+        color: '#74b9ff',
+        defaults: {
+            name: {value:""},
+            asset: {value:""},
+            event: {value:""},
+            filter: {value:""},
+            filters: {value:{}},
+            server: {type:"thinger-server", required: true}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 0,
+        outputs: 1,
+        label: function() {
+            return this.name || this.event || "server events";
+        },
+        paletteLabel: function() {
+            return "server events";
+        },
+        oneditprepare: function() {
+
+            const user = new ThingerUser();
+            const events = new ThingerEvents(user.role);
+
+            const _event = this.event;
+            const _filter = this.filter;
+            const _filters = this.filters;
+            const _filterField = $(".node-row-filter")[0].outerHTML;
+
+            let firstLoad1 = true;
+
+            // Fill asset options
+            ThingerDOM.fillSelect("asset",events.assets);
+            ThingerDOM.selectOption("asset",this.asset);
+
+            let assetEvents = {};
+            $('#node-input-asset').change(function() {
+                // Set assets, empty event field and change filter field name
+                $("#node-input-event").val(firstLoad1 ? _event : '').change();
+                assetEvents = events.assetEvents($(this).val());
+
+                if (!firstLoad1) {
+                    $(".node-row-filter").replaceWith(_filterField);
+                }
+                if ($(this).val() !== "") {
+                    ThingerDOM.renameInputField("filter", $(this).val());
+                }
+                firstLoad1 = false;
+            });
+
+            $('#node-input-event').focus(function() {
+                // Show existing events
+                ThingerDOM.showOptions("event",assetEvents,$(this).val());
+            });
+
+            $('#node-input-event').change(function() {
+                // Add additional fields with hints if needed
+                $(".node-row-additional-field").remove();
+                if ($(this).val() !== "" && events.exists($(this).val())) {
+
+                    let filters = events.event($(this).val()).filters;
+
+                    filters.forEach(filter => {
+                        ThingerDOM.addInputField(filter.field, "Filter", "filter", "filter");
+                        if (filter.hasOwnProperty("hints")) {
+                            $(`#node-input-${filter.field}`).focus(function() {
+                                // show existing hints
+                                ThingerDOM.showOptions(filter.field, filter.hints,$(this).val());
+                            });
+                        }
+                        // When additional fields match saved values restore them
+                        $(`#node-input-${filter.field}`).val(_filters[filter.field]);
+                    });
+                }
+            });
+        },
+        oneditsave: function() {
+            this.filters = {};
+            $(".node-row-additional-field").each((index,element) => {
+                let input = element.children[0].children[1];
+                let id = input.id.split('-').pop();
+                let value = input.value;
+
+                this.filters[id] = value;
+            });
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="server-events">
+
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="node-row-asset">
+        <div class="form-row">
+            <label for="node-input-asset"><i class="fa fa-building"></i> Asset</label>
+            <select id="node-input-asset" style="width:70%; !important">
+                <option value="" default>Select Asset</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-event">
+        <div class="form-row">
+            <label for="node-input-event"><i class="fa fa-bolt"></i> Event</label>
+            <input type="text" id="node-input-event" placeholder="Select Event...">
+        </div>
+    </div>
+
+    <!-- filter for default asset -->
+    <div class="node-row-filter">
+        <div class="form-row">
+            <label for="node-input-filter"><i class="fa fa-filter"></i> Filter</label>
+            <input type="text" id="node-input-filter" placeholder="Filter">
+        </div>
+    </div>
+
+    <div class="node-row-server">
+        <div class="form-row">
+            <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+            <input type="text" id="node-input-server" placeholder="Select Server">
+        </div>
+    </>
+</script>
+
+<script type="text/x-red" data-help-name="server-events">
+    <p>Subscribes to the thinger server events API.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>asset <span class="property-type">string</span></dt>
+        <dd> the type of asset.</dd>
+        <dt>event <span class="property-type">string</span></dt>
+        <dd> the name of the event to detect.</dd>
+        <dt>filter <span class="property-type">string</span></dt>
+        <dd> the asset filter for said event.</dd>
+        <dt class="optional">filters <span class="property-type">string</span></dt>
+        <dd> additional filters that may apply to the event.</dd>
+    </dl>
+
+     <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li -->
+     </ol>
+
+    <h3>Details</h3>
+    <p>The field <code>filter</code> and in some cases also the field <code>filters</code> allow basic regular expressions.</p>
+
+    <p>The filters field is only used in some cases where additional filters can be applied to an event. Its value will be a JSON object for which the name of the property corresponds to the filter name and the property value to the filter to apply.</p>
+
+    <p>Note that as this node is an Inject node it does not allow its configuration through and input message.</p>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
+    </ul>
+</script>

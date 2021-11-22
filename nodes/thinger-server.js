@@ -1,8 +1,8 @@
 const WebSocket = require('ws');
 const jwt = require('jsonwebtoken');
 
-const http = require('http');
-const https = require('https');
+const Request = require('../lib/utils/request.js');
+const Utils = require('../lib/utils/utils.js');
 
 module.exports = function(RED) {
 
@@ -33,65 +33,6 @@ module.exports = function(RED) {
         }
     }
 
-    async function request(url, method, data = {}) {
-
-        var adapterFor = (function() {
-            var url = require('url'),
-              adapters = {
-                'http:': require('http'),
-                'https:': require('https'),
-            };
-
-            return function(inputUrl) {
-              return adapters[url.parse(inputUrl).protocol]
-            }
-        }());
-
-        const options = {
-          method: method,
-          headers: {
-            'Authorization': 'Bearer '+token,
-            'Content-Type': 'application/json'
-          },
-          timeout: 1000, // in ms
-        };
-
-        const dataString = JSON.stringify(data);
-        if (method === "POST" || method === "PUT") {
-            options.headers['Content-Length'] = dataString.length;
-        }
-
-        return new Promise((resolve, reject) => {
-          const req = adapterFor(url).request(url, options, (res) => {
-            console.log(`${res.statusCode} ${method} ${url}`);
-            //if (res.statusCode < 200 || res.statusCode > 299) {
-            //  return reject(new Error(`HTTP status code ${res.statusCode}`));
-            //}
-
-            const body = [];
-            res.on('data', (chunk) => body.push(chunk));
-            res.on('end', () => {
-              const res = Buffer.concat(body).toString();
-              resolve(!res ? res : JSON.parse(res));
-            });
-          });
-
-          req.on('error', (err) => {
-            reject(err);
-          });
-
-          req.on('timeout', () => {
-            req.destroy();
-            reject(new Error('Request time out'));
-          });
-
-          if (method === "POST" || method === "PUT") {
-              req.write(dataString);
-          }
-
-          req.end();
-        });
-    }
 
     function ThingerServerNode(configa) {
         RED.nodes.createNode(this, configa);
@@ -127,8 +68,8 @@ module.exports = function(RED) {
         });
 
         node.openWebsocket = function(node, path, on_open, on_message, on_close, on_error){
-            const url = (config.ssl ? 'wss://' : "ws://") + config.host + "/v1/users/" + config.username + path + "?authorization=" + config.token;
-            node.log("opening websocket to: " + url);
+            const url = `${config.ssl ? "wss://" : "ws://"}${config.host}/v1/users/${config.username}${path}?authorization=${config.token}`;
+            node.log(`opening websocket to: ${url}`);
             let wss = new WebSocket(url);
 
             wss.on('error', function(e){
@@ -160,14 +101,14 @@ module.exports = function(RED) {
 
         node.callEndpoint = async function(endpointId, data, handler){
 
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/endpoints/" + endpointId + "/call";
-            const res = await request(url, 'POST', data);
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/endpoints/${endpointId}/call`;
+            const res = await Request.request(url, 'POST', token, data);
             handler(res);
         };
 
         node.createBucket = async function(data, handler){
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/buckets";
-            const res = await request(url, 'POST', data);
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/buckets`;
+            const res = await Request.request(url, 'POST', token, data);
             handler(res);
         };
 
@@ -180,39 +121,39 @@ module.exports = function(RED) {
                 }
             });
 
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/buckets/" + bucketId + "/data?" + queryParametersString;
-            return request(url, 'GET');
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/buckets/${bucketId}/data?${queryParametersString}`;
+            return Request.request(url, 'GET', token);
         };
 
         node.writeBucket = function(bucketId, data){
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/buckets/" + bucketId + "/data";
-            request(url, 'POST', data);
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/buckets/${bucketId}/data`;
+            Request.request(url, 'POST', token, data);
         };
 
         node.createDevice = async function(data, handler){
             // It fails when no credentials are passed as expected by the backend
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/devices";
-            const res = await request(url, 'POST', data);
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/devices`;
+            const res = await Request.request(url, 'POST', token, data);
             handler(res);
         };
 
         node.readDevice = async function(deviceId, resourceId, handler){
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v3/users/" + config.username + "/devices/" + deviceId + "/resources/" + resourceId;
-            const res = await request(url, 'GET');
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v3/users/${config.username}/devices/${deviceId}/resources/${resourceId}`;
+            const res = await Request.request(url, 'GET', token);
             handler(res);
         };
 
         node.writeDevice = async function(deviceId, resourceId, data, handler){
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v3/users/" + config.username + "/devices/" + deviceId + "/resources/" + resourceId;
-            const res = await request(url, 'POST', data);
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v3/users/${config.username}/devices/${deviceId}/resources/${resourceId}`;
+            const res = await Request.request(url, 'POST', token, data);
             handler(res);
         };
 
         node.callbackDevice = async function(device, assetType, assetGroup, prefix, data, handler){
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v3/users/" + config.username + "/devices/" + device + "/callback";
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v3/users/${config.username}/devices/${device}/callback`;
 
             // Check if device exists if not autoprovision resources
-            const res1 = await request(url, 'GET');
+            const res1 = await Request.request(url, 'GET', token);
             if ( !res1 ) {
                 let json = {};
 
@@ -260,36 +201,56 @@ module.exports = function(RED) {
                         "write_bucket": device
                     }
                 }
-                await request(url, 'PUT', dataAction); // There is no response
+                await Request.request(url, 'PUT', token, dataAction); // There is no response
             }
 
-            const res = await request(url+"/data", 'POST', data);
+            const res = await Request.request(`${url}/data`, 'POST', token, data);
             handler(res);
         };
 
         node.readProperty = async function(assetType, assetId, propertyId, handler){
             const apiVersion = (assetType == "devices" ? "v3" : "v1");
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + assetType + "/" + assetId + "/properties/" + propertyId;
-            const res = await request(url, 'GET');
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${assetType}/${assetId}/properties/${propertyId}`;
+            const res = await Request.request(url, 'GET', token);
             handler(res);
         };
 
         node.writeProperty = async function(assetType, assetId, propertyId, data, handler){
             const apiVersion = (assetType == "devices" ? "v3" : "v1");
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + assetType + "/" + assetId + "/properties/" + propertyId;
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${assetType}/${assetId}/properties/${propertyId}`;
 
             // Check if property exists if not create it
-            const res = await request(url, 'GET');
+            const res = await Request.request(url, 'GET', token);
             if ( !res ) {
-                const res1 = await request(
+                const res1 = await Request.request(
                     url.replace("/"+propertyId,""),
                     'POST',
+                    token,
                     JSON.parse('{"property":"'+propertyId+'","value":'+data+'}'));
                 handler(res1);
             } else {
-                const res1 = await request(url, 'PUT', JSON.parse('{"property":"'+propertyId+'","value":'+data+'}'));
+                const res1 = await Request.request(url, 'PUT', token, JSON.parse('{"property":"'+propertyId+'","value":'+data+'}'));
                 handler(res1);
             }
+        };
+
+        node.iterateAssets = async function(assetType, assetFilter="", handler) {
+            const count = 50;
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/${assetType}?name=${assetFilter}&count=${count}`;
+
+            let body = [];
+            let index = 0;
+            let res_length = 0;
+
+            do {
+              const res = await Request.request(`${url}&index=${index}`, 'GET', token);
+              res_length = res.length;
+              body = body.concat(res);
+              index += res_length;
+              console.log(res_length);
+            } while (res_length == count);
+            console.log(body.length);
+            handler(body);
         };
 
         node.unRegisterDeviceResourceListener = function (deviceId, resourceId, node){
@@ -436,7 +397,7 @@ module.exports = function(RED) {
     }
 
     function getDeviceWebsocket(deviceId){
-        const url = (config.ssl ? 'wss://' : "ws://") + config.host + "/v3/users/" + config.username + "/devices/" + deviceId + "/resources?authorization=" + token;
+        const url = `${config.ssl ? "wss://" : "ws://"}${config.host}/v3/users/${config.username}/devices/${deviceId}/resources?authorization=${token}`;
 
         node.log("opening websocket to " + url);
 
@@ -512,8 +473,7 @@ module.exports = function(RED) {
                 }
                 listener.node.status({fill:"blue",shape:"dot",text:"connected"});
                 listener.node.send({payload: payload.out ? payload.out : payload.in});
-                listener.node.status({fill:"green",shape:"dot",text:"connected"});
-            }
+                listener.node.status({fill:"green",shape:"dot",text:"connected"}); }
         });
 
         wss.on('close', function close() {
@@ -539,18 +499,18 @@ module.exports = function(RED) {
         }
     });
 
-    /**
-    *  Admin Endpoints
-    */
+
+    // API Endpoints
+
     RED.httpAdmin.get("/assets/:asset", RED.auth.needsPermission('assets.read'), async function(req,res) {
         var filter = "";
         if (req.query.name) {
-            filter = "name="+req.query.name;
+            filter = `name=${req.query.name}`;
         }
 
         try {
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/v1/users/" + config.username + "/" + req.params.asset + "?" + filter;
-            res.json(await request(url, 'GET'));
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/${req.params.asset}?${filter}`;
+            res.json(await Request.request(url, 'GET', token));
         } catch(err) {
             res.sendStatus(500);
             node.error(RED._("assets.failed",{error:err.toString()}));
@@ -566,8 +526,8 @@ module.exports = function(RED) {
         }
 
         try {
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/" + req.params.properties + "?" + filter;
-            res.json(await request(url, 'GET'));
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${req.params.asset}/${req.params.asset_id}/${req.params.properties}?${filter}`;
+            res.json(await Request.request(url, 'GET', token));
         } catch(err) {
             res.sendStatus(500);
             node.error(RED._("properties.failed",{error:err.toString()}));
@@ -583,17 +543,50 @@ module.exports = function(RED) {
         }
 
         try {
-            const url = (config.ssl ? 'https://' : "http://") + config.host + "/" + apiVersion + "/users/" + config.username + "/" + req.params.asset + "/" + req.params.asset_id + "/" + req.params.properties + req.params.property_id + "?" + filter;
-            res.json(await request(url, 'GET'));
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${req.params.asset}/${req.params.asset_id}/${req.params.properties}${req.params.property_id}?${filter}`;
+            res.json(await Request.request(url, 'GET', token));
         } catch(err) {
             res.sendStatus(500);
             node.error(RED._("properties.failed",{error:err.toString()}));
         }
     });
 
-    RED.httpAdmin.get('/thinger-server/js/*', function(req, res){
+    RED.httpAdmin.get("/users/user", RED.auth.needsPermission('users.read'), async function(req,res) {
+        try {
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}`;
+            res.json(await Request.request(url, 'GET', token));
+        } catch(err) {
+            res.sendStatus(500);
+            node.error(RED._("users.failed",{error:err.toString()}));
+        }
+    });
+
+    RED.httpAdmin.get("/server/:resource", RED.auth.needsPermission('server.read'), async function(req,res) {
+        let host = "";
+        let ssl = true;
+        if (config === undefined) {
+            host = 'backend.thinger.io'
+        } else {
+            host = config.host;
+            ssl = config.ssl;
+        }
+        try {
+            const url = `${ssl ? "https://" : "http://"}${host}/v1/server/${req.params.resource}`;
+            let data = await Request.request(url, 'GET', token);
+            // order assets
+            if (req.params.resource === "assets") {
+                data = Utils.sortObjectArray(data,"asset");
+            }
+            res.json(data);
+        } catch(err) {
+            res.sendStatus(500);
+            node.error(RED._("server.failed",{error:err.toString()}));
+        }
+    });
+
+    RED.httpAdmin.get('/thinger/static/*', function(req, res){
         var options = {
-            root: __dirname + '/static/',
+            root: __dirname + '/../static/',
             dotfiles: 'deny'
         };
 

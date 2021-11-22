@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.0] - 2021-11-22
+### Added
+- New asset iterator node
+
+### Changed
+- Server events node now is able to subscribe to any event published by the API
+
+### Fix
+- Removed readme.md so npmjs will show content from README.md
+
 ## [1.1.0] - 2021-09-14
 ### Added
 - New bucket create node
@@ -53,7 +63,8 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
-[Unreleased]: https://github.com/thinger-io/Node-REDcompare/1.1.0...HEAD
+[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.2.0...HEAD
+[1.2.0]: https://github.com/thinger-io/Node-RED/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/thinger-io/Node-RED/compare/1.0.2...1.1.0
 [1.0.2]: https://github.com/thinger-io/Node-RED/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/thinger-io/Node-RED/compare/0.0.8...1.0.1

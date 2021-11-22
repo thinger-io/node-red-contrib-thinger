@@ -60,17 +60,27 @@
                 }
             });
 
-            $("#node-input-device").click(function() {
-                if (!$(".red-form-options").length) {
-                    createOptions("assets/devices","device");
-                }
-            });
+            $("#node-input-device").focus(function() {
+                const field1 = "device";
+                const device1 = $(this).val();
+                let devices = new ThingerDevices(device1);
+                devices.getDevices().then(function(data) {
+                    ThingerDOM.showOptions(field1,data,device1,function(value) {
+                        // devices filtering callback
+                        devices = new ThingerDevices(value);
+                        devices.getDevices().then((data) => {ThingerDOM.showOptions(field1, data)});
+                    });
 
-            $("#node-input-resource").click(function() {
-                if (!$(".red-form-options").length) {
-                    let deviceId = $("#node-input-device").val();
-                    createOptions("assets/devices/"+deviceId+"/resources","resource",3);
-                }
+                    $("#node-input-resource").off('focus');
+                    $("#node-input-resource").focus(function() {
+                        const field2 = "resource";
+                        const resource = $(this).val();
+                        const device2 = $("#node-input-device").val()
+                        devices.getDeviceOutputResources(device2).then(function(data) {
+                            ThingerDOM.showOptions(field2,data,resource);
+                        });
+                    })
+                });
             });
 
             $("#node-input-update").change(function() {
@@ -88,16 +98,30 @@
                 }
             });
 
-            $("#node-input-assetType").click(function() {
-                if (!$(".red-form-options").length) {
-                    createOptions("assets/types","assetType");
-                }
+            $("#node-input-assetType").focus(function() {
+                const field = "assetType";
+                const type = $(this).val();
+                let types = new ThingerTypes(type);
+                types.getTypes().then(function(data) {
+                    ThingerDOM.showOptions(field, data, type, function(value) {
+                        // types filtering callback
+                        types = new ThingerTypes(value);
+                        types.getTypes().then((data) => {ThingerDOM.showOptions(field,data)});
+                    });
+                });
             });
 
-            $("#node-input-assetGroup").click(function() {
-                if (!$(".red-form-options").length) {
-                    createOptions("assets/groups","assetGroup");
-                }
+            $("#node-input-assetGroup").focus(function() {
+                const field = "assetGroup";
+                const group = $(this).val();
+                let groups = new ThingerGroups(group);
+                groups.getGroups().then(function(data) {
+                    ThingerDOM.showOptions(field, data, group, function(value) {
+                        // groups filtering callback
+                        groups = new ThingerGroups(value);
+                        groups.getGroups().then((data) => {ThingerDOM.showOptions(field,data)});
+                    });
+                });
             });
 
             // Load values into fields
@@ -114,14 +138,6 @@
                 $("#node-input-enabled").prop("checked", true)
             }
 
-            // Load static scripts, also needed for stylesheets
-            console.log("Loading starting scripts");
-            $.getScript('thinger-server/js/thinger-server/thinger.js')
-            .fail(function(jqxhr, settings, exception ) {
-              console.log("failed");
-              console.log(exception);
-              console.log(exception.stack);
-            });
         },
         oneditsave: function() {
             if ($("#node-input-source").val() == "device") {
@@ -143,10 +159,6 @@
 </script>
 
 <script type="text/x-red" data-template-name="bucket-create">
-    <!-- Add thinger styling -->
-    <div>
-        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
-    </div>
 
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>

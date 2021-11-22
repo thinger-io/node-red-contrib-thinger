@@ -40,6 +40,7 @@ To connect the [Node-RED](https://NodeRED.org) instance to [Thinger.io](https://
 ## Nodes
 Once installed, detailed documentation of each node can be found in the `Help` dialog of [Node-RED](https://NodeRED.org).
 Below is a brief description of the actions allowed:
+- Iterate over the assets from the Thinger.io Platform (asset iterator node).
 - Create buckets when an event occurs (bucket create node).
 - Read from data buckets (bucket read node).
 - Writing to data buckets (bucket write node).
@@ -51,7 +52,7 @@ Below is a brief description of the actions allowed:
 - Calling endpoints (endpoint call node).
 - Reading properties of devices, types or groups (property read node).
 - Writing and modifying properties of devices, types or groups (property write node).
-- Detecting different events of devices, buckets and endpoints (server events node).
+- Detecting different events of devices, buckets, endpoints and others (server events node).
 
 ## License
 

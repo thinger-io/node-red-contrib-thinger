@@ -34,27 +34,29 @@
             }
 
             // Event listeners
-            $("#node-input-device").click(function() {
-                if (!$(".red-form-options").length) {
-                    createOptions("assets/devices","device");
-                }
+            $("#node-input-device").focus(function() {
+                const field1 = "device";
+                const device1 = $(this).val();
+                let devices = new ThingerDevices(device1);
+                devices.getDevices().then(function(data) {
+                    ThingerDOM.showOptions(field1,data,device1,function(value) {
+                        // devices filtering callback
+                        devices = new ThingerDevices(value);
+                        devices.getDevices().then((data) => {ThingerDOM.showOptions(field1, data)});
+                    });
+
+                    $("#node-input-resource").off('focus');
+                    $("#node-input-resource").focus(function() {
+                        const field2 = "resource";
+                        const resource = $(this).val();
+                        const device2 = $("#node-input-device").val()
+                        devices.getDeviceInputResources(device2).then(function(data) {
+                            ThingerDOM.showOptions(field2,data,resource);
+                        });
+                    })
+                });
             });
 
-            $("#node-input-resource").click(function() {
-                if (!$(".red-form-options").length) {
-                    let deviceId = $("#node-input-device").val();
-                    createOptions("assets/devices/"+deviceId+"/resources","resource",2);
-                }
-            });
-
-            // Load static scripts, also needed for stylesheets
-            console.log("Loading starting scripts");
-            $.getScript('thinger-server/js/thinger-server/thinger.js')
-            .fail(function(jqxhr, settings, exception ) {
-              console.log("failed");
-              console.log(exception);
-              console.log(exception.stack);
-            });
         },
         oneditsave: function() {
             // remove pretty characters and save
@@ -75,10 +77,6 @@
 </script>
 
 <script type="text/x-red" data-template-name="device-write">
-    <!-- Add thinger styling -->
-    <div>
-        <link rel="stylesheet" href="thinger-server/js/thinger-server/thinger.css" />
-    </div>
 
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>

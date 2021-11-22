@@ -1,5 +1,5 @@
 module.exports = function(RED) {
-    "use strict";
+    'use strict';
     const RECONNECT_TIMEOUT_MS = 5000;
 
     function ServerEventsNode(config) {
@@ -14,18 +14,24 @@ module.exports = function(RED) {
         let server = RED.nodes.getNode(config.server);
 
         // fill event info
-        let event_fields = ["event", "device", "bucket", "endpoint", "state"];
-        let event = {};
-        for (let key in config) {
-            if (event_fields.includes(key)){
-                let data = config[key].trim();
-                if(data.length!==0) event[key] = data;
-            }
+        let asset = config.asset;
+        let event = config.event;
+        let filter = config.filter;
+        let filters = config.filters;
+
+        let subscription = {};
+        subscription[asset] = filter;
+        if (event !== "any" && event !== "")
+            subscription["event"] = event;
+        else subscription["event"] = ".*";
+        for (let key in filters) {
+          if (filters[key] !== "any" && filters[key] !== "")
+              subscription[key] = filters[key];
         }
 
         function on_open(){
-            node.log("sending event subscription: " + JSON.stringify(event));
-            wss.send(JSON.stringify(event));
+            node.log("sending event subscription: " + JSON.stringify(subscription));
+            wss.send(JSON.stringify(subscription));
         }
 
         function on_message(payload){
