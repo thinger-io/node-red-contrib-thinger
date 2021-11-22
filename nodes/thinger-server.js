@@ -235,8 +235,18 @@ module.exports = function(RED) {
         };
 
         node.iterateAssets = async function(assetType, assetFilter="", handler) {
+
+            const assetsUrl = `${config.ssl ? "https://" : "http://"}${config.host}/v1/server/assets`;
+            let data = await Request.request(assetsUrl, 'GET', token);
+
+            let user = "";
+            for (let i in data) {
+                if (`${data[i].asset}s` === assetType && data[i].role === "user")
+                    user = `users/${config.username}/`;
+            }
+
             const count = 50;
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/${assetType}?name=${assetFilter}&count=${count}`;
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/${user}${assetType}?name=${assetFilter}&count=${count}`;
 
             let body = [];
             let index = 0;
@@ -245,12 +255,11 @@ module.exports = function(RED) {
             do {
               const res = await Request.request(`${url}&index=${index}`, 'GET', token);
               res_length = res.length;
-              body = body.concat(res);
+              //body = body.concat(res);
+              handler(res);
               index += res_length;
-              console.log(res_length);
             } while (res_length == count);
-            console.log(body.length);
-            handler(body);
+              //handler(body);
         };
 
         node.unRegisterDeviceResourceListener = function (deviceId, resourceId, node){
