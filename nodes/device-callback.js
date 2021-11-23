@@ -34,10 +34,12 @@ module.exports = function(RED) {
                 body = JSON.parse(body);
             }
 
-            server.callbackDevice(device, assetType, assetGroup, prefix, body, function(res) {
-                node.send({payload: res});
-            })
-            .catch(console.log);
+            if (typeof server.callbackDevice === "function")
+                server.callbackDevice(device, assetType, assetGroup, prefix, body, function(res) {
+                    node.send({payload: res});
+                });
+            else
+                node.error("device-callback: Check Thinger Server Configuration");
         });
     }
 

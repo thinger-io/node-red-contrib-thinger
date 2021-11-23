@@ -3,12 +3,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.2] - 2021-11-23
+### Fix
+- Fixed UnhandledPromiseRejectionWarning when request to Thinger server failed
+- Restored properties for server events node up to version 1.1.0, that caused configuration to dissapear
+
 ## [1.2.1] - 2021-11-22
 ### Fix
 - Asset iterator node failed when asset count was over 65K
 - Asset iterator node failing to retrieve admin role assets
 - Server events node subscription failed on some cases
-- Asset iterator node failed when saving with asset type or asset group and the switching to a different asset
+- Asset iterator node failed when saving with asset type or asset group and then switching to a different asset
 
 ### Changed
 - Server events node now is able to subscribe to any event published by the API
@@ -76,7 +81,8 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
-[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.2.1...HEAD
+[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.2.2...HEAD
+[1.2.2]: https://github.com/thinger-io/Node-RED/compare/1.2.1...1.2.2
 [1.2.1]: https://github.com/thinger-io/Node-RED/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/thinger-io/Node-RED/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/thinger-io/Node-RED/compare/1.0.2...1.1.0

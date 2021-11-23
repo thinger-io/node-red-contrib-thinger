@@ -45,31 +45,34 @@ module.exports = function(RED) {
         queryParameters.set('items',limit > 1000 || limit < 0 ? 1000 : limit);
 
         // Recursive call to readBucket until done
-        return server.readBucket(bucket, queryParameters)
-        .then(function(res) {
-            if (!result) {
-                result = [];
-            }
-            result = result.concat(res);
+        if (typeof server.readBucket === "function")
+            return server.readBucket(bucket, queryParameters)
+            .then(function(res) {
+                if (!result) {
+                    result = [];
+                }
+                result = result.concat(res);
 
-            limit = (res.length > 0 ? limit - res.length : 0);
+                limit = (res.length > 0 ? limit - res.length : 0);
 
-            if (limit != 0 && res.length == 1000) { // There is more
-                switch (queryParameters.get("sort")) {
-                    case "asc":
-                        queryParameters.set("min_ts",res[999].ts-1);
-                        break;
-                     case "desc":
-                        queryParameters.set("max_ts",res[999].ts-1);
-                        break;
+                if (limit != 0 && res.length == 1000) { // There is more
+                    switch (queryParameters.get("sort")) {
+                        case "asc":
+                            queryParameters.set("min_ts",res[999].ts-1);
+                            break;
+                        case "desc":
+                            queryParameters.set("max_ts",res[999].ts-1);
+                            break;
+                     }
+
+                     return readBucket(server, bucket, queryParameters, limit, result);
                  }
+                 return result;
 
-                 return readBucket(server, bucket, queryParameters, limit, result);
-             }
-             return result;
-
-         })
-         .catch(console.log);
+              })
+              .catch(console.log);
+          else
+              node.error("bucket-read: Check Thinger Server Configuration");
      }
 
     function BucketReadNode(config) {

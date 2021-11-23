@@ -17,23 +17,25 @@ module.exports = function(RED) {
             let assetType = config.assetType || msg.asset_type;
             let assetGroup = config.assetGroup || msg.asset_group;
 
-            server.iterateAssets(asset, filter, function(res) {
-              for (var i in res) {
-                  let type = res[i].asset_type;
-                  let group = res[i].asset_group;
+            if (typeof server.iterateAssets === "function")
+                server.iterateAssets(asset, filter, function(res) {
+                  for (var i in res) {
+                      let type = res[i].asset_type;
+                      let group = res[i].asset_group;
 
-                  if (assetType === undefined && assetGroup === undefined) {
-                      node.send({payload: res[i]});
-                  } else if (assetType === type && assetGroup === group) {
-                      node.send({payload: res[i]});
-                  } else if (assetType === type && assetGroup === undefined) {
-                      node.send({payload: res[i]});
-                  } else if (assetType === undefined && assetGroup == group) {
-                      node.send({payload: res[i]});
+                      if (assetType === undefined && assetGroup === undefined) {
+                          node.send({payload: res[i]});
+                      } else if (assetType === type && assetGroup === group) {
+                          node.send({payload: res[i]});
+                      } else if (assetType === type && assetGroup === undefined) {
+                          node.send({payload: res[i]});
+                      } else if (assetType === undefined && assetGroup == group) {
+                          node.send({payload: res[i]});
+                      }
                   }
-              }
-            })
-            .catch(console.log);
+                });
+            else
+                node.error("asset-iterator: Check Thinger Server Configuration");
         });
     }
 

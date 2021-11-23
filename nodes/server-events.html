@@ -10,6 +10,10 @@
             event: {value:""},
             filter: {value:""},
             filters: {value:{}},
+            bucket: {value:""}, // This properties must be keept for backwards compatibility
+            device: {value:""}, // and they will slowly be into 'filter' property field.
+            endpoint: {value:""},
+            state: {value:""},
             server: {type:"thinger-server", required: true}
         },
         icon:"thinger_logo_white.png",
@@ -27,8 +31,15 @@
             const events = new ThingerEvents(user.role);
 
             const _event = this.event;
-            const _filter = this.filter;
-            const _filters = this.filters;
+            let _filter = this.filter; // || this.bucket || this.device || this.endpoint;
+            switch(true) {
+              case /^bucket.*/.test(_event): _filter = this.bucket; break;
+              case /^device.*/.test(_event): _filter = this.device; break;
+              case /^endpoi.*/.test(_event): _filter = this.endpoint; break;
+            }
+            $("#node-input-filter").val(_filter);
+            const _state = this.state;
+            const _filters = this.filters || {};
             const _filterField = $(".node-row-filter")[0].outerHTML;
 
             let firstLoad1 = true;
@@ -73,7 +84,10 @@
                             });
                         }
                         // When additional fields match saved values restore them
-                        $(`#node-input-${filter.field}`).val(_filters[filter.field]);
+                        if (filter.field === "state" && _state !== undefined && _state !== "") // backwards compatibility
+                            $(`#node-input-${filter.field}`).val(_state);
+                        else 
+                            $(`#node-input-${filter.field}`).val(_filters[filter.field]);
                     });
                 }
             });
@@ -87,6 +101,12 @@
 
                 this.filters[id] = value;
             });
+
+            // slowly remove old version properties
+            this.bucket = "";
+            this.device = "";
+            this.endpoint = "";
+            this.state = "";
         }
     });
 </script>

@@ -57,6 +57,11 @@ module.exports = function(RED) {
             return;
         }
 
+        // Will handle all rejections from requests
+        process.on('unhandledRejection', e => {
+            node.error(e);
+        });
+
         node.on('close', function(removed, done) {
             // clear reconnection timeout
             clearTimeout(timeout);
@@ -217,19 +222,28 @@ module.exports = function(RED) {
 
         node.writeProperty = async function(assetType, assetId, propertyId, data, handler){
             const apiVersion = (assetType == "devices" ? "v3" : "v1");
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${assetType}/${assetId}/properties/${propertyId}`;
+            //const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${assetType}/${assetId}/properties/${propertyId}`;
+            const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${assetType}/${assetId}/properties`;
 
             // Check if property exists if not create it
             const res = await Request.request(url, 'GET', token);
-            if ( !res ) {
+            let exists = false;
+            for (let i in res) {
+                if (res[i].property === propertyId) {
+                    exists = true;
+                    break;
+                }
+            }
+            if ( exists ) {
                 const res1 = await Request.request(
-                    url.replace("/"+propertyId,""),
+                    //url.replace("/"+propertyId,""),
+                    url,
                     'POST',
                     token,
                     JSON.parse('{"property":"'+propertyId+'","value":'+data+'}'));
                 handler(res1);
             } else {
-                const res1 = await Request.request(url, 'PUT', token, JSON.parse('{"property":"'+propertyId+'","value":'+data+'}'));
+                const res1 = await Request.request(url, 'POST', token, JSON.parse('{"property":"'+propertyId+'","value":'+data+'}'));
                 handler(res1);
             }
         };
@@ -237,6 +251,7 @@ module.exports = function(RED) {
         node.iterateAssets = async function(assetType, assetFilter="", handler) {
 
             const assetsUrl = `${config.ssl ? "https://" : "http://"}${config.host}/v1/server/assets`;
+
             let data = await Request.request(assetsUrl, 'GET', token);
 
             let user = "";
@@ -519,7 +534,7 @@ module.exports = function(RED) {
             res.json(await Request.request(url, 'GET', token));
         } catch(err) {
             res.sendStatus(500);
-            node.error(RED._("assets.failed",{error:err.toString()}));
+            console.error(`assets.failed ${err.toString()}`);
         }
     });
 
@@ -536,7 +551,7 @@ module.exports = function(RED) {
             res.json(await Request.request(url, 'GET', token));
         } catch(err) {
             res.sendStatus(500);
-            node.error(RED._("properties.failed",{error:err.toString()}));
+            console.error(`properties.failed ${err.toString()}`);
         }
     });
 
@@ -553,7 +568,7 @@ module.exports = function(RED) {
             res.json(await Request.request(url, 'GET', token));
         } catch(err) {
             res.sendStatus(500);
-            node.error(RED._("properties.failed",{error:err.toString()}));
+            console.error(`properties.failed ${err.toString()}`);
         }
     });
 
@@ -563,7 +578,7 @@ module.exports = function(RED) {
             res.json(await Request.request(url, 'GET', token));
         } catch(err) {
             res.sendStatus(500);
-            node.error(RED._("users.failed",{error:err.toString()}));
+            console.error(`users.failed ${err.toString()}`);
         }
     });
 
@@ -586,7 +601,7 @@ module.exports = function(RED) {
             res.json(data);
         } catch(err) {
             res.sendStatus(500);
-            node.error(RED._("server.failed",{error:err.toString()}));
+            console.error(`server.failed ${err.toString()}`);
         }
     });
 

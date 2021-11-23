@@ -45,10 +45,12 @@ module.exports = function(RED) {
                 json.asset_group = group;
             }
 
-            server.createDevice(json, function(res) {
-              node.send({payload: res});
-            })
-            .catch(console.log);
+            if (typeof server.createDevice === "function")
+                server.createDevice(json, function(res) {
+                  node.send({payload: res});
+                });
+            else
+                node.error("device-create: Check Thinger Server Configuration");
         });
     }
 

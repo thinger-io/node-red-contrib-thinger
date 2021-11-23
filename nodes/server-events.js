@@ -16,8 +16,15 @@ module.exports = function(RED) {
         // fill event info
         let asset = config.asset;
         let event = config.event;
-        let filter = config.filter;
+        let filter = config.filter || config.bucket || config.device || config.endpoint;
         let filters = config.filters;
+
+        // backwards compatibility
+        let state = config.state;
+        if ( config.state !== undefined && state !== "") {
+            if (filters === undefined) filters = {};
+            filters["state"] = state;
+        }
 
         let subscription = {};
         if (filter !== "")
@@ -44,12 +51,18 @@ module.exports = function(RED) {
             timeout = setTimeout(function() {
                 node.log("trying to reconnect");
                 timeout=undefined;
-                wss = server.openWebsocket(node, "/events", on_open, on_message, reconnect, reconnect);
+                if (typeof server.openWebsocket === "function")
+                    wss = server.openWebsocket(node, "/events", on_open, on_message, reconnect, reconnect);
+                else
+                    node.error("server-events: check thinger server configuration");
             }, RECONNECT_TIMEOUT_MS);
         }
 
         // initialize websocket connection
-        wss = server.openWebsocket(node, "/events", on_open, on_message, reconnect, reconnect);
+        if (typeof server.openWebsocket === "function")
+            wss = server.openWebsocket(node, "/events", on_open, on_message, reconnect, reconnect);
+        else
+            node.error("server-events: check thinger server configuration");
 
         // unregister listener on close
         this.on('close', function() {

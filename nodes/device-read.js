@@ -15,10 +15,12 @@ module.exports = function(RED) {
             let device = config.device || msg.device;
             let resource = config.resource || msg.resource;
 
-            server.readDevice(device, resource, function(res){
-                node.send({payload: res});
-            })
-            .catch(console.log);
+            if (typeof server.readDevice === "function")
+                server.readDevice(device, resource, function(res){
+                    node.send({payload: res});
+                });
+            else
+                node.error("device-read: Check Thinger Server Configuration");
         });
     }
 

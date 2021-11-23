@@ -14,12 +14,18 @@ module.exports = function(RED) {
         let resource = config.resource || msg.resource;
         let interval = config.interval || msg.interval;
 
-        server.registerDeviceResourceListener(device, resource, Number(interval), node);
+        if (typeof server.registerDeviceResourceListener === "function")
+            server.registerDeviceResourceListener(device, resource, Number(interval), node);
+        else
+            node.error("device-stream: Check Thinger Server Configuration");
 
         // unregister listener on close
         node.on('close', function(removed, done) {
             if(removed){
-                server.unRegisterDeviceResourceListener(device, resource, node);
+                if (typeof server.unRegisterDeviceResourceListener === "function")
+                    server.unRegisterDeviceResourceListener(device, resource, node);
+                else
+                    node.error("device-stream: Check Thinger Server Configuration");
             }
             done();
         });
