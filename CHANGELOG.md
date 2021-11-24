@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.3] - 2021-11-24
+### Fix
+- Correctly handling of legacy server events when more than one asset filter is set
+
 ## [1.2.2] - 2021-11-23
 ### Fix
 - Fixed UnhandledPromiseRejectionWarning when request to Thinger server failed
@@ -81,7 +85,8 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
-[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.2.2...HEAD
+[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.2.3...HEAD
+[1.2.3]: https://github.com/thinger-io/Node-RED/compare/1.2.2...1.2.3
 [1.2.2]: https://github.com/thinger-io/Node-RED/compare/1.2.1...1.2.2
 [1.2.1]: https://github.com/thinger-io/Node-RED/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/thinger-io/Node-RED/compare/1.1.0...1.2.0

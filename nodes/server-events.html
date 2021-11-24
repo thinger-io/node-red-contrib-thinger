@@ -31,12 +31,14 @@
             const events = new ThingerEvents(user.role);
 
             const _event = this.event;
-            let _filter = this.filter; // || this.bucket || this.device || this.endpoint;
+            let _filter = "";
             switch(true) {
               case /^bucket.*/.test(_event): _filter = this.bucket; break;
               case /^device.*/.test(_event): _filter = this.device; break;
               case /^endpoi.*/.test(_event): _filter = this.endpoint; break;
             }
+            if (this.filter !== undefined && this.filter !== "") // if filter property is set will be predominant
+                _filter = this.filter;
             $("#node-input-filter").val(_filter);
             const _state = this.state;
             const _filters = this.filters || {};

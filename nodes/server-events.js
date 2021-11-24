@@ -16,7 +16,14 @@ module.exports = function(RED) {
         // fill event info
         let asset = config.asset;
         let event = config.event;
-        let filter = config.filter || config.bucket || config.device || config.endpoint;
+        let filter = "";
+        switch(true) {
+          case /^bucket.*/.test(event): filter = config.bucket; break;
+          case /^device.*/.test(event): filter = config.device; break;
+          case /^endpoi.*/.test(event): filter = config.endpoint; break;
+        }
+        if (config.filter !== undefined && config.filter !== "")
+            filter = config.filter; // if field filter exists its value will be predominant
         let filters = config.filters;
 
         // backwards compatibility
@@ -27,8 +34,10 @@ module.exports = function(RED) {
         }
 
         let subscription = {};
-        if (filter !== "")
+        if (filter !== "" && asset !== undefined && asset !== "")
             subscription[asset] = filter;
+        else if (filter !== "")
+            subscription[event.split('_')[0]] = filter;
         if (event !== "any" && event !== "")
             subscription["event"] = event;
         else subscription["event"] = `${asset !== "" ? asset+"_.*" : ".*"}`;
