@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.4] - 2021-11-30
+### Fix
+- Updated bucket create documentation with correct values
+- Added seconds for time interval in bucket create
+
 ## [1.2.3] - 2021-11-24
 ### Fix
 - Correctly handling of legacy server events when more than one asset filter is set
@@ -85,7 +90,8 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
-[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.2.3...HEAD
+[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.2.4...HEAD
+[1.2.4]: https://github.com/thinger-io/Node-RED/compare/1.2.3...1.2.4
 [1.2.3]: https://github.com/thinger-io/Node-RED/compare/1.2.2...1.2.3
 [1.2.2]: https://github.com/thinger-io/Node-RED/compare/1.2.1...1.2.2
 [1.2.1]: https://github.com/thinger-io/Node-RED/compare/1.2.0...1.2.1

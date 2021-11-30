@@ -18,6 +18,9 @@ module.exports = function(RED) {
             case 'm':
                 seconds = seconds * 60;
                 break;
+            case 's':
+                //seconds = seconds;
+                break;
             default:
                 // TODO: handle error, at the moment it will fail from the thinger server side
                 return interval;
