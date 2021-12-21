@@ -14,7 +14,9 @@ module.exports = function(RED) {
 
             let json = {};
 
-            json.type = config.deviceType || msg.type;
+            let deviceType = config.deviceType || msg.type;
+            if (deviceType !== undefined)
+                json.type = deviceType;
             json.device = config.deviceId || msg.device;
 
             let credentials;
@@ -23,7 +25,8 @@ module.exports = function(RED) {
             } else {
                 credentials = msg.credentials;
             }
-            json.credentials = credentials;
+            if (credentials !== undefined)
+                json.credentials = credentials;
 
             let deviceName = config.deviceName || msg.name;
             if (deviceName) {
