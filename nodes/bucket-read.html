@@ -49,13 +49,6 @@
         $("#node-input-items").val("");
     }
 
-    function hideAggregation() {
-        $(".node-row-aggregation").hide();
-        $("#node-input-aggregation").val("");
-        $("#node-input-aggregationType").hide();
-        $("#node-input-aggregationType").val("");
-    }
-
     RED.nodes.registerType('bucket-read', {
         category: 'thinger',
         color: '#74b9ff',
@@ -106,14 +99,6 @@
                         buckets.getBuckets().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });
-            });
-
-            $("#node-input-bucket").change(function() {
-                if ($(this).val()) {
-                    $(".node-row-aggregation").show();
-                } else {
-                    hideAggregation();
-                }
             });
 
             $("#node-input-filter").change(function() {
@@ -264,7 +249,7 @@
         </div>
     </div>
 
-    <div class="node-row-aggregation" style="display: none;">
+    <div class="node-row-aggregation">
         <div class="form-row">
             <label for="node-input-aggregation"><i class="fa fa-bar-chart"></i> Aggregation</label>
             <select id="node-input-aggregation" style="width:35%; !important">
