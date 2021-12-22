@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ## [1.2.4] - 2021-11-30
+### Added
+- Device create node is able to update details of an already existing device
+- Asset iterator node shows status of operation
+- Use of Keep-Alive header in http request to improve network performance
+
+### Changed
+- In bucket read node, aggregation is always shown, event when no bucket is configured
+- Function nodes maintain input messages, overwriting only its defined output property
+
 ### Fix
 - Updated bucket create documentation with correct values
 - Added seconds for time interval in bucket create

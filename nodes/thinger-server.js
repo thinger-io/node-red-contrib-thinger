@@ -293,6 +293,8 @@ module.exports = function(RED) {
               handler(res);
               index += res_length;
             } while (res_length == count);
+
+            handler("done");
         };
 
         node.unRegisterDeviceResourceListener = function (deviceId, resourceId, node){

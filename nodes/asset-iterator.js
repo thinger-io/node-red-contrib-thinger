@@ -11,6 +11,8 @@ module.exports = function(RED) {
 
         // call property read on input
         node.on("input",function(msg, send) {
+            node.status({fill:"blue", shape:"ring", text:"running"});
+
             let asset = (config.asset || msg.asset)+"s";
             let filter = config.filter || msg.asset_filter;
 
@@ -21,14 +23,18 @@ module.exports = function(RED) {
 
             if (typeof server.iterateAssets === "function")
                 server.iterateAssets(asset, filter, function(res) {
+                  if (res === "done") {
+                      node.status({fill:"blue", shape:"dot", text:"done"});
+                      return;
+                  }
                   for (var i in res) {
                       let type = res[i].asset_type;
                       let group = res[i].asset_group;
 
                       let newMsg = {};
+                      Object.assign(newMsg, msg);
                       if (multipleMatch || res.length > 1) { // if more than one asset create new message with its own id
                           multipleMatch = true;
-                          Object.assign(newMsg, msg);
                           delete newMsg._msgid;
                       }
 
