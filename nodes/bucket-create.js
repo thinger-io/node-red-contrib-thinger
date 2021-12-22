@@ -38,7 +38,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket read on close
-        node.on("input",function(msg) {
+        node.on("input",function(msg, send) {
 
             let json = {};
             json.bucket = config.bucketId || msg.id;
@@ -83,7 +83,8 @@ module.exports = function(RED) {
 
             if (typeof server.createBucket === "function")
                 server.createBucket(json, function(res) {
-                  node.send({payload: res});
+                  msg.payload = res;
+                  send(msg);
                 });
             else
                 node.error("bucket-create: Check Thinger Server Configuration");

@@ -10,13 +10,14 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call endpoint on message reception
-        node.on("input",function(msg) {
+        node.on("input",function(msg, send) {
 
             let endpoint = config.endpoint || msg.endpoint;
 
             if (typeof server.callEndpoint === "function")
                 server.callEndpoint(endpoint, msg.payload, function(res) {
-                    node.send({payload: res});
+                    msg.payload = res;
+                    node.send(msg);
                 });
             else
                 node.error("endpoint-call: Check Thinger Server Configuration");

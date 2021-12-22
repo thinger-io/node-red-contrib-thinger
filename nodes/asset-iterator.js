@@ -10,12 +10,14 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call property read on input
-        node.on("input",function(msg) {
+        node.on("input",function(msg, send) {
             let asset = (config.asset || msg.asset)+"s";
             let filter = config.filter || msg.asset_filter;
 
             let assetType = config.assetType || msg.asset_type;
             let assetGroup = config.assetGroup || msg.asset_group;
+
+            let multipleMatch = false;
 
             if (typeof server.iterateAssets === "function")
                 server.iterateAssets(asset, filter, function(res) {
@@ -23,14 +25,25 @@ module.exports = function(RED) {
                       let type = res[i].asset_type;
                       let group = res[i].asset_group;
 
+                      let newMsg = {};
+                      if (multipleMatch || res.length > 1) { // if more than one asset create new message with its own id
+                          multipleMatch = true;
+                          Object.assign(newMsg, msg);
+                          delete newMsg._msgid;
+                      }
+
                       if (assetType === undefined && assetGroup === undefined) {
-                          node.send({payload: res[i]});
+                          newMsg.payload = res[i];
+                          send(newMsg);
                       } else if (assetType === type && assetGroup === group) {
-                          node.send({payload: res[i]});
+                          newMsg.payload = res[i];
+                          send(newMsg);
                       } else if (assetType === type && assetGroup === undefined) {
-                          node.send({payload: res[i]});
+                          newMsg.payload = res[i];
+                          send(newMsg);
                       } else if (assetType === undefined && assetGroup == group) {
-                          node.send({payload: res[i]});
+                          newMsg.payload = res[i];
+                          send(newMsg);
                       }
                   }
                 });

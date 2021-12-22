@@ -10,7 +10,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call device read on close
-        node.on("input",function(msg) {
+        node.on("input",function(msg, send) {
 
             let json = {};
 
@@ -50,7 +50,8 @@ module.exports = function(RED) {
 
             if (typeof server.createDevice === "function")
                 server.createDevice(json, function(res) {
-                  node.send({payload: res});
+                  msg.payload = res;
+                  send(msg);
                 });
             else
                 node.error("device-create: Check Thinger Server Configuration");

@@ -10,7 +10,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket write on message reception
-        node.on("input",function(msg) {
+        node.on("input",function(msg, send) {
 
             let device = config.device || msg.device;
             let resource = config.resource || msg.resource;
@@ -21,7 +21,8 @@ module.exports = function(RED) {
 
             if (typeof server.writeDevice === "function")
                 server.writeDevice(device, resource, value, function(res) {
-                    node.send({payload: res});
+                    msg.payload = res;
+                    send(msg);
                });
             else
                 node.error("device-write: Check Thinger Server Configuration");
