@@ -10,7 +10,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket write on message reception
-        node.on("input",function(msg) {
+        node.on("input",function(msg, send) {
 
             let device = config.device || msg.device;
 
@@ -36,7 +36,8 @@ module.exports = function(RED) {
 
             if (typeof server.callbackDevice === "function")
                 server.callbackDevice(device, assetType, assetGroup, prefix, body, function(res) {
-                    node.send({payload: res});
+                    msg.payload = res;
+                    send(msg);
                 });
             else
                 node.error("device-callback: Check Thinger Server Configuration");

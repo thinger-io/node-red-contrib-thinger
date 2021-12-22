@@ -10,11 +10,13 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call device read on close
-        node.on("input",function(msg) {
+        node.on("input",function(msg, send) {
 
             let json = {};
 
-            json.type = config.deviceType || msg.type;
+            let deviceType = config.deviceType || msg.type;
+            if (deviceType !== undefined)
+                json.type = deviceType;
             json.device = config.deviceId || msg.device;
 
             let credentials;
@@ -23,7 +25,8 @@ module.exports = function(RED) {
             } else {
                 credentials = msg.credentials;
             }
-            json.credentials = credentials;
+            if (credentials !== undefined)
+                json.credentials = credentials;
 
             let deviceName = config.deviceName || msg.name;
             if (deviceName) {
@@ -47,7 +50,8 @@ module.exports = function(RED) {
 
             if (typeof server.createDevice === "function")
                 server.createDevice(json, function(res) {
-                  node.send({payload: res});
+                  msg.payload = res;
+                  send(msg);
                 });
             else
                 node.error("device-create: Check Thinger Server Configuration");

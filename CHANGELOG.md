@@ -3,6 +3,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.0] - 2021-12-22
+### Added
+- Device create node is able to update details of an already existing device
+- Asset iterator node shows status of operation
+- Use of Keep-Alive header in http request to improve network performance
+
+### Changed
+- In bucket read node, aggregation is always shown, event when no bucket is configured
+- Function nodes maintain input messages, overwriting only its defined output property
+
+### Fix
+- Updated bucket create documentation with correct values
+- Added seconds for time interval in bucket create
+
 ## [1.2.3] - 2021-11-24
 ### Fix
 - Correctly handling of legacy server events when more than one asset filter is set
@@ -85,7 +99,8 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
-[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.2.3...HEAD
+[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.3.0...HEAD
+[1.3.0]: https://github.com/thinger-io/Node-RED/compare/1.2.3...1.3.0
 [1.2.3]: https://github.com/thinger-io/Node-RED/compare/1.2.2...1.2.3
 [1.2.2]: https://github.com/thinger-io/Node-RED/compare/1.2.1...1.2.2
 [1.2.1]: https://github.com/thinger-io/Node-RED/compare/1.2.0...1.2.1

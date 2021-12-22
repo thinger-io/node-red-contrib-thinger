@@ -85,7 +85,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket read on close
-        node.on("input",function(msg) {
+        node.on("input",function(msg, send) {
 
 
             let bucket = config.bucket || msg.bucket;
@@ -159,7 +159,8 @@ module.exports = function(RED) {
                         return a.ts - b.ts;
                     });
                 }
-                node.send({payload: result});
+                msg.payload = result;
+                send(msg);
               })
               .catch(console.log);
 

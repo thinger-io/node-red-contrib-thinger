@@ -138,8 +138,29 @@ module.exports = function(RED) {
         node.createDevice = async function(data, handler){
             // It fails when no credentials are passed as expected by the backend
             const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/devices`;
-            const res = await Request.request(url, 'POST', token, data);
-            handler(res);
+
+            // Check if device exists
+            let exists = true;
+            try {
+                const res = await Request.request(`${url}/${data.device}`, 'GET', token);
+            } catch(e) {
+                exists = false;
+            }
+
+            // Update if exist or create it
+            if ( exists ) {
+                let device = data.device;
+                delete data.device;
+                const res1 = await Request.request(
+                    `${url}/${device}`,
+                    'PUT',
+                    token,
+                    data);
+                handler(res1);
+            } else {
+                const res1 = await Request.request(url, 'POST', token, data);
+                handler(res1);
+            }
         };
 
         node.readDevice = async function(deviceId, resourceId, handler){
@@ -272,6 +293,8 @@ module.exports = function(RED) {
               handler(res);
               index += res_length;
             } while (res_length == count);
+
+            handler("done");
         };
 
         node.unRegisterDeviceResourceListener = function (deviceId, resourceId, node){

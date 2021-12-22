@@ -18,6 +18,9 @@ module.exports = function(RED) {
             case 'm':
                 seconds = seconds * 60;
                 break;
+            case 's':
+                //seconds = seconds;
+                break;
             default:
                 // TODO: handle error, at the moment it will fail from the thinger server side
                 return interval;
@@ -35,7 +38,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket read on close
-        node.on("input",function(msg) {
+        node.on("input",function(msg, send) {
 
             let json = {};
             json.bucket = config.bucketId || msg.id;
@@ -80,7 +83,8 @@ module.exports = function(RED) {
 
             if (typeof server.createBucket === "function")
                 server.createBucket(json, function(res) {
-                  node.send({payload: res});
+                  msg.payload = res;
+                  send(msg);
                 });
             else
                 node.error("bucket-create: Check Thinger Server Configuration");

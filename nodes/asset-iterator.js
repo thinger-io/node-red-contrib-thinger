@@ -10,27 +10,46 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call property read on input
-        node.on("input",function(msg) {
+        node.on("input",function(msg, send) {
+            node.status({fill:"blue", shape:"ring", text:"running"});
+
             let asset = (config.asset || msg.asset)+"s";
             let filter = config.filter || msg.asset_filter;
 
             let assetType = config.assetType || msg.asset_type;
             let assetGroup = config.assetGroup || msg.asset_group;
 
+            let multipleMatch = false;
+
             if (typeof server.iterateAssets === "function")
                 server.iterateAssets(asset, filter, function(res) {
+                  if (res === "done") {
+                      node.status({fill:"blue", shape:"dot", text:"done"});
+                      return;
+                  }
                   for (var i in res) {
                       let type = res[i].asset_type;
                       let group = res[i].asset_group;
 
+                      let newMsg = {};
+                      Object.assign(newMsg, msg);
+                      if (multipleMatch || res.length > 1) { // if more than one asset create new message with its own id
+                          multipleMatch = true;
+                          delete newMsg._msgid;
+                      }
+
                       if (assetType === undefined && assetGroup === undefined) {
-                          node.send({payload: res[i]});
+                          newMsg.payload = res[i];
+                          send(newMsg);
                       } else if (assetType === type && assetGroup === group) {
-                          node.send({payload: res[i]});
+                          newMsg.payload = res[i];
+                          send(newMsg);
                       } else if (assetType === type && assetGroup === undefined) {
-                          node.send({payload: res[i]});
+                          newMsg.payload = res[i];
+                          send(newMsg);
                       } else if (assetType === undefined && assetGroup == group) {
-                          node.send({payload: res[i]});
+                          newMsg.payload = res[i];
+                          send(newMsg);
                       }
                   }
                 });
