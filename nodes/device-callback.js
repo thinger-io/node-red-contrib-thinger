@@ -34,13 +34,14 @@ module.exports = function(RED) {
                 body = JSON.parse(body);
             }
 
-            if (typeof server.callbackDevice === "function")
+            if (typeof server.callbackDevice === "function") {
                 server.callbackDevice(device, assetType, assetGroup, prefix, body, function(res) {
                     msg.payload = res;
                     send(msg);
-                });
-            else
-                node.error("device-callback: Check Thinger Server Configuration");
+                })
+                .catch(e => node.error(e));
+            } else
+                node.error("Check Thinger Server Configuration");
         });
     }
 

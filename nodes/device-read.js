@@ -15,13 +15,14 @@ module.exports = function(RED) {
             let device = config.device || msg.device;
             let resource = config.resource || msg.resource;
 
-            if (typeof server.readDevice === "function")
+            if (typeof server.readDevice === "function") {
                 server.readDevice(device, resource, function(res){
                     msg.payload = res;
                     send(msg);
-                });
-            else
-                node.error("device-read: Check Thinger Server Configuration");
+                })
+                .catch(e => node.error(e));
+            } else
+                node.error("Check Thinger Server Configuration");
         });
     }
 

@@ -72,7 +72,7 @@ module.exports = function(RED) {
               })
               .catch(console.log);
           else
-              node.error("bucket-read: Check Thinger Server Configuration");
+              node.error("Check Thinger Server Configuration");
      }
 
     function BucketReadNode(config) {
@@ -162,7 +162,7 @@ module.exports = function(RED) {
                 msg.payload = result;
                 send(msg);
               })
-              .catch(console.log);
+              .catch(e => node.error(e));
 
           });
     }

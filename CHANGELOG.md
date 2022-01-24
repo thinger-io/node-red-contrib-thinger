@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Fix
+- Assign same Keep-Alive agent to all requests
+- Handle errors for each node when backend request fails
 
 ## [1.3.0] - 2021-12-22
 ### Added

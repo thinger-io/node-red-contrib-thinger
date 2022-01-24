@@ -14,13 +14,16 @@ module.exports = function(RED) {
 
             let endpoint = config.endpoint || msg.endpoint;
 
-            if (typeof server.callEndpoint === "function")
-                server.callEndpoint(endpoint, msg.payload, function(res) {
-                    msg.payload = res;
-                    node.send(msg);
-                });
-            else
-                node.error("endpoint-call: Check Thinger Server Configuration");
+            if (typeof server.callEndpoint === "function") {
+
+                    server.callEndpoint(endpoint, msg.payload, function(res) {
+                        msg.payload = res;
+                        node.send(msg);
+                    })
+                    .catch(e => node.error(e));
+
+            } else
+                node.error("Check Thinger Server Configuration");
         });
     }
 

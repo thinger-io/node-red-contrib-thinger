@@ -45,7 +45,7 @@ Below is a brief description of the actions allowed:
 - Read from data buckets (bucket read node).
 - Writing to data buckets (bucket write node).
 - Calling devices callbacks with autoprovisioning (device callback node).
-- Creating any type of devices (device create node).
+- Creating any type of devices or updating its details (device create node).
 - Reading a device resource when an event occurs (device read node).
 - Subscribing to device resources at a given interval (device stream node).
 - Sending data to a connected device (device write node).
