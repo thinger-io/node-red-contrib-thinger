@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.1] - 2021-01-29
+### Fix
+- Assign same Keep-Alive agent to all requests
+- Handle errors for each node when backend request fails
+
 ## [1.3.0] - 2021-12-22
 ### Added
 - Device create node is able to update details of an already existing device
@@ -100,6 +105,7 @@ All notable changes to this project will be documented in this file.
 ## [0.0.6] - 2019-06-20
 
 [Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.3.0...HEAD
+[1.3.1]: https://github.com/thinger-io/Node-RED/compare/1.2.3...1.3.1
 [1.3.0]: https://github.com/thinger-io/Node-RED/compare/1.2.3...1.3.0
 [1.2.3]: https://github.com/thinger-io/Node-RED/compare/1.2.2...1.2.3
 [1.2.2]: https://github.com/thinger-io/Node-RED/compare/1.2.1...1.2.2

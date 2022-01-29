@@ -1,6 +1,6 @@
 # node-red-contrib-thinger
 
-[![NPM Version](https://img.shields.io/static/v1?label=npm&message=v1.3.0&color=blue&style=flat)](https://www.npmjs.com/package/node-red-contrib-thinger)
+[![NPM Version](https://img.shields.io/static/v1?label=npm&message=v1.3.1&color=blue&style=flat)](https://www.npmjs.com/package/node-red-contrib-thinger)
 
 ![Node-RED and Thinger.io Integration](https://gblobscdn.gitbook.com/assets%2F-LpXqB3J1BMD5s4OpYSg%2F-LqolIqYDvSBb7V2MiNj%2F-LqpE9l6dUWZx6GQe8NQ%2Fimage.png?alt=media&token=35ce9cca-cec8-45db-b298-d973f2bb7f9b "Thinger.io web console with Node-RED plugin and ad-hoc nodes")
 
@@ -45,7 +45,7 @@ Below is a brief description of the actions allowed:
 - Read from data buckets (bucket read node).
 - Writing to data buckets (bucket write node).
 - Calling devices callbacks with autoprovisioning (device callback node).
-- Creating any type of devices (device create node).
+- Creating any type of devices or updating its details (device create node).
 - Reading a device resource when an event occurs (device read node).
 - Subscribing to device resources at a given interval (device stream node).
 - Sending data to a connected device (device write node).

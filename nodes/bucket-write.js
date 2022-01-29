@@ -18,10 +18,15 @@ module.exports = function(RED) {
                 value = JSON.parse(value);
             }
 
-            if (typeof server.writeBucket === "function")
-              server.writeBucket(bucket, value);
+            if (typeof server.writeBucket === "function") {
+              try {
+                  server.writeBucket(bucket, value);
+              } catch(e) {
+                  node.error(e);
+              }
+            }
             else
-              node.error("bucket-write: Check Thinger Server Configuration");
+              node.error("Check Thinger Server Configuration");
         });
     }
 

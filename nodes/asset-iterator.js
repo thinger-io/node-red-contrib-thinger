@@ -21,7 +21,7 @@ module.exports = function(RED) {
 
             let multipleMatch = false;
 
-            if (typeof server.iterateAssets === "function")
+            if (typeof server.iterateAssets === "function") {
                 server.iterateAssets(asset, filter, function(res) {
                   if (res === "done") {
                       node.status({fill:"blue", shape:"dot", text:"done"});
@@ -52,9 +52,10 @@ module.exports = function(RED) {
                           send(newMsg);
                       }
                   }
-                });
-            else
-                node.error("asset-iterator: Check Thinger Server Configuration");
+                })
+                .catch(e => node.error(e));
+            } else
+                node.error("Check Thinger Server Configuration");
         });
     }
 

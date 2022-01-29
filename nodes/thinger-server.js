@@ -13,8 +13,6 @@ module.exports = function(RED) {
     let timeout = undefined;
     let node = this;
 
-    let websockets = {};
-
     function handleReconnection(){
         for(let id in devices){
             let device = devices[id];
@@ -57,7 +55,7 @@ module.exports = function(RED) {
             return;
         }
 
-        // Will handle all rejections from requests
+        // As precaution, but should not be desired handler: will handle all rejections from requests
         process.on('unhandledRejection', e => {
             node.error(e);
         });
@@ -105,7 +103,6 @@ module.exports = function(RED) {
         };
 
         node.callEndpoint = async function(endpointId, data, handler){
-
             const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/endpoints/${endpointId}/call`;
             const res = await Request.request(url, 'POST', token, data);
             handler(res);

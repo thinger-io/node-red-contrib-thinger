@@ -15,13 +15,14 @@ module.exports = function(RED) {
             let assetId = config.assetId || msg.asset_id;
             let property = config.property || msg.property;
 
-            if (typeof server.readProperty === "function")
+            if (typeof server.readProperty === "function") {
                 server.readProperty(asset, assetId, property, function(res) {
                   msg.payload = res;
                   send(msg);
-                });
-            else
-                node.error("property-read: Check Thinger Server Configuration");
+                })
+                .catch(e => node.error(e));
+            } else
+                node.error("Check Thinger Server Configuration");
         });
     }
 

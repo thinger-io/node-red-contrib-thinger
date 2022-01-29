@@ -19,13 +19,14 @@ module.exports = function(RED) {
                 value = JSON.stringify(value);
             }
 
-            if (typeof server.writeProperty === "function")
+            if (typeof server.writeProperty === "function") {
                 server.writeProperty(asset, assetId, property, value, function(res) {
                   msg.payload = res;
                   send(msg);
-                });
-            else
-                node.error("property-write: Check Thinger Server Configuration");
+                })
+                .catch(e => node.error(e));
+            } else
+                node.error("Check Thinger Server Configuration");
         });
     }
 

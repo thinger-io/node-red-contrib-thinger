@@ -19,13 +19,14 @@ module.exports = function(RED) {
                 value = JSON.parse(value);
             }
 
-            if (typeof server.writeDevice === "function")
+            if (typeof server.writeDevice === "function") {
                 server.writeDevice(device, resource, value, function(res) {
                     msg.payload = res;
                     send(msg);
-               });
-            else
-                node.error("device-write: Check Thinger Server Configuration");
+                })
+                .catch(e => node.error(e));
+            } else
+                node.error("Check Thinger Server Configuration");
         });
     }
 

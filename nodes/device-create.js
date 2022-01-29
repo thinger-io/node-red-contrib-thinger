@@ -48,13 +48,14 @@ module.exports = function(RED) {
                 json.asset_group = group;
             }
 
-            if (typeof server.createDevice === "function")
+            if (typeof server.createDevice === "function") {
                 server.createDevice(json, function(res) {
                   msg.payload = res;
                   send(msg);
-                });
-            else
-                node.error("device-create: Check Thinger Server Configuration");
+                })
+                .catch(e => node.error(e));
+            } else
+                node.error("Check Thinger Server Configuration");
         });
     }
 

@@ -81,13 +81,14 @@ module.exports = function(RED) {
             }
             json.config = jsonConfig;
 
-            if (typeof server.createBucket === "function")
+            if (typeof server.createBucket === "function") {
                 server.createBucket(json, function(res) {
                   msg.payload = res;
                   send(msg);
-                });
-            else
-                node.error("bucket-create: Check Thinger Server Configuration");
+                })
+                .catch(e => node.error(e));
+            } else
+                node.error("Check Thinger Server Configuration");
         });
     }
 
