@@ -3,7 +3,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [1.3.1] - 2021-01-29
+## [1.3.2] - 2022-03-14
+### Added
+- Example of regex in server events node
+
+### Changed
+- When resource is not found a not found message is returned instead of an error
+
+### Fix
+- Requests where the payload contained special characters could not be handled
+- Device write node does not overwrite message payload if nothing is returned
+- Input/output resources are not available on device read and write
+
+## [1.3.1] - 2022-01-29
 ### Fix
 - Assign same Keep-Alive agent to all requests
 - Handle errors for each node when backend request fails
@@ -104,8 +116,9 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
-[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.3.0...HEAD
-[1.3.1]: https://github.com/thinger-io/Node-RED/compare/1.2.3...1.3.1
+[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.3.2...HEAD
+[1.3.2]: https://github.com/thinger-io/Node-RED/compare/1.3.1...1.3.2
+[1.3.1]: https://github.com/thinger-io/Node-RED/compare/1.3.0...1.3.1
 [1.3.0]: https://github.com/thinger-io/Node-RED/compare/1.2.3...1.3.0
 [1.2.3]: https://github.com/thinger-io/Node-RED/compare/1.2.2...1.2.3
 [1.2.2]: https://github.com/thinger-io/Node-RED/compare/1.2.1...1.2.2

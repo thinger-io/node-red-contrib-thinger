@@ -184,7 +184,7 @@ class ThingerDevice extends ThingerAsset {
         let inputResources = [];
         return this.getResources().then(function (data) {
             for (let i in data) {
-                if (data[i].isInput()) {
+                if (data[i].isInput() || data[i].isInputOutput()) {
                     inputResources.push(data[i]);
                 }
             }
@@ -196,7 +196,7 @@ class ThingerDevice extends ThingerAsset {
         let outputResources = [];
         return this.getResources().then(function (data) {
             for (let i in data) {
-                if (data[i].isOutput()) {
+                if (data[i].isOutput() || data[i].isInputOutput()) {
                     outputResources.push(data[i]);
                 }
             }
