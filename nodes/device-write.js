@@ -21,7 +21,10 @@ module.exports = function(RED) {
 
             if (typeof server.writeDevice === "function") {
                 server.writeDevice(device, resource, value, function(res) {
-                    msg.payload = res;
+
+                    if (res && res.length != 0)
+                        msg.payload = res;
+
                     send(msg);
                 })
                 .catch(e => node.error(e));
