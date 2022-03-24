@@ -19,11 +19,7 @@ module.exports = function(RED) {
             }
 
             if (typeof server.writeBucket === "function") {
-              try {
-                  server.writeBucket(bucket, value);
-              } catch(e) {
-                  node.error(e);
-              }
+              server.writeBucket(bucket, value).catch(e => node.error(e));;
             }
             else
               node.error("Check Thinger Server Configuration");

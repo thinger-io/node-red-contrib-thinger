@@ -27,7 +27,9 @@
         },
         oneditprepare: function() {
 
-            const user = new ThingerUser();
+            let server_id = this.server ? this.server : "";
+
+            const user = new ThingerUser(server_id);
             const events = new ThingerEvents(user.role);
 
             const _event = this.event;

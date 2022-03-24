@@ -36,11 +36,12 @@
             $("#node-input-device").click(function() {
                 const field = "device";
                 const device = $(this).val();
-                let devices = new ThingerDevices(device);
+                const svr_id = $('#node-input-server').find(":selected")[0].value;
+                let devices = new ThingerDevices(device,svr_id);
                 devices.getHTTPDevices().then(function(data) {
                     ThingerDOM.showOptions(field,data,device,function(value) {
                         // devices filtering callback
-                        devices = new ThingerDevices(value);
+                        devices = new ThingerDevices(value,svr_id);
                         devices.getHTTPDevices().then((data) => {ThingerDOM.showOptions(field, data)});
                     });
                 });

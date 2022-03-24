@@ -4,11 +4,12 @@ class ThingerAssets {
 
     _url = "server/assets"; // can't be private as it is used by children
 
-    constructor(url,role="user") {
+    constructor(url,role="user",svr_id="") {
         if (url) {
             this._url=url;
         }
         this.role = role;
+        this.svr_id = svr_id;
     }
 
     async getAssets() {
@@ -39,8 +40,9 @@ class ThingerAsset {
 
     #_url = "assets";
 
-    constructor(type) {
+    constructor(type,svr_id="") {
         this.type = type;
+        this.svr_id = svr_id;
     }
 
     async getProperties() {
@@ -48,7 +50,7 @@ class ThingerAsset {
 
         this._properties = [];
         const self = this;
-        return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/properties`).
+        return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/properties?svr_id=${this.svr_id ? this.svr_id : ""}`).
         then(function(data) {
             for (let i in data) {
                 self._properties.push(
@@ -74,9 +76,9 @@ class ThingerAsset {
 
 class ThingerDevices extends ThingerAssets {
 
-    constructor(name="") {
+    constructor(name="",svr_id="") {
         const _url = "assets/devices";
-        super(`${_url}?name=${name}`);
+        super(`${_url}?name=${name}&svr_id=${svr_id}`,"user",svr_id);
     }
 
     async getDevices() {
@@ -93,7 +95,8 @@ class ThingerDevices extends ThingerAssets {
                     data[i].device,
                     data[i].name,
                     data[i].type,
-                    data[i].connection.active
+                    data[i].connection.active,
+                    self.svr_id
                 ));
             }
             return self._devices;
@@ -153,8 +156,8 @@ class ThingerDevice extends ThingerAsset {
 
     #_url = "assets";
 
-    constructor(id,name="",type,active=false) {
-        super("device");
+    constructor(id,name="",type,active=false,svr_id="") {
+        super("device",svr_id);
         this.id = id;
         this.name = name;
         this.active = active;
@@ -166,7 +169,7 @@ class ThingerDevice extends ThingerAsset {
 
         this._resources = [];
         const self = this;
-        return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/resources`).
+        return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/resources?svr_id=${this.svr_id ? this.svr_id : ""}`).
         then(function(data) {
             for (let i in data) {
                 self._resources.push(
@@ -249,9 +252,9 @@ class ThingerResource {
 }
 class ThingerBuckets extends ThingerAssets {
 
-    constructor(name="") {
+    constructor(name="",svr_id="") {
         const _url = "assets/buckets";
-        super(`${_url}?name=${name}`);
+        super(`${_url}?name=${name}&svr_id=${svr_id}`);
     }
 
     getBuckets() {
@@ -293,9 +296,9 @@ class ThingerBucket extends ThingerAsset {
 
 class ThingerEndpoints extends ThingerAssets {
 
-    constructor(name="") {
+    constructor(name="",svr_id="") {
         const _url = "assets/endpoints";
-        super(`${_url}?name=${name}`);
+        super(`${_url}?name=${name}&svr_id=${svr_id}`);
     }
 
     getEndpoints() {
@@ -337,9 +340,9 @@ class ThingerEndpoint extends ThingerAsset {
 
 class ThingerTypes extends ThingerAssets {
 
-    constructor(name="") {
+    constructor(name="",svr_id="") {
         const _url = "assets/types";
-        super(`${_url}?name=${name}`);
+        super(`${_url}?name=${name}&svr_id=${svr_id}`);
     }
 
     async getTypes() {
@@ -369,19 +372,20 @@ class ThingerTypes extends ThingerAssets {
 
 class ThingerType extends ThingerAsset {
 
-    constructor(id, name) {
+    constructor(id, name, svr_id = "") {
         super("type");
         this.id = id;
         this.name = name;
+        this.svr_id = svr_id;
     }
 
 }
 
 class ThingerGroups extends ThingerAssets {
 
-    constructor(name="") {
+    constructor(name="",svr_id="") {
         const _url = "assets/groups";
-        super(`${_url}?name=${name}`);
+        super(`${_url}?name=${name}&svr_id=${svr_id}`);
     }
 
     getGroups() {
@@ -411,10 +415,11 @@ class ThingerGroups extends ThingerAssets {
 
 class ThingerGroup extends ThingerAsset {
 
-    constructor(id, name) {
+    constructor(id, name, svr_id = "") {
         super("group");
         this.id = id;
         this.name = name;
+        this.svr_id = svr_id;
     }
 
 }
@@ -433,5 +438,4 @@ const assetClass = new Map([
     ['types', ThingerTypes], ['type', ThingerType],
     ['groups', ThingerGroups], ['group', ThingerGroup]
     ]);
-
 

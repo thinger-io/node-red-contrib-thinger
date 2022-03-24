@@ -58,17 +58,19 @@
                 var assetType = $(this).val();
 
                 if (assetType) {
+                    // Field appearance
                     ThingerDOM.changeInputField(assetType,"assetId");
-
-                    let assets = new (assetClass.get(`${assetType}s`))();
 
                     // Options and filtering
                     $("#node-input-assetId").focus(function() {
                         const field = "assetId";
                         const assetId = $(this).val();
+
+                        const svr_id = $('#node-input-server').find(":selected")[0].value;
+                        let assets = new (assetClass.get(`${assetType}s`))("",svr_id);
                         assets.getAssets().then(function(data) {
                             ThingerDOM.showOptions(field,data,assetId,function(value) {
-                                assets = new (assetClass.get(`${assetValue}s`))(value);
+                                assets = new (assetClass.get(`${assetType}s`))(value,svr_id);
                                 assets.getAssets().then((data) => {ThingerDOM.showOptions(field, data)});
                             });
                         });
@@ -78,7 +80,10 @@
                     $('#node-input-property').focus(function() {
                         const assetId = $("#node-input-assetId").val();
                         const property = $(this).val();
-                        const asset = new (assetClass.get(`${assetType}`))(assetId);
+
+                        const svr_id = $('#node-input-server').find(":selected")[0].value;
+                        const asset = new (assetClass.get(`${assetType}`))(assetId,"","",false,svr_id);
+
                         if (assetId) {
                             asset.getProperties().then(function(data) {
                                 ThingerDOM.showOptions("property",data,property);

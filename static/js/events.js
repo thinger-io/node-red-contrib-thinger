@@ -4,10 +4,10 @@ class ThingerEvents {
 
     #_url = "server/events";
 
-    constructor(role="user") {
+    constructor(role="user",svr_id="") {
         var self = this;
         $.ajax({
-            url: this.#_url,
+            url: `${this.#_url}?svr_id=${svr_id}#`,
             async: false, // TODO: make async
             dataType: 'json',
             success: function(data) {

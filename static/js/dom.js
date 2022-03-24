@@ -96,7 +96,7 @@ class ThingerDOM {
             ThingerDOM.#destroyOptions(field); // here field is of no use really
         }
 
-            ThingerDOM.#createOptionsDiv(field,callback);
+        ThingerDOM.#createOptionsDiv(field,callback);
         let elements = $();
 
         options.forEach(option => {
@@ -236,7 +236,7 @@ class ThingerDOM {
 
         $("span[class^='red-form-option'").each((index,element) => {
             var id = element.getElementsByTagName('strong')[0].innerHTML.toLowerCase();
-            var name = element.children.length >= 3 ? element.children()[2].innerHTML.toLowerCase() : "";
+            var name = element.children.length >= 3 ? element.children[2].innerHTML.toLowerCase() : "";
             if (id.match(re) || name.match(re)) {
                 element.style.display = "block";
             } else {

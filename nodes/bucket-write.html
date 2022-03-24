@@ -36,11 +36,12 @@
             $("#node-input-bucket").focus(function() {
                 const field = "bucket";
                 const bucket = $(this).val();
-                let buckets = new ThingerBuckets(bucket);
+                const svr_id = $('#node-input-server').find(":selected")[0].value;
+                let buckets = new ThingerBuckets(bucket,svr_id);
                 buckets.getBuckets().then(function(data) {
                     ThingerDOM.showOptions(field, data, bucket, function(value) {
                         // buckets filtering callback
-                        buckets = new ThingerBuckets(value);
+                        buckets = new ThingerBuckets(value,svr_id);
                         buckets.getBuckets().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });

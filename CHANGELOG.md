@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.4.0] - 2022-04-15
+### Fix
+- Having two thinger backends configured was not working properly
+
 ## [1.3.2] - 2022-03-14
 ### Added
 - Example of regex in server events node
@@ -116,7 +120,8 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
-[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.3.2...HEAD
+[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.4.0...HEAD
+[1.4.0]: https://github.com/thinger-io/Node-RED/compare/1.3.2...1.4.0
 [1.3.2]: https://github.com/thinger-io/Node-RED/compare/1.3.1...1.3.2
 [1.3.1]: https://github.com/thinger-io/Node-RED/compare/1.3.0...1.3.1
 [1.3.0]: https://github.com/thinger-io/Node-RED/compare/1.2.3...1.3.0

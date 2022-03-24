@@ -4,39 +4,40 @@ const jwt = require('jsonwebtoken');
 const Request = require('../lib/utils/request.js');
 const Utils = require('../lib/utils/utils.js');
 
+const RECONNECT_TIMEOUT_MS = 10000;
+
 module.exports = function(RED) {
 
-    const RECONNECT_TIMEOUT_MS = 10000;
-    let devices = {};
-    let config = undefined;
-    let token = undefined;
-    let timeout = undefined;
-    let node = this;
-
-    function handleReconnection(){
-        for(let id in devices){
-            let device = devices[id];
-            if(device.wss && (device.wss.readyState === device.wss.CLOSED)){
-                device.wss = getDeviceWebsocket(id);
-            }
-        }
-    }
-
-    function closeWebsockets(){
-        for(let id in devices){
-            let device = devices[id];
-            if(device.wss){
-                device.wss.close();
-            }
-        }
-    }
-
-
     function ThingerServerNode(configa) {
+        let devices = {};
+        let config = undefined;
+        let token = undefined;
+        let timeout = undefined;
+        let node = this;
+
+        function handleReconnection(){
+            for(let id in devices){
+                let device = devices[id];
+                if(device.wss && (device.wss.readyState === device.wss.CLOSED)){
+                    device.wss = getDeviceWebsocket(id);
+                }
+            }
+        }
+
+        function closeWebsockets(){
+            for(let id in devices){
+                let device = devices[id];
+                if(device.wss){
+                    device.wss.close();
+                }
+            }
+        }
+
         RED.nodes.createNode(this, configa);
 
         node = this;
         config = configa;
+        node.config = config; // export to use in exposed APIs
 
         if(this.credentials && this.credentials.hasOwnProperty("token")) {
             let provided_token = this.credentials.token;
@@ -55,8 +56,9 @@ module.exports = function(RED) {
             return;
         }
 
-        // As precaution, but should not be desired handler: will handle all rejections from requests
+        // As precaution, but should not be the desired handler: will handle all rejections from requests
         process.on('unhandledRejection', e => {
+            //console.log("Unhandled Rejection");
             node.error(e);
         });
 
@@ -129,7 +131,7 @@ module.exports = function(RED) {
 
         node.writeBucket = function(bucketId, data){
             const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/buckets/${bucketId}/data`;
-            Request.request(url, 'POST', token, data);
+            return Request.request(url, 'POST', token, data);
         };
 
         node.createDevice = async function(data, handler){
@@ -365,173 +367,174 @@ module.exports = function(RED) {
             handleReconnection();
             timeout = setTimeout(tick, RECONNECT_TIMEOUT_MS);
         }, RECONNECT_TIMEOUT_MS);
-    }
 
-    function controlDeviceResourceStreaming(device, resource){
-        // there are listeners (or nodes) waiting for information
-        if(Object.keys(resource.listeners).length){
-            // get current resource interval
-            let currentInterval = resource.interval;
+        function controlDeviceResourceStreaming(device, resource){
+            // there are listeners (or nodes) waiting for information
+            if(Object.keys(resource.listeners).length){
+                // get current resource interval
+                let currentInterval = resource.interval;
 
-            // set resource interval to the greatest common divisor of all listeners
-            resource.interval = getDeviceResourceInterval(device, resource);
+                // set resource interval to the greatest common divisor of all listeners
+                resource.interval = getDeviceResourceInterval(device, resource);
 
-            // update skip values for listeners
-            for(let id in resource.listeners){
-                let listener = resource.listeners[id];
-                if(listener.interval!==resource.interval){
-                    listener.skipMeasures = listener.interval>0? listener.interval  / resource.interval : 0;
-                    listener.skipCurrent  = listener.interval>0? listener.interval  / resource.interval : 0;
-                }
-            }
-
-            // initialize websocket in new connection
-            if(!device.wss || device.wss.readyState === device.wss.CLOSING || device.wss.readyState === device.wss.CLOSED) {
-                device.wss = getDeviceWebsocket(device.id);
-                // create/update stream subscription
-            }else if(currentInterval!==resource.interval){
-                controlDeviceResource(device.id, {
-                    resource: resource.id,
-                    interval: Number(resource.interval),
-                    enabled: true
-                });
-            }
-        }else{
-            controlDeviceResource(device.id, {
-                resource: resource.id,
-                enabled: false
-            });
-        }
-    }
-
-    function gcd(arr){
-        let i, y,
-            n = arr.length,
-            x = Math.abs(arr[0]);
-
-        for (i = 1; i < n; i++) {
-            y = Math.abs(arr[i]);
-            while (x && y) {
-                (x > y) ? x %= y : y %= x;
-            }
-            x += y;
-        }
-        return x;
-    }
-
-    function getDeviceResourceInterval(device, resource){
-        let intervals = [];
-        for(let id in resource.listeners){
-            let listener = resource.listeners[id];
-            intervals.push(listener.interval);
-        }
-        let result =  intervals.length!==0 ? gcd(intervals) : 0;
-        node.log("Computing intervals for " + device.id + "[" + resource.id + "] with: " + JSON.stringify(intervals) + " -> " + result);
-        return result;
-    }
-
-    function controlDeviceResource(deviceId, control){
-        let device = devices[deviceId];
-        if(device === undefined) return;
-        node.log(">> Sending to " + deviceId + ": " + JSON.stringify(control));
-        device.wss.send(JSON.stringify(control));
-    }
-
-    function getDeviceWebsocket(deviceId){
-        const url = `${config.ssl ? "wss://" : "ws://"}${config.host}/v3/users/${config.username}/devices/${deviceId}/resources?authorization=${token}`;
-
-        node.log("opening websocket to " + url);
-
-        let wss = new WebSocket(url);
-
-        wss.on('error', function(e){
-            console.error("websocket failed");
-            console.error(e);
-
-            // get current device
-            let device = devices[deviceId];
-            if(device === undefined) return;
-
-            for(let resource_name in device.resources){
-                // mark listeners as connected
-                let resource = device.resources[resource_name];
-                for(let id in resource.listeners) {
+                // update skip values for listeners
+                for(let id in resource.listeners){
                     let listener = resource.listeners[id];
-                    listener.node.status({fill:"red", shape:"ring", text: 'disconnected'});
-                }
-            }
-
-            wss.close();
-        });
-
-        wss.on('open', function open() {
-            // get current device
-            let device = devices[deviceId];
-            if(device === undefined) return;
-
-            for(let resource_name in device.resources){
-                // mark listeners as connected
-                let resource = device.resources[resource_name];
-                for(let id in resource.listeners) {
-                    let listener = resource.listeners[id];
-                    listener.node.status({fill:"green",shape:"dot",text:"connected"});
-                }
-                // control resource
-                controlDeviceResource(deviceId, {
-                    resource: resource_name,
-                    interval: Number(resource.interval),
-                    enabled: true
-                });
-            }
-        });
-
-        wss.on('message', function incoming(data) {
-            //node.log("<< Received from " + deviceId + ": " + data);
-
-            // get current device
-            let device = devices[deviceId];
-            if(device === undefined) return;
-
-            // parse incoming data
-            let payload = JSON.parse(data);
-
-            // get resource
-            let resource = device.resources[payload.resource];
-
-            // no listeners for this resource?
-            if(resource === undefined) return;
-
-            for(let id in resource.listeners) {
-                let listener = resource.listeners[id];
-                if(listener.skipMeasures){
-                    node.log("Listener " + id + ": SkipMeasures(" + listener.skipMeasures + ") SkipCurrent (" + listener.skipCurrent + ")");
-                    if(listener.skipCurrent===listener.skipMeasures){
-                        listener.skipCurrent = 1;
-                    }else{
-                        listener.skipCurrent++;
-                        continue;
+                    if(listener.interval!==resource.interval){
+                        listener.skipMeasures = listener.interval>0? listener.interval  / resource.interval : 0;
+                        listener.skipCurrent  = listener.interval>0? listener.interval  / resource.interval : 0;
                     }
                 }
-                listener.node.status({fill:"blue",shape:"dot",text:"connected"});
-                listener.node.send({payload: payload.out ? payload.out : payload.in});
-                listener.node.status({fill:"green",shape:"dot",text:"connected"}); }
-        });
 
-        wss.on('close', function close() {
-            // get current device
+                // initialize websocket in new connection
+                if(!device.wss || device.wss.readyState === device.wss.CLOSING || device.wss.readyState === device.wss.CLOSED) {
+                    device.wss = getDeviceWebsocket(device.id);
+                    // create/update stream subscription
+                }else if(currentInterval!==resource.interval){
+                    controlDeviceResource(device.id, {
+                        resource: resource.id,
+                        interval: Number(resource.interval),
+                        enabled: true
+                    });
+                }
+            }else{
+                controlDeviceResource(device.id, {
+                    resource: resource.id,
+                    enabled: false
+                });
+            }
+        }
+
+        function gcd(arr){
+            let i, y,
+                n = arr.length,
+                x = Math.abs(arr[0]);
+
+            for (i = 1; i < n; i++) {
+                y = Math.abs(arr[i]);
+                while (x && y) {
+                    (x > y) ? x %= y : y %= x;
+                }
+                x += y;
+            }
+            return x;
+        }
+
+        function getDeviceResourceInterval(device, resource){
+            let intervals = [];
+            for(let id in resource.listeners){
+                let listener = resource.listeners[id];
+                intervals.push(listener.interval);
+            }
+            let result =  intervals.length!==0 ? gcd(intervals) : 0;
+            node.log("Computing intervals for " + device.id + "[" + resource.id + "] with: " + JSON.stringify(intervals) + " -> " + result);
+            return result;
+        }
+
+        function controlDeviceResource(deviceId, control){
             let device = devices[deviceId];
             if(device === undefined) return;
-            for(let resource_name in device.resources){
-                // mark listeners as connected
-                let resource = device.resources[resource_name];
+            node.log(">> Sending to " + deviceId + ": " + JSON.stringify(control));
+            device.wss.send(JSON.stringify(control));
+        }
+
+        function getDeviceWebsocket(deviceId){
+            const url = `${config.ssl ? "wss://" : "ws://"}${config.host}/v3/users/${config.username}/devices/${deviceId}/resources?authorization=${token}`;
+
+            node.log("opening websocket to " + url);
+
+            let wss = new WebSocket(url);
+
+            wss.on('error', function(e){
+                console.error("websocket failed");
+                console.error(e);
+
+                // get current device
+                let device = devices[deviceId];
+                if(device === undefined) return;
+
+                for(let resource_name in device.resources){
+                    // mark listeners as connected
+                    let resource = device.resources[resource_name];
+                    for(let id in resource.listeners) {
+                        let listener = resource.listeners[id];
+                        listener.node.status({fill:"red", shape:"ring", text: 'disconnected'});
+                    }
+                }
+
+                wss.close();
+            });
+
+            wss.on('open', function open() {
+                // get current device
+                let device = devices[deviceId];
+                if(device === undefined) return;
+
+                for(let resource_name in device.resources){
+                    // mark listeners as connected
+                    let resource = device.resources[resource_name];
+                    for(let id in resource.listeners) {
+                        let listener = resource.listeners[id];
+                        listener.node.status({fill:"green",shape:"dot",text:"connected"});
+                    }
+                    // control resource
+                    controlDeviceResource(deviceId, {
+                        resource: resource_name,
+                        interval: Number(resource.interval),
+                        enabled: true
+                    });
+                }
+            });
+
+            wss.on('message', function incoming(data) {
+                //node.log("<< Received from " + deviceId + ": " + data);
+
+                // get current device
+                let device = devices[deviceId];
+                if(device === undefined) return;
+
+                // parse incoming data
+                let payload = JSON.parse(data);
+
+                // get resource
+                let resource = device.resources[payload.resource];
+
+                // no listeners for this resource?
+                if(resource === undefined) return;
+
                 for(let id in resource.listeners) {
                     let listener = resource.listeners[id];
-                    listener.node.status({fill:"red",shape:"ring",text:"disconnected"});
-                }
-            }
-        });
+                    if(listener.skipMeasures){
+                        node.log("Listener " + id + ": SkipMeasures(" + listener.skipMeasures + ") SkipCurrent (" + listener.skipCurrent + ")");
+                        if(listener.skipCurrent===listener.skipMeasures){
+                            listener.skipCurrent = 1;
+                        }else{
+                            listener.skipCurrent++;
+                            continue;
+                        }
+                    }
+                    listener.node.status({fill:"blue",shape:"dot",text:"connected"});
+                    listener.node.send({payload: payload.out ? payload.out : payload.in});
+                    listener.node.status({fill:"green",shape:"dot",text:"connected"}); }
+            });
 
-        return wss;
+            wss.on('close', function close() {
+                // get current device
+                let device = devices[deviceId];
+                if(device === undefined) return;
+                for(let resource_name in device.resources){
+                    // mark listeners as connected
+                    let resource = device.resources[resource_name];
+                    for(let id in resource.listeners) {
+                        let listener = resource.listeners[id];
+                        listener.node.status({fill:"red",shape:"ring",text:"disconnected"});
+                    }
+                }
+            });
+
+            return wss;
+        }
+
     }
 
     RED.nodes.registerType("thinger-server", ThingerServerNode, {
@@ -540,42 +543,54 @@ module.exports = function(RED) {
         }
     });
 
-
     // API Endpoints
-
-    RED.httpAdmin.get("/assets/:asset", RED.auth.needsPermission('assets.read'), async function(req,res) {
+    RED.httpNode.get("/assets/:asset", async function(req,res) {
         var filter = "";
         if (req.query.name) {
             filter = `name=${req.query.name}`;
         }
 
+        if (!req.query.svr_id) { // If no server node has been selected return empty
+            console.error(`assets.failed: missing thinger server node id`);
+            return res.json({});
+        }
+
+        const config = RED.nodes.getNode(req.query.svr_id).config;
+
         try {
             const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/${req.params.asset}?${filter}`;
-            res.json(await Request.request(url, 'GET', token));
+            res.json(await Request.request(url, 'GET', config.token));
         } catch(err) {
             res.sendStatus(500);
             console.error(`assets.failed ${err.toString()}`);
         }
     });
 
-    RED.httpAdmin.get("/assets/:asset/:asset_id/:properties", RED.auth.needsPermission('properties.read'), async function(req,res) {
+    RED.httpNode.get("/assets/:asset/:asset_id/:properties", async function(req,res) {
         const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
 
         var filter = "";
         if (req.query.name) {
             filter = "name="+req.query.name;
         }
+
+        if (!req.query.svr_id) { // If no server node has been selected return empty
+            console.error(`properties.failed: missing thinger server node id`);
+            return res.json({});
+        }
+
+        const config = RED.nodes.getNode(req.query.svr_id).config;
 
         try {
             const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${req.params.asset}/${req.params.asset_id}/${req.params.properties}?${filter}`;
-            res.json(await Request.request(url, 'GET', token));
+            res.json(await Request.request(url, 'GET', config.token));
         } catch(err) {
             res.sendStatus(500);
             console.error(`properties.failed ${err.toString()}`);
         }
     });
 
-    RED.httpAdmin.get("/assets/:asset/:asset_id/:properties/:property_id", RED.auth.needsPermission('properties.write'), async function(req,res) {
+    RED.httpNode.get("/assets/:asset/:asset_id/:properties/:property_id", async function(req,res) {
         const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
 
         var filter = "";
@@ -583,37 +598,58 @@ module.exports = function(RED) {
             filter = "name="+req.query.name;
         }
 
+        if (!req.query.svr_id) { // If no server node has been selected return empty
+            console.error(`properties.failed: missing thinger server node id `);
+            return res.json({});
+        }
+
+        const config = RED.nodes.getNode(req.query.svr_id).config;
+
         try {
             const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${req.params.asset}/${req.params.asset_id}/${req.params.properties}${req.params.property_id}?${filter}`;
-            res.json(await Request.request(url, 'GET', token));
+            res.json(await Request.request(url, 'GET', config.token));
         } catch(err) {
             res.sendStatus(500);
             console.error(`properties.failed ${err.toString()}`);
         }
     });
 
-    RED.httpAdmin.get("/users/user", RED.auth.needsPermission('users.read'), async function(req,res) {
+    RED.httpNode.get("/users/user", async function(req,res) {
+
+        if (typeof req.query.svr_id === 'undefined' || !req.query.svr_id || req.query.svr_id === "") { // If no server node has been selected return empty
+            console.error(`users.failed: missing thinger server node id`);
+            return res.json({});
+        }
+
+        const config = RED.nodes.getNode(req.query.svr_id).config;
+
         try {
             const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}`;
-            res.json(await Request.request(url, 'GET', token));
+            res.json(await Request.request(url, 'GET', config.token));
         } catch(err) {
             res.sendStatus(500);
             console.error(`users.failed ${err.toString()}`);
         }
     });
 
-    RED.httpAdmin.get("/server/:resource", RED.auth.needsPermission('server.read'), async function(req,res) {
+    RED.httpNode.get("/server/:resource", async function(req,res) {
         let host = "";
         let ssl = true;
-        if (config === undefined) {
+        let config = undefined;
+
+        if (typeof req.query.svr_id !== "undefined" && req.query.svr_id && config)
+            config = RED.nodes.getNode(req.query.svr_id).config;
+
+        if (typeof config === undefined || !config) {
             host = 'backend.thinger.io'
         } else {
             host = config.host;
             ssl = config.ssl;
         }
+
         try {
             const url = `${ssl ? "https://" : "http://"}${host}/v1/server/${req.params.resource}`;
-            let data = await Request.request(url, 'GET', token);
+            let data = await Request.request(url, 'GET', ""); // token is not neccesary
             // order assets
             if (req.params.resource === "assets") {
                 data = Utils.sortObjectArray(data,"asset");

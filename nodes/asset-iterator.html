@@ -25,8 +25,11 @@
         },
         oneditprepare: function() {
 
-            const user = new ThingerUser();
-            const assets = new ThingerAssets(null,user.role);
+            let server_id = this.server ? this.server : "";
+
+            const user = new ThingerUser(server_id);
+            const assets = new ThingerAssets(null,user.role,server_id);
+
 
             let _asset = this.asset;
 
@@ -59,11 +62,12 @@
             $("#node-input-assetType").focus(function() {
                 const field = "assetType";
                 const type = $(this).val();
-                let types = new ThingerTypes(type);
+                const svr_id = $('#node-input-server').find(":selected")[0].value;
+                let types = new ThingerTypes(type,svr_id);
                 types.getTypes().then(function(data) {
                     ThingerDOM.showOptions(field, data, type, function(value) {
                         // types filtering callback
-                        types = new ThingerTypes(value);
+                        types = new ThingerTypes(value,svr_id);
                         types.getTypes().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });
@@ -72,11 +76,12 @@
             $("#node-input-assetGroup").focus(function() {
                 const field = "assetGroup";
                 const group = $(this).val();
-                let groups = new ThingerGroups(group);
+                const svr_id = $('#node-input-server').find(":selected")[0].value;
+                let groups = new ThingerGroups(group,svr_id);
                 groups.getGroups().then(function(data) {
                     ThingerDOM.showOptions(field, data, group, function(value) {
                         // groups filtering callback
-                        groups = new ThingerGroups(value);
+                        groups = new ThingerGroups(value,svr_id);
                         groups.getGroups().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });

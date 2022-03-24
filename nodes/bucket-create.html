@@ -63,11 +63,12 @@
             $("#node-input-device").focus(function() {
                 const field1 = "device";
                 const device1 = $(this).val();
-                let devices = new ThingerDevices(device1);
+                const svr_id = $('#node-input-server').find(":selected")[0].value;
+                let devices = new ThingerDevices(device1,svr_id);
                 devices.getDevices().then(function(data) {
                     ThingerDOM.showOptions(field1,data,device1,function(value) {
                         // devices filtering callback
-                        devices = new ThingerDevices(value);
+                        devices = new ThingerDevices(value,svr_id);
                         devices.getDevices().then((data) => {ThingerDOM.showOptions(field1, data)});
                     });
 
@@ -101,11 +102,12 @@
             $("#node-input-assetType").focus(function() {
                 const field = "assetType";
                 const type = $(this).val();
-                let types = new ThingerTypes(type);
+                const svr_id = $('#node-input-server').find(":selected")[0].value;
+                let types = new ThingerTypes(type,svr_id);
                 types.getTypes().then(function(data) {
                     ThingerDOM.showOptions(field, data, type, function(value) {
                         // types filtering callback
-                        types = new ThingerTypes(value);
+                        types = new ThingerTypes(value,svr_id);
                         types.getTypes().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });
@@ -114,11 +116,12 @@
             $("#node-input-assetGroup").focus(function() {
                 const field = "assetGroup";
                 const group = $(this).val();
-                let groups = new ThingerGroups(group);
+                const svr_id = $('#node-input-server').find(":selected")[0].value;
+                let groups = new ThingerGroups(group,svr_id);
                 groups.getGroups().then(function(data) {
                     ThingerDOM.showOptions(field, data, group, function(value) {
                         // groups filtering callback
-                        groups = new ThingerGroups(value);
+                        groups = new ThingerGroups(value,svr_id);
                         groups.getGroups().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });
