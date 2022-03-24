@@ -4,8 +4,13 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ## [1.4.0] - 2022-04-15
+### Added
+- Errors from backend now show more detail in the cause of the error
+
 ### Fix
-- Having two thinger backends configured was not working properly
+- Having two or more thinger backends configured was not working properly
+- Bad Request from backend in bucket write node was returning more than one error message
+- Property write and read nodes were not filtering options
 
 ## [1.3.2] - 2022-03-14
 ### Added
