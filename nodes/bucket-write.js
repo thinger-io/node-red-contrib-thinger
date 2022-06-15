@@ -1,3 +1,5 @@
+const Request = require('../lib/utils/request.js');
+
 module.exports = function(RED) {
 
     function BucketWriteNode(config) {
@@ -10,7 +12,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket write on message reception
-        node.on("input",function(msg) {
+        node.on("input", function(msg) {
 
             let bucket = config.bucket || msg.bucket;
             var value = config.value || msg.payload || msg.value;
@@ -18,11 +20,15 @@ module.exports = function(RED) {
                 value = JSON.parse(value);
             }
 
-            if (typeof server.writeBucket === "function") {
-              server.writeBucket(bucket, value).catch(e => node.error(e));;
+            const method = 'POST';
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/buckets/${bucket}/data`;
+
+            if (typeof server.request === "function") {
+              server.request(node, url, method, value).catch(e => node.error(e));
             }
             else
               node.error("Check Thinger Server Configuration");
+
         });
     }
 

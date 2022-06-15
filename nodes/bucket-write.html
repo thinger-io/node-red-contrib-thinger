@@ -32,16 +32,18 @@
                 editor.setValue(JSON.stringify(editor_value,null,'\t'));
             }
 
+            const node_id = this.id;
+
             // Event handlers and requests
             $("#node-input-bucket").focus(function() {
                 const field = "bucket";
                 const bucket = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value;
-                let buckets = new ThingerBuckets(bucket,svr_id);
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let buckets = new ThingerBuckets(bucket,node_id,svr_id);
                 buckets.getBuckets().then(function(data) {
                     ThingerDOM.showOptions(field, data, bucket, function(value) {
                         // buckets filtering callback
-                        buckets = new ThingerBuckets(value,svr_id);
+                        buckets = new ThingerBuckets(value,node_id,svr_id);
                         buckets.getBuckets().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });

@@ -81,14 +81,19 @@ module.exports = function(RED) {
             }
             json.config = jsonConfig;
 
-            if (typeof server.createBucket === "function") {
-                server.createBucket(json, function(res) {
-                  msg.payload = res;
-                  send(msg);
+            const method = 'POST';
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/buckets`;
+
+            if (typeof server.request === "function") {
+              server.request(node, url, method, json)
+                .then(res => {
+                    msg.payload = res.payload;
+                    send(msg);
                 })
                 .catch(e => node.error(e));
-            } else
-                node.error("Check Thinger Server Configuration");
+            }
+            else
+              node.error("Check Thinger Server Configuration");
         });
     }
 

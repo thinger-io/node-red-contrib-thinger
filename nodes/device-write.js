@@ -14,22 +14,24 @@ module.exports = function(RED) {
 
             let device = config.device || msg.device;
             let resource = config.resource || msg.resource;
-            var value = config.value || msg.payload || msg.value;
-            if (typeof(value) === 'string') {
-                value = JSON.parse(value);
+            var data = config.value || msg.payload || msg.value;
+
+            const method = 'POST';
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${device}/resources/${resource}`;
+
+            if (typeof server.request === "function") {
+              server.request(node, url, method, data)
+              .then(res => {
+
+                 if (res && res.length != 0)
+                    msg.payload = res.payload;
+
+                  node.send(msg);
+              })
+              .catch(e => node.error(e));
             }
-
-            if (typeof server.writeDevice === "function") {
-                server.writeDevice(device, resource, value, function(res) {
-
-                    if (res && res.length != 0)
-                        msg.payload = res;
-
-                    send(msg);
-                })
-                .catch(e => node.error(e));
-            } else
-                node.error("Check Thinger Server Configuration");
+            else
+              node.error("Check Thinger Server Configuration");
         });
     }
 

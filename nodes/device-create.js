@@ -9,15 +9,14 @@ module.exports = function(RED) {
         // get server configuration
         var server = RED.nodes.getNode(config.server);
 
-        // call device read on close
-        node.on("input",function(msg, send) {
+        node.on("input", async function(msg, send) {
 
-            let json = {};
+            let data = {};
 
             let deviceType = config.deviceType || msg.type;
             if (deviceType !== undefined)
-                json.type = deviceType;
-            json.device = config.deviceId || msg.device;
+                data.type = deviceType;
+            data.device = config.deviceId || msg.device;
 
             let credentials;
             if (this.credentials && this.credentials.hasOwnProperty("deviceCredentials")) {
@@ -26,36 +25,60 @@ module.exports = function(RED) {
                 credentials = msg.credentials;
             }
             if (credentials !== undefined)
-                json.credentials = credentials;
+                data.credentials = credentials;
 
             let deviceName = config.deviceName || msg.name;
             if (deviceName) {
-                json.name = deviceName;
+                data.name = deviceName;
             }
 
             let description = config.description || msg.description;
             if (description) {
-                json.description = description;
+                data.description = description;
             }
 
             let type = config.assetType || msg.asset_type;
             if (type) {
-                json.asset_type = type;
+                data.asset_type = type;
             }
 
             let group = config.assetGroup || msg.asset_group;
             if (group) {
-                json.asset_group = group;
+                data.asset_group = group;
             }
 
-            if (typeof server.createDevice === "function") {
-                server.createDevice(json, function(res) {
-                  msg.payload = res;
-                  send(msg);
-                })
-                .catch(e => node.error(e));
-            } else
-                node.error("Check Thinger Server Configuration");
+            // It fails when no credentials are passed as expected by the backend
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/devices`;
+
+            if (typeof server.request === "function") {
+                // Check if device exists
+                let exists = true;
+                let res;
+                res = await server.request(node,`${url}/${data.device}`, 'GET');
+                if (res.status !== 200)
+                    exists = false;
+
+                // Update if exist or create it
+                try {
+                  if ( exists ) {
+                    let device = data.device;
+                    delete data.device;
+                    delete data.type;
+                    res = await server.request(node,`${url}/${device}`,'PUT',data);
+                  } else {
+                        res = await server.request(node, url, 'POST', data);
+                  }
+                } catch(err) {
+                    node.error(err);
+                    return;
+                }
+
+                msg.payload = res.payload;
+                send(msg);
+            }
+            else
+              node.error("Check Thinger Server Configuration");
+
         });
     }
 

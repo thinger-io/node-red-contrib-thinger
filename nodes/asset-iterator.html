@@ -6,12 +6,12 @@
         category: 'thinger',
         color: '#74b9ff',
         defaults: {
+            server: {type:"thinger-server", required:true},
             name: {value:""},
             asset: {value: ""},
             filter: {value: ""}, // regex
             assetType: {value: ""},
-            assetGroup: {value: ""},
-            server: {type:"thinger-server", required:true}
+            assetGroup: {value: ""}
         },
         icon:"thinger_logo_white.png",
         inputs: 1,
@@ -25,19 +25,21 @@
         },
         oneditprepare: function() {
 
-            let server_id = this.server ? this.server : "";
+            const node_id = this.id;
 
-            const user = new ThingerUser(server_id);
-            const assets = new ThingerAssets(null,user.role,server_id);
+            let _asset = this.asset ? this.asset : "";
 
+            $("#node-input-server").change(function() {
+                let server_id = this.value ? this.value : "";;
 
-            let _asset = this.asset;
+                const user = new ThingerUser(server_id);
+                const assets = typeof user.role !== 'undefined' ? new ThingerAssets(null,node_id,server_id,user.role) : new ThingerAssets(null,node_id,server_id);
 
-            assets.getAssets().then((data) => {
-                ThingerDOM.fillSelect("asset",data);
-                ThingerDOM.selectOption("asset",this.asset);
+                assets.getAssets().then((data) => {
+                    ThingerDOM.fillSelect("asset",data);
+                    ThingerDOM.selectOption("asset",_asset);
+                });
             });
-
 
             $("#node-input-asset").change(function() {
 
@@ -58,16 +60,15 @@
                 }
             });
 
-
             $("#node-input-assetType").focus(function() {
                 const field = "assetType";
                 const type = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value;
-                let types = new ThingerTypes(type,svr_id);
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let types = new ThingerTypes(type,node_id,svr_id);
                 types.getTypes().then(function(data) {
                     ThingerDOM.showOptions(field, data, type, function(value) {
                         // types filtering callback
-                        types = new ThingerTypes(value,svr_id);
+                        types = new ThingerTypes(value,node_id,svr_id);
                         types.getTypes().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });
@@ -76,12 +77,12 @@
             $("#node-input-assetGroup").focus(function() {
                 const field = "assetGroup";
                 const group = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value;
-                let groups = new ThingerGroups(group,svr_id);
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let groups = new ThingerGroups(group,node_id,svr_id);
                 groups.getGroups().then(function(data) {
                     ThingerDOM.showOptions(field, data, group, function(value) {
                         // groups filtering callback
-                        groups = new ThingerGroups(value,svr_id);
+                        groups = new ThingerGroups(value,node_id,svr_id);
                         groups.getGroups().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });

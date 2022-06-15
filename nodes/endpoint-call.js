@@ -14,16 +14,19 @@ module.exports = function(RED) {
 
             let endpoint = config.endpoint || msg.endpoint;
 
-            if (typeof server.callEndpoint === "function") {
+            const method = 'POST';
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/endpoints/${endpoint}/call`;
 
-                    server.callEndpoint(endpoint, msg.payload, function(res) {
-                        msg.payload = res;
-                        node.send(msg);
-                    })
-                    .catch(e => node.error(e));
-
-            } else
-                node.error("Check Thinger Server Configuration");
+            if (typeof server.request === "function") {
+              server.request(node, url, method, msg.payload)
+              .then(res => {
+                  msg.payload = res.payload;
+                  node.send(msg);
+              })
+              .catch(e => node.error(e));
+            }
+            else
+              node.error("Check Thinger Server Configuration");
         });
     }
 

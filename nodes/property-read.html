@@ -23,6 +23,8 @@
         },
         oneditprepare: function() {
 
+            const node_id = this.id;
+
             // Save original assetId row to restore in case of asset change
             var originalAssetId = $(".node-row-assetId")[0].outerHTML;
             var originalProperty = $(".node-row-property")[0].outerHTML;
@@ -51,12 +53,13 @@
                         const field = "assetId";
                         const assetId = $(this).val();
 
-                        const svr_id = $('#node-input-server').find(":selected")[0].value;
-                        let assets = new (assetClass.get(`${assetType}s`))("",svr_id);
+                        const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                        let assets = new (assetClass.get(`${assetType}s`))(assetId,node_id,svr_id);
 
                         assets.getAssets().then(function(data) {
                             ThingerDOM.showOptions(field,data,assetId,function(value) {
-                                assets = new (assetClass.get(`${assetType}s`))(value,svr_id);
+                                // asset filtering callback
+                                assets = new (assetClass.get(`${assetType}s`))(value,node_id,svr_id);
                                 assets.getAssets().then((data) => {ThingerDOM.showOptions(field, data)});
                             });
                         });
@@ -67,8 +70,8 @@
                         const assetId = $("#node-input-assetId").val();
                         const property = $(this).val();
 
-                        const svr_id = $('#node-input-server').find(":selected")[0].value;
-                        const asset = new (assetClass.get(`${assetType}`))(assetId,"","",false,svr_id);
+                        const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                        const asset = new (assetClass.get(`${assetType}`))(assetId,"","",false,node_id,svr_id);
 
                         if (assetId) {
                             asset.getProperties().then(function(data) {

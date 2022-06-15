@@ -11,7 +11,7 @@ module.exports = function(RED) {
     function ThingerServerNode(configa) {
         let devices = {};
         let config = undefined;
-        let token = undefined;
+        let token = undefined; // TODO: remove token from config, should only be accesible via credentials
         let timeout = undefined;
         let node = this;
 
@@ -57,10 +57,10 @@ module.exports = function(RED) {
         }
 
         // As precaution, but should not be the desired handler: will handle all rejections from requests
-        process.on('unhandledRejection', e => {
-            //console.log("Unhandled Rejection");
-            node.error(e);
-        });
+        //process.on('unhandledRejection', e => {
+            //this.error("Unhandled Rejection");
+        //    node.error(e);
+        //});
 
         node.on('close', function(removed, done) {
             // clear reconnection timeout
@@ -104,196 +104,18 @@ module.exports = function(RED) {
             return wss;
         };
 
-        node.callEndpoint = async function(endpointId, data, handler){
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/endpoints/${endpointId}/call`;
-            const res = await Request.request(url, 'POST', token, data);
-            handler(res);
-        };
-
-        node.createBucket = async function(data, handler){
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/buckets`;
-            const res = await Request.request(url, 'POST', token, data);
-            handler(res);
-        };
-
-        node.readBucket = function(bucketId, queryParameters){
-            // Query parameters to string
-            var queryParametersString = "";
-            queryParameters.forEach(function(value,key) {
-                if (value) {
-                    queryParametersString += key+"="+value+"&";
-                }
-            });
-
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/buckets/${bucketId}/data?${queryParametersString}`;
-            return Request.request(url, 'GET', token);
-        };
-
-        node.writeBucket = function(bucketId, data){
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/buckets/${bucketId}/data`;
-            return Request.request(url, 'POST', token, data);
-        };
-
-        node.createDevice = async function(data, handler){
-            // It fails when no credentials are passed as expected by the backend
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/devices`;
-
-            // Check if device exists
-            let exists = true;
-            try {
-                const res = await Request.request(`${url}/${data.device}`, 'GET', token);
-            } catch(e) {
-                exists = false;
-            }
-
-            // Update if exist or create it
-            if ( exists ) {
-                let device = data.device;
-                delete data.device;
-                const res1 = await Request.request(
-                    `${url}/${device}`,
-                    'PUT',
-                    token,
-                    data);
-                handler(res1);
-            } else {
-                const res1 = await Request.request(url, 'POST', token, data);
-                handler(res1);
-            }
-        };
-
-        node.readDevice = async function(deviceId, resourceId, handler){
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v3/users/${config.username}/devices/${deviceId}/resources/${resourceId}`;
-            const res = await Request.request(url, 'GET', token);
-            handler(res);
-        };
-
-        node.writeDevice = async function(deviceId, resourceId, data, handler){
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v3/users/${config.username}/devices/${deviceId}/resources/${resourceId}`;
-            const res = await Request.request(url, 'POST', token, data);
-            handler(res);
-        };
-
-        node.callbackDevice = async function(device, assetType, assetGroup, prefix, data, handler){
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v3/users/${config.username}/devices/${device}/callback`;
-
-            // Check if device exists if not autoprovision resources
-            const res1 = await Request.request(url, 'GET', token);
-            if ( !res1 ) {
-                let json = {};
-
-                // create auto provisioned device
-                json.type = "HTTP";
-                json.device = prefix+device;
-                json.name = device;
-                json.description = "Auto provisioned Node-RED Device"
-                if (assetType) {
-                    json.asset_type = assetType;
-                }
-                if (assetGroup) {
-                    json.asset_group = assetGroup;
-                }
-
-                await node.createDevice(json, function(res) {
-                    if ( !res ) {
-                        return new Error(`Could not create device on device callback auto provisioning`);
-                    }
-                });
-
-                // create auto provisioned bucket
-                json = {};
-                json.bucket = prefix+device;
-                json.name = device;
-                json.description = "Auto provisioned Node-RED Bucket";
-                json.enabled = true;
-                json.config = {"source": "api"}
-                if (assetType) {
-                    json.asset_type = assetType;
-                }
-                if (assetGroup) {
-                    json.asset_group = assetGroup;
-                }
-
-                await node.createBucket(json, function(res) {
-                    if ( !res ) {
-                        return new Error(`Could not create bucket on device callback auto provisioning`);
-                    }
-                });
-
-                // set write bucket action
-                const dataAction = { 
-                    "actions": {
-                        "write_bucket": device
-                    }
-                }
-                await Request.request(url, 'PUT', token, dataAction); // There is no response
-            }
-
-            const res = await Request.request(`${url}/data`, 'POST', token, data);
-            handler(res);
-        };
-
-        node.readProperty = async function(assetType, assetId, propertyId, handler){
-            const apiVersion = (assetType == "devices" ? "v3" : "v1");
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${assetType}/${assetId}/properties/${propertyId}`;
-            const res = await Request.request(url, 'GET', token);
-            handler(res);
-        };
-
-        node.writeProperty = async function(assetType, assetId, propertyId, data, handler){
-            const apiVersion = (assetType == "devices" ? "v3" : "v1");
-            //const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${assetType}/${assetId}/properties/${propertyId}`;
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${assetType}/${assetId}/properties`;
-
-            // Check if property exists if not create it
-            const res = await Request.request(url, 'GET', token);
-            let exists = false;
-            for (let i in res) {
-                if (res[i].property === propertyId) {
-                    exists = true;
-                    break;
-                }
-            }
-            if ( exists ) {
-                const res1 = await Request.request(
-                    //url.replace("/"+propertyId,""),
-                    url,
-                    'POST',
-                    token,
-                    JSON.parse('{"property":"'+propertyId+'","value":'+data+'}'));
-                handler(res1);
-            } else {
-                const res1 = await Request.request(url, 'POST', token, JSON.parse('{"property":"'+propertyId+'","value":'+data+'}'));
-                handler(res1);
-            }
-        };
-
-        node.iterateAssets = async function(assetType, assetFilter="", handler) {
-
-            const assetsUrl = `${config.ssl ? "https://" : "http://"}${config.host}/v1/server/assets`;
-
-            let data = await Request.request(assetsUrl, 'GET', token);
-
-            let user = "";
-            for (let i in data) {
-                if (`${data[i].asset}s` === assetType && data[i].role === "user")
-                    user = `users/${config.username}/`;
-            }
-
-            const count = 50;
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/${user}${assetType}?name=${assetFilter}&count=${count}`;
-
-            let index = 0;
-            let res_length = 0;
-
-            do {
-              const res = await Request.request(`${url}&index=${index}`, 'GET', token);
-              res_length = res.length;
-              handler(res);
-              index += res_length;
-            } while (res_length == count);
-
-            handler("done");
+        // function used by all nodes
+        node.request = function(caller, url, method, data) {
+            if (typeof caller === 'undefined') caller = node;
+            return Request.request(url, method, token, data)
+              .then(res => {
+                  caller.log(`${res.status} ${method} ${url} ${ typeof data === 'object' ? JSON.stringify(data) : typeof data !== 'undefined' ? data : '' }`);
+                  return res;
+              })
+              .catch(err => {
+                  caller.log(`${err.status} ${method} ${url} ${ typeof data === 'object' ? JSON.stringify(data) : typeof data !== 'undefined' ? data : '' }`);
+                  throw err; // handle from parent caller
+              });
         };
 
         node.unRegisterDeviceResourceListener = function (deviceId, resourceId, node){
@@ -405,28 +227,13 @@ module.exports = function(RED) {
             }
         }
 
-        function gcd(arr){
-            let i, y,
-                n = arr.length,
-                x = Math.abs(arr[0]);
-
-            for (i = 1; i < n; i++) {
-                y = Math.abs(arr[i]);
-                while (x && y) {
-                    (x > y) ? x %= y : y %= x;
-                }
-                x += y;
-            }
-            return x;
-        }
-
         function getDeviceResourceInterval(device, resource){
             let intervals = [];
             for(let id in resource.listeners){
                 let listener = resource.listeners[id];
                 intervals.push(listener.interval);
             }
-            let result =  intervals.length!==0 ? gcd(intervals) : 0;
+            let result =  intervals.length!==0 ? Utils.gcd(intervals) : 0;
             node.log("Computing intervals for " + device.id + "[" + resource.id + "] with: " + JSON.stringify(intervals) + " -> " + result);
             return result;
         }
@@ -514,7 +321,7 @@ module.exports = function(RED) {
                         }
                     }
                     listener.node.status({fill:"blue",shape:"dot",text:"connected"});
-                    listener.node.send({payload: payload.out ? payload.out : payload.in});
+                    listener.node.send({payload: payload});
                     listener.node.status({fill:"green",shape:"dot",text:"connected"}); }
             });
 
@@ -550,23 +357,29 @@ module.exports = function(RED) {
             filter = `name=${req.query.name}`;
         }
 
+        const node = RED.nodes.getNode(req.query.node_id);
+
         if (!req.query.svr_id) { // If no server node has been selected return empty
-            console.error(`assets.failed: missing thinger server node id`);
+            node.error(`assets.failed: missing thinger server`);
             return res.json({});
         }
 
-        const config = RED.nodes.getNode(req.query.svr_id).config;
+        // User is adding new server option
+        if (req.query.svr_id === "_ADD_") return res.json({});
+
+        const server = RED.nodes.getNode(req.query.svr_id);
 
         try {
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}/${req.params.asset}?${filter}`;
-            res.json(await Request.request(url, 'GET', config.token));
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/${req.params.asset}?${filter}`;
+            res.json((await server.request(server, url, 'GET')).payload);
         } catch(err) {
             res.sendStatus(500);
-            console.error(`assets.failed ${err.toString()}`);
+            server.error(`assets.failed ${err.toString()}`);
         }
     });
 
     RED.httpNode.get("/assets/:asset/:asset_id/:properties", async function(req,res) {
+
         const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
 
         var filter = "";
@@ -574,23 +387,29 @@ module.exports = function(RED) {
             filter = "name="+req.query.name;
         }
 
+        const node = RED.nodes.getNode(req.query.node_id);
+
         if (!req.query.svr_id) { // If no server node has been selected return empty
-            console.error(`properties.failed: missing thinger server node id`);
+            node.error(`properties.failed: missing thinger server`);
             return res.json({});
         }
 
-        const config = RED.nodes.getNode(req.query.svr_id).config;
+        // User is adding new server option
+        if (req.query.svr_id === "_ADD_") return res.json({});
+
+        const server = RED.nodes.getNode(req.query.svr_id);
 
         try {
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${req.params.asset}/${req.params.asset_id}/${req.params.properties}?${filter}`;
-            res.json(await Request.request(url, 'GET', config.token));
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${req.params.asset}/${req.params.asset_id}/${req.params.properties}?${filter}`;
+            res.json((await server.request(server,url, 'GET')).payload);
         } catch(err) {
             res.sendStatus(500);
-            console.error(`properties.failed ${err.toString()}`);
+            server.error(`properties.failed ${err.toString()}`);
         }
     });
 
     RED.httpNode.get("/assets/:asset/:asset_id/:properties/:property_id", async function(req,res) {
+
         const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
 
         var filter = "";
@@ -598,58 +417,76 @@ module.exports = function(RED) {
             filter = "name="+req.query.name;
         }
 
+        const node = RED.nodes.getNode(req.query.node_id);
+
         if (!req.query.svr_id) { // If no server node has been selected return empty
-            console.error(`properties.failed: missing thinger server node id `);
+            node.error(`properties.failed: missing thinger server`);
             return res.json({});
         }
 
-        const config = RED.nodes.getNode(req.query.svr_id).config;
+        // User is adding new server option
+        if (req.query.svr_id === "_ADD_") return res.json({});
+
+        const server = RED.nodes.getNode(req.query.svr_id);
 
         try {
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/${apiVersion}/users/${config.username}/${req.params.asset}/${req.params.asset_id}/${req.params.properties}${req.params.property_id}?${filter}`;
-            res.json(await Request.request(url, 'GET', config.token));
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${req.params.asset}/${req.params.asset_id}/${req.params.properties}${req.params.property_id}?${filter}`;
+            res.json((await server.request(server, url, 'GET')).payload);
         } catch(err) {
             res.sendStatus(500);
-            console.error(`properties.failed ${err.toString()}`);
+            server.error(`properties.failed ${err.toString()}`);
         }
     });
 
     RED.httpNode.get("/users/user", async function(req,res) {
 
         if (typeof req.query.svr_id === 'undefined' || !req.query.svr_id || req.query.svr_id === "") { // If no server node has been selected return empty
-            console.error(`users.failed: missing thinger server node id`);
+            console.error(`users.failed: missing thinger server`);
             return res.json({});
         }
 
-        const config = RED.nodes.getNode(req.query.svr_id).config;
+        // User is adding new server option
+        if (req.query.svr_id === "_ADD_") return res.json({});
+
+        const server = RED.nodes.getNode(req.query.svr_id);
 
         try {
-            const url = `${config.ssl ? "https://" : "http://"}${config.host}/v1/users/${config.username}`;
-            res.json(await Request.request(url, 'GET', config.token));
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}`;
+            res.json((await server.request(server, url, 'GET')).payload);
         } catch(err) {
             res.sendStatus(500);
-            console.error(`users.failed ${err.toString()}`);
+            server.error(`users.failed ${err.toString()}`);
         }
     });
 
     RED.httpNode.get("/server/:resource", async function(req,res) {
+
         let host = "";
         let ssl = true;
-        let config = undefined;
+        let server = undefined;
 
-        if (typeof req.query.svr_id !== "undefined" && req.query.svr_id && config)
-            config = RED.nodes.getNode(req.query.svr_id).config;
+        if (typeof req.query.svr_id !== "undefined" && req.query.svr_id) {
+            // User is adding new server option
+            if (req.query.svr_id === "_ADD_") return res.json({});
 
-        if (typeof config === undefined || !config) {
+            server = RED.nodes.getNode(req.query.svr_id);
+        }
+
+        if (typeof server === undefined || !server) {
             host = 'backend.thinger.io'
         } else {
-            host = config.host;
-            ssl = config.ssl;
+            host = server.config.host;
+            ssl = server.config.ssl;
         }
 
         try {
+            const method = 'GET';
             const url = `${ssl ? "https://" : "http://"}${host}/v1/server/${req.params.resource}`;
-            let data = await Request.request(url, 'GET', ""); // token is not neccesary
+            let data = {};
+            if (typeof server !== 'undefined')
+                data = (await server.request(server, url, method)).payload;
+            else
+                data = (await  Request.request(url, method)).payload;
             // order assets
             if (req.params.resource === "assets") {
                 data = Utils.sortObjectArray(data,"asset");
@@ -657,7 +494,7 @@ module.exports = function(RED) {
             res.json(data);
         } catch(err) {
             res.sendStatus(500);
-            console.error(`server.failed ${err.toString()}`);
+            server.error(`server.failed ${err.toString()}`);
         }
     });
 

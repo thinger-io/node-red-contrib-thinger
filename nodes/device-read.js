@@ -15,14 +15,19 @@ module.exports = function(RED) {
             let device = config.device || msg.device;
             let resource = config.resource || msg.resource;
 
-            if (typeof server.readDevice === "function") {
-                server.readDevice(device, resource, function(res){
-                    msg.payload = res;
-                    send(msg);
-                })
-                .catch(e => node.error(e));
-            } else
-                node.error("Check Thinger Server Configuration");
+            const method = 'POST';
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${device}/resources/${resource}`;
+
+            if (typeof server.request === "function") {
+              server.request(node, url, method, msg.payload)
+              .then(res => {
+                  msg.payload = res.payload;
+                  node.send(msg);
+              })
+              .catch(e => node.error(e));
+            }
+            else
+              node.error("Check Thinger Server Configuration");
         });
     }
 

@@ -6,11 +6,14 @@ All notable changes to this project will be documented in this file.
 ## [1.4.0] - 2022-04-15
 ### Added
 - Errors from backend now show more detail in the cause of the error
+- Compatibility with Node-RED 3.0.0
 
 ### Fix
+- Device write handling plain text as well as JSON
 - Having two or more thinger backends configured was not working properly
 - Bad Request from backend in bucket write node was returning more than one error message
 - Property write and read nodes were not filtering options
+- Device stream was returning undefined in payload
 
 ## [1.3.2] - 2022-03-14
 ### Added

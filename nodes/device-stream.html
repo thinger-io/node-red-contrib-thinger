@@ -20,16 +20,18 @@
         },
         oneditprepare: function() {
 
+            const node_id = this.id;
+
             // Event listeners
             $("#node-input-device").focus(function() {
                 const field1 = "device";
                 const device1 = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value;
-                let devices = new ThingerDevices(device1,svr_id);
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to accoutn for changes of the server field
+                let devices = new ThingerDevices(device1,node_id,svr_id);
                 devices.getDevices().then(function(data) {
                     ThingerDOM.showOptions(field1,data,device1,function(value) {
                         // devices filtering callback
-                        devices = new ThingerDevices(value,svr_id);
+                        devices = new ThingerDevices(value,node_id,svr_id);
                         devices.getDevices().then((data) => {ThingerDOM.showOptions(field1, data)});
                     });
 

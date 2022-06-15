@@ -101,8 +101,12 @@ class ThingerDOM {
 
         options.forEach(option => {
             let element = $("<span>");
-
-            if (option === selected) {
+            if ((typeof option === 'string' && option === selected) ||
+                (typeof option === 'object' &&
+                  ((option.id === selected) ||
+                   (option.hasOwnProperty("name") && typeof option.name !== 'undefined' && option.name.length != 0 &&
+                    option.name === selected))))
+            {
                 element.addClass("red-form-option-active");
             } else {
                 element.addClass("red-form-option");
@@ -134,13 +138,17 @@ class ThingerDOM {
         $(".red-form-option").remove();
         $(".red-form-option-active").remove();
         $(".red-form-options").append(elements);
-
-        // Set the first option as active
+        // Set the first option as active if none exist
         if (!$(".red-form-option-active").length) {
             let first = $(".red-form-options span:first-child");
             first.addClass("red-form-option-active");
             first.removeClass("red-form-option");
         }
+
+        // Prefilter option for resources that do not have callback
+        if (callback === undefined)
+            ThingerDOM.#filterOptions($(`#node-input-${field}`));
+
     }
 
     static #eventHandlerOptionsDiv(e,field) {
@@ -155,6 +163,7 @@ class ThingerDOM {
 
         $("<div>").insertAfter(`#node-input-${field}`)
         .addClass("red-form-options");
+
         // Keep div active while no clicks outside
         $(document).mouseup(function (e) {
             if (!($(".red-form-options").is(e.target) || $(`#node-input-${field}`).is(e.target))// if the target of the click is the container...
@@ -164,6 +173,7 @@ class ThingerDOM {
             $(`#node-input-${field}`).off('keydown'); // fallback in case it is destroyed before
             }
         });
+
         $(`#node-input-${field}`).keydown(function(e) {
             if (e.key === "Tab")
             {
@@ -221,10 +231,12 @@ class ThingerDOM {
         obj.addClass("red-form-option-active");
 
         //  Value to input (needs to be id to work with Node Red model), also fire event just in case
-        let inputValue = obj.children('strong')[0].innerHTML;
+        if (typeof obj.children('strong')[0] !== "undefined") {
+            let inputValue = obj.children('strong')[0].innerHTML;
 
-        $(`#node-input-${field}`).val(inputValue);
-        $(`#node-input-${field}`).trigger("change");
+            $(`#node-input-${field}`).val(inputValue);
+            $(`#node-input-${field}`).trigger("change");
+        }
 
         // Handle destruction of element
         ThingerDOM.#destroyOptions(field);
