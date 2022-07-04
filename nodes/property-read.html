@@ -50,6 +50,8 @@
 
                     // Options and filtering
                     $("#node-input-assetId").focus(function() {
+                        if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
                         const field = "assetId";
                         const assetId = $(this).val();
 
@@ -67,6 +69,8 @@
 
                     // Properties
                     $('#node-input-property').focus(function() {
+                        if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
                         const assetId = $("#node-input-assetId").val();
                         const property = $(this).val();
 

@@ -23,6 +23,8 @@
 
             // Event handlers and requests
             $("#node-input-endpoint").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
                 const field = "endpoint";
                 const endpoint = $(this).val();
                 const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field

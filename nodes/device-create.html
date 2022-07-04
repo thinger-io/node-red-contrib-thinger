@@ -19,7 +19,6 @@
             name: {value:""},
             deviceType: {value: ""},
             deviceId: {value: ""},
-            deviceCredentials: {type: "password"},
             deviceName: {value: ""},
             description: {value: ""},
             assetType: {value: ""},
@@ -58,6 +57,8 @@
             });
 
             $("#node-input-assetType").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
                 const field = "assetType";
                 const type = $(this).val();
                 const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
@@ -72,6 +73,8 @@
             });
 
             $("#node-input-assetGroup").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
                 const field = "assetGroup";
                 const group = $(this).val();
                 const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
@@ -117,7 +120,7 @@
     <div class="node-row-deviceCredentials">
         <div class="form-row">
             <label for="node-input-deviceCredentials"><i class="fa fa-key"></i> Credentials</label>
-            <input type="text" id="node-input-deviceCredentials" placeholder="Enter device credentials" style="width: 50%; !important">
+            <input type="password" id="node-input-deviceCredentials" placeholder="Enter device credentials" style="width: 50%; !important">
             <button class="red-ui-button" id="node-input-random" style="width: 18%; height: 34px;"><i class="fa fa-random" aria-hidden="true"></i>Random</button>
         </div>
     </div>

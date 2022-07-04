@@ -68,6 +68,7 @@
             });
 
             $('#node-input-event').focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
                 // Show existing events
                 ThingerDOM.showOptions("event",assetEvents,$(this).val());
             });
@@ -83,6 +84,7 @@
                         ThingerDOM.addInputField(filter.field, "Filter", "filter", "filter");
                         if (filter.hasOwnProperty("hints")) {
                             $(`#node-input-${filter.field}`).focus(function() {
+                                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
                                 // show existing hints
                                 ThingerDOM.showOptions(filter.field, filter.hints,$(this).val());
                             });

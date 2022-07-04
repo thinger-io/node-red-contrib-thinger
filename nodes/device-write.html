@@ -38,26 +38,33 @@
 
             // Event listeners
             $("#node-input-device").focus(function() {
-                const field1 = "device";
-                const device1 = $(this).val();
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                const field = "device";
+                const device = $(this).val();
                 const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let devices = new ThingerDevices(device1,node_id,svr_id);
+                let devices = new ThingerDevices(device,node_id,svr_id);
                 devices.getDevices().then(function(data) {
-                    ThingerDOM.showOptions(field1,data,device1,function(value) {
+                    ThingerDOM.showOptions(field,data,device,function(value) {
                         // devices filtering callback
                         devices = new ThingerDevices(value,node_id,svr_id);
-                        devices.getDevices().then((data) => {ThingerDOM.showOptions(field1, data)});
+                        devices.getDevices().then((data) => {ThingerDOM.showOptions(field, data)});
                     });
+                });
+            });
 
-                    $("#node-input-resource").off('focus');
-                    $("#node-input-resource").focus(function() {
-                        const field2 = "resource";
-                        const resource = $(this).val();
-                        const device2 = $("#node-input-device").val()
-                        devices.getDeviceInputResources(device2).then(function(data) {
-                            ThingerDOM.showOptions(field2,data,resource);
-                        });
-                    })
+            $("#node-input-resource").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                const field = "resource";
+                const resource = $(this).val();
+                const device = $("#node-input-device").val()
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let devices = new ThingerDevices(device,node_id,svr_id);
+                devices.getDevices().then(function() {
+                    devices.getDeviceInputResources(device).then(function(data) {
+                        ThingerDOM.showOptions(field,data,resource);
+                    });
                 });
             });
 
