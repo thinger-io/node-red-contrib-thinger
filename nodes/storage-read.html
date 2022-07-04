@@ -1,0 +1,216 @@
+<script type="text/javascript">
+    RED.nodes.registerType('storage-read', {
+        category: 'thinger',
+        color: '#74b9ff',
+        defaults: {
+            name: {value: ""},
+            storage: {value: ""},
+            file: {value: ""},
+            data: {value: ""},
+            recursive: {value: false},
+            minDepth: {value: 0},
+            maxDepth: {value: -1},
+            server: {type:"thinger-server", required:true}
+        },
+        icon:"thinger_logo_white.png",
+        inputs: 1,
+        outputs:1,
+        inputLabels: "event",
+        label: function() {
+            return this.name || ((this.storage && this.file) ? (this.storage + "/" + this.file) : "storage read");
+        },
+        paletteLabel: function() {
+            return "storage read";
+        },
+        oneditprepare: function() {
+
+            const node_id = this.id;
+
+            $("#node-input-storage").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                const field = "storage";
+                const storage = $(this).val();
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let storages = new ThingerStorages(storage,node_id,svr_id);
+                storages.getStorages().then(function(data) {
+                    ThingerDOM.showOptions(field,data,storage,function(value) {
+                        // devices filtering callback
+                        storages = new ThingerStorages(value,node_id,svr_id);
+                        storages.getStorages().then((data) => {ThingerDOM.showOptions(field, data)});
+                    });
+                });
+            });
+
+            $("#node-input-file").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                const field = "file";
+                const file = $(this).val();
+                const storage = $("#node-input-storage").val()
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let storages = new ThingerStorages(storage,node_id,svr_id);
+                storages.getStorages().then(function() {
+                    storages.getStorageFiles(storage).then((data) => {
+                        ThingerDOM.showOptions(field, data, file)
+                    });
+                });
+            });
+
+            $("#node-input-file").change(function(e,obj) {
+
+                if (typeof obj !== "undefined" && obj.textContent !== "") {
+                  if (obj.textContent.endsWith('directory')) {
+                    $(".node-row-recursive").show();
+                    $(".node-row-recursive").trigger("change");
+                  } else {
+                    $(".node-row-recursive").hide();
+                    $("#node-input-recursive").prop("checked", false);
+                    $("#node-input-recursive").trigger("change");
+                  }
+                } else if ($(this).val() !== "") {
+
+                    const file = $(this).val();
+                    const storage = $("#node-input-storage").val()
+                    const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                    let storages = new ThingerStorages(storage,node_id,svr_id);
+                    storages.getStorages().then(function() {
+                      storages.getStorageFiles(storage).then((data) => {
+                          const fileDetails = data.find(e=>e.id === file);
+                          $("#node-input-file").trigger("change",{"textContent":fileDetails.name});
+                      });
+                    });
+                }
+            });
+
+            $("#node-input-recursive").change(function() {
+                if ($(this).is(':checked')) {
+                    $(".node-row-minDepth").show();
+                    $(".node-row-maxDepth").show();
+                } else {
+                    $(".node-row-minDepth").hide();
+                    $(".node-row-maxDepth").hide();
+                }
+            });
+
+            $("#node-input-data").val(this.data || "content");
+
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="storage-read">
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-storage"><i class="fa fa-archive"></i> Storage</label>
+        <input type="text" id="node-input-storage" placeholder="Storage Identifier">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-file"><i class="fa fa-file"></i> File</label>
+        <input type="text" id="node-input-file" placeholder="File Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-data"><i class="fa fa-file-text"></i> Data</label>
+        <select id="node-input-data" style="width:30%; !important">
+            <option value="content" selected>file content</option>
+            <option value="details">file details</option>
+        </select>
+    </div>
+
+    <div class="node-row-recursive">
+    <div class="form-row">
+        <label for="node-input-recursive" style="vertical-align: bottom; margin-bottom: 0px;"><i class="fa fa-folder-open"></i> Recursive</label>
+        <label class="switch">
+          <input type="checkbox" id="node-input-recursive">
+          <div class="slider round"></div>
+        </label>
+    </div>
+    </div>
+
+    <div class="node-row-minDepth" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-minDepth"><i class="fa fa-search-minus "></i> Min Depth</label>
+            <input type="number" id="node-input-minDepth" placeholder="Specify the value for the minimum depth " style="width:15%; !important" min=0>
+        </div>
+    </div>
+
+    <div class="node-row-maxDepth" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-maxDepth"><i class="fa fa-search-plus "></i> Max Depth</label>
+            <input type="number" id="node-input-maxDepth" placeholder="Specify the value for the maximum depth " style="width:15%; !important" min=-1>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="storage-read">
+    <p>Reads a file from a storage.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>storage <span class="property-type">string</span></dt>
+        <dd> the id of the storage to read from.</dd>
+        <dt>file <span class="property-type">string</span></dt>
+        <dd> the file path or directory path of the storage to read.</dd>
+        <dt>data <span class="property-type">string</span></dt>
+        <dd> sets the data to retrieve, file content or file data.</dd>
+        <dt>recursive <span class="property-type">string</span></dt>
+        <dd> allows the configuration of depth for recursiveness.</dd>
+        <dt>min_depth <span class="property-type">string</span></dt>
+        <dd> do not apply any tests or actions at levels less than.</dd>
+        <dt>max_depth <span class="property-type">string</span></dt>
+        <dd> descend at most levels of directories below the starting points.</dd>
+    </dl>
+
+     <h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard output of the command.</dd>
+             </dl>
+         </li>
+         <!-- li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>the standard error of the command.</dd>
+             </dl>
+         </li -->
+     </ol>
+
+    <h3>Details</h3>
+    <p>This node is able to retrieve any text file (plain, csv, json, ...) and images (in base64). Any other file will be returned as a Buffer.
+
+    The node presents different functionalities depending on the configuration:
+    <ul>
+        <li>When file is selected and data type is set to <samp>file content</samp>, the <code>msg.payload</code> property will be the content of the file.</li>
+        <li>When file is selected and data type is set to <samp>file details</samp>, the <code>msg.payload</code> property will be the details of the file.</li>
+        <li>When directory or path is selected and data type is set to <samp>file content</samp>, the <code>msg.payload</code> property will be an array with the details and the contents of the file.</li>
+        <li>When directory or path is selected and data type is set to <samp>file details</samp>, the <code>msg.payload</code> property will be an array with the details.</li>
+        <li>The <code>msg.recursive</code> in combination with <code>msg.max_depth</code> and <code>msg.min_depth</code>, allows the retrieval of multiple files at once.</li>
+    </ul>
+
+    The node allows the configuration via the edit dialog or through an input message.
+    The values assigned through the dialog will have priority over the message.
+    </p>
+
+    <h3>References</h3>
+    <ul>
+        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
+        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
+        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
+        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
+    </ul>
+</script>
