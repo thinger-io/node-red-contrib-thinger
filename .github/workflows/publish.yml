@@ -36,26 +36,26 @@ jobs:
         run: |
           echo "tag_version=`awk '/^## \[[0-9]+/' CHANGELOG.md | awk 'NR==1 && -F"\[\]" {print $2}' 2>/dev/null | tail -c +2 | head -c -2`" >> $GITHUB_ENV
 
-    - name: Get changelog body
-      id: get_changelog
-      run: |
-        release_body=$(cat << EOF
-        $(awk '/^## \[[0-9]+/,EOF' CHANGELOG.md | awk '(NR>1)' | awk '1;/^## \[[0-9]+/{exit}' | sed '$d')
-        EOF
-        )
-        release_body="${release_body//'%'/'%25'}"
-        release_body="${release_body//$'\n'/'%0A'}"
-        release_body="${release_body//$'\r'/'%0D'}"
-        echo "::set-output name=RELEASE_BODY::$release_body"
+      - name: Get changelog body
+        id: get_changelog
+        run: |
+          release_body=$(cat << EOF
+          $(awk '/^## \[[0-9]+/,EOF' CHANGELOG.md | awk '(NR>1)' | awk '1;/^## \[[0-9]+/{exit}' | sed '$d')
+          EOF
+          )
+          release_body="${release_body//'%'/'%25'}"
+          release_body="${release_body//$'\n'/'%0A'}"
+          release_body="${release_body//$'\r'/'%0D'}"
+          echo "::set-output name=RELEASE_BODY::$release_body"
 
-    - name: Create GitHub release
-      uses: ncipollo/release-action@v1
-      with:
-        tag: ${{ env.tag_version }}
-        name: ${{ env.tag_version }}
-        token: ${{ secrets.GITHUB_TOKEN }}
-        body: |
-          ${{ steps.get_changelog.outputs.RELEASE_BODY }}
+      - name: Create GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ env.tag_version }}
+          name: ${{ env.tag_version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: |
+            ${{ steps.get_changelog.outputs.RELEASE_BODY }}
 
 
 
