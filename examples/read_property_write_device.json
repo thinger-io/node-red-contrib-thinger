@@ -1,0 +1,177 @@
+[
+    {
+        "id": "b8aa6b826f865963",
+        "type": "tab",
+        "label": "Read property and write to device resource",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "4c29a2fb4d85f231",
+        "type": "device-write",
+        "z": "b8aa6b826f865963",
+        "name": "",
+        "device": "esp32",
+        "resource": "mult",
+        "value": "",
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 550,
+        "y": 120,
+        "wires": [
+            [
+                "60e2fbc3c620de3d"
+            ]
+        ]
+    },
+    {
+        "id": "2462f18de816ad49",
+        "type": "property-read",
+        "z": "b8aa6b826f865963",
+        "name": "",
+        "asset": "device",
+        "assetId": "esp32",
+        "property": "multiplier",
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 220,
+        "y": 120,
+        "wires": [
+            [
+                "6d23c84f4306c5ba"
+            ]
+        ]
+    },
+    {
+        "id": "2524b74cd29fb5fa",
+        "type": "inject",
+        "z": "b8aa6b826f865963",
+        "name": "",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 75,
+        "y": 120,
+        "wires": [
+            [
+                "2462f18de816ad49"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "60e2fbc3c620de3d",
+        "type": "debug",
+        "z": "b8aa6b826f865963",
+        "name": "debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 695,
+        "y": 120,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "6d23c84f4306c5ba",
+        "type": "change",
+        "z": "b8aa6b826f865963",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "value",
+                "pt": "msg",
+                "to": "payload.value.value",
+                "tot": "msg"
+            },
+            {
+                "t": "delete",
+                "p": "payload",
+                "pt": "msg"
+            },
+            {
+                "t": "set",
+                "p": "payload.term1",
+                "pt": "msg",
+                "to": "value",
+                "tot": "msg",
+                "dc": true
+            },
+            {
+                "t": "set",
+                "p": "payload.term2",
+                "pt": "msg",
+                "to": "value",
+                "tot": "msg"
+            },
+            {
+                "t": "delete",
+                "p": "value",
+                "pt": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 385,
+        "y": 120,
+        "wires": [
+            [
+                "4c29a2fb4d85f231"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "144776cb03d13761",
+        "type": "inject",
+        "z": "b8aa6b826f865963",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"term1\": 2, \"term2\": 2}",
+        "payloadType": "json",
+        "x": 250,
+        "y": 180,
+        "wires": [
+            [
+                "4c29a2fb4d85f231"
+            ]
+        ]
+    },
+    {
+        "id": "b7470460695f263d",
+        "type": "comment",
+        "z": "b8aa6b826f865963",
+        "name": "Read property of device and write it to device resource",
+        "info": "",
+        "x": 240,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "ec0dd4b1ef5aa9a8",
+        "type": "thinger-server",
+        "host": "$(THINGER_HOST)",
+        "name": "local",
+        "ssl": false
+    }
+]

@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 - New read storage node
 - Errors from backend now show more detail in the cause of the error
 - Compatibility with Node-RED 3.0.0
-- Example flows from Thinger.io official documentation
+- Simple example flows
 
 ### Fix
 - Device write handling plain text as well as JSON

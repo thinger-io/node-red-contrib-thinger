@@ -1,0 +1,142 @@
+[
+    {
+        "id": "75545c7418b780c1",
+        "type": "tab",
+        "label": "Read data from last hour of all buckets",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "1a2fe5b425ec896e",
+        "type": "asset-iterator",
+        "z": "75545c7418b780c1",
+        "server": "ec0dd4b1ef5aa9a8",
+        "name": "get all buckets",
+        "asset": "bucket",
+        "filter": "",
+        "assetType": "",
+        "assetGroup": "",
+        "x": 240,
+        "y": 120,
+        "wires": [
+            [
+                "83d7bda141c32412"
+            ]
+        ]
+    },
+    {
+        "id": "9caa2ac59d1ff8e8",
+        "type": "inject",
+        "z": "75545c7418b780c1",
+        "name": "",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 95,
+        "y": 120,
+        "wires": [
+            [
+                "1a2fe5b425ec896e"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "34b46b265fb11ddd",
+        "type": "debug",
+        "z": "75545c7418b780c1",
+        "name": "debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 645,
+        "y": 120,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "1d9877e4a5dce9d9",
+        "type": "bucket-read",
+        "z": "75545c7418b780c1",
+        "name": "",
+        "bucket": "",
+        "filter": "relative",
+        "timespanSequence": "latest",
+        "timespanValue": "1",
+        "timespanUnits": "h",
+        "maxTs": "",
+        "minTs": "",
+        "items": "",
+        "limit": "",
+        "aggregation": "30m",
+        "aggregationType": "mean",
+        "sort": "asc",
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 510,
+        "y": 120,
+        "wires": [
+            [
+                "34b46b265fb11ddd"
+            ]
+        ]
+    },
+    {
+        "id": "83d7bda141c32412",
+        "type": "change",
+        "z": "75545c7418b780c1",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "bucket",
+                "pt": "msg",
+                "to": "payload.bucket",
+                "tot": "msg"
+            },
+            {
+                "t": "delete",
+                "p": "payload",
+                "pt": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 375,
+        "y": 120,
+        "wires": [
+            [
+                "1d9877e4a5dce9d9"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "25216da1bc8eb569",
+        "type": "comment",
+        "z": "75545c7418b780c1",
+        "name": "Iterate over all buckets and read data from the last hour of all of them",
+        "info": "",
+        "x": 300,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "ec0dd4b1ef5aa9a8",
+        "type": "thinger-server",
+        "host": "$(THINGER_HOST)",
+        "name": "local",
+        "ssl": false
+    }
+]

@@ -1,0 +1,156 @@
+[
+    {
+        "id": "acfd7c7637ef7b17",
+        "type": "tab",
+        "label": "Stream from device and write to bucket",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "d6d04a1b13534a5e",
+        "type": "device-stream",
+        "z": "acfd7c7637ef7b17",
+        "name": "",
+        "device": "climastick",
+        "resource": "location",
+        "interval": "30",
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 160,
+        "y": 220,
+        "wires": [
+            [
+                "55fbc10afee1b9ff"
+            ]
+        ]
+    },
+    {
+        "id": "2baeddebe32817f7",
+        "type": "bucket-write",
+        "z": "acfd7c7637ef7b17",
+        "name": "",
+        "bucket": "climastick",
+        "value": "",
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 600,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "df245e5bba528c7f",
+        "type": "comment",
+        "z": "acfd7c7637ef7b17",
+        "name": "Stream location resource from device and write it to bucket\\n Read environment resource every 30s and save to bucket\\n Also, set location property of device",
+        "info": "",
+        "x": 270,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "55fbc10afee1b9ff",
+        "type": "change",
+        "z": "acfd7c7637ef7b17",
+        "name": "",
+        "rules": [
+            {
+                "t": "move",
+                "p": "payload.payload",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 325,
+        "y": 220,
+        "wires": [
+            [
+                "2baeddebe32817f7",
+                "9af32a81637f9110"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "9af32a81637f9110",
+        "type": "property-write",
+        "z": "acfd7c7637ef7b17",
+        "name": "set location property",
+        "asset": "device",
+        "assetId": "climastick",
+        "property": "location",
+        "value": "",
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 500,
+        "y": 160,
+        "wires": [
+            [
+                "59c66c2de4ab6822"
+            ]
+        ]
+    },
+    {
+        "id": "59c66c2de4ab6822",
+        "type": "debug",
+        "z": "acfd7c7637ef7b17",
+        "name": "debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 675,
+        "y": 160,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "cbd4fdfbcfe94e97",
+        "type": "inject",
+        "z": "acfd7c7637ef7b17",
+        "name": "every 30s",
+        "props": [],
+        "repeat": "30",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "30",
+        "topic": "",
+        "x": 150,
+        "y": 300,
+        "wires": [
+            [
+                "8f1eba320fbecef3"
+            ]
+        ]
+    },
+    {
+        "id": "8f1eba320fbecef3",
+        "type": "device-read",
+        "z": "acfd7c7637ef7b17",
+        "name": "",
+        "device": "climastick",
+        "resource": "environment",
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 360,
+        "y": 300,
+        "wires": [
+            [
+                "2baeddebe32817f7"
+            ]
+        ]
+    },
+    {
+        "id": "ec0dd4b1ef5aa9a8",
+        "type": "thinger-server",
+        "host": "$(THINGER_HOST)",
+        "name": "local",
+        "ssl": false
+    }
+]
