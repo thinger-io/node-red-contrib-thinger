@@ -33,6 +33,7 @@
 			"endpoint-call": "nodes/endpoint-call.js",
 			"property-read": "nodes/property-read.js",
 			"property-write": "nodes/property-write.js",
+			"storage-read": "nodes/storage-read.js",
 			"server-events": "nodes/server-events.js",
 			"thinger-server": "nodes/thinger-server.js"
 		}
