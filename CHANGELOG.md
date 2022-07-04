@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ## [1.4.0] - 2022-04-15
 ### Added
+- New read storage node
 - Errors from backend now show more detail in the cause of the error
 - Compatibility with Node-RED 3.0.0
 - Example flows from Thinger.io official documentation
@@ -15,6 +16,11 @@ All notable changes to this project will be documented in this file.
 - Bad Request from backend in bucket write node was returning more than one error message
 - Property write and read nodes were not filtering options
 - Device stream was returning undefined in payload
+- Device resources only shown after focusing on device field
+- Field filters were not filtering by name and only by id
+
+### Changed
+- Improved user interaction in frontend
 
 ## [1.3.2] - 2022-03-14
 ### Added
