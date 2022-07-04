@@ -31,7 +31,7 @@ module.exports = function(RED) {
                     }
                 }
 
-                data = {property: property, value: JSON.parse(data)};
+                data = {property: property, value: (typeof data === 'object') ? data : JSON.parse(data)};
 
                 // Update if exist or create it
                 let method;

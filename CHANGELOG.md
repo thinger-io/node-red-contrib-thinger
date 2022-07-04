@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 - Device stream was returning undefined in payload
 - Device resources only shown after focusing on device field
 - Field filters were not filtering by name and only by id
+- Write property failed when passing JSON object as value from the input message
 
 ### Changed
 - Improved user interaction in frontend
