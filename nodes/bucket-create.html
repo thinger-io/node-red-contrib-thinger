@@ -27,6 +27,7 @@
             interval: {value: ""},
             assetType: {value: ""},
             assetGroup: {value: ""},
+            product: {value: ""},
             server: {type:"thinger-server", required:true}
         },
         icon:"thinger_logo_white.png",
@@ -136,6 +137,22 @@
                         // groups filtering callback
                         groups = new ThingerGroups(value,node_id,svr_id);
                         groups.getGroups().then((data) => {ThingerDOM.showOptions(field,data)});
+                    });
+                });
+            });
+
+            $("#node-input-product").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                const field = "product";
+                const product = $(this).val();
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let products = new ThingerProducts(product,node_id,svr_id);
+                products.getProducts().then(function(data) {
+                    ThingerDOM.showOptions(field, data, product, function(value) {
+                        // products filtering callback
+                        products = new ThingerProducts(value,node_id,svr_id);
+                        products.getProducts().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });
             });
@@ -271,6 +288,11 @@
     </div>
 
     <div class="form-row">
+        <label for="node-input-product"><i class="fa fa-shopping-bag"></i> Product</label>
+        <input type="text" id="node-input-product" placeholder="Select Product...">
+    </div>
+
+    <div class="form-row">
         <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
         <input type="text" id="node-input-server" placeholder="Select Server">
     </div>
@@ -303,6 +325,8 @@
         <dd> the type of thinger asset.</dd>
         <dt class="optional">asset_group <span class="property-type">string</span></dt>
         <dd> the type of thinger group.</dd>
+        <dt class="optional">product <span class="property-type">string</span></dt>
+        <dd> the type of thinger product.</dd>
     </dl>
 
      <h3>Outputs</h3>

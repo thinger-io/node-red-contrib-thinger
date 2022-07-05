@@ -99,10 +99,10 @@ class ThingerDevices extends ThingerAssets {
                   new ThingerDevice(
                     data[i].device,
                     data[i].name,
-                    data[i].type,
-                    data[i].connection.active,
                     self.node_id,
-                    self.svr_id
+                    self.svr_id,
+                    data[i].connection.active, // after node_id and svr_id as groups and types don't have similar property
+                    data[i].type // type is last as other assets don't have a similar property
                 ));
             }
             return self._devices;
@@ -162,7 +162,7 @@ class ThingerDevice extends ThingerAsset {
 
     #_url = "assets";
 
-    constructor(id,name="",type,active=false,node_id,svr_id="") {
+    constructor(id,name="",node_id,svr_id="",active=false,type="") {
         super("device",node_id,svr_id);
         this.id = id;
         this.name = name;
@@ -364,7 +364,9 @@ class ThingerTypes extends ThingerAssets {
                 self._types.push(
                   new ThingerType(
                     data[i].type,
-                    data[i].name
+                    data[i].name,
+                    self.node_id,
+                    self.svr_id
                 ));
             }
             return self._types;
@@ -407,7 +409,9 @@ class ThingerGroups extends ThingerAssets {
                 self._groups.push(
                   new ThingerGroup(
                     data[i].group,
-                    data[i].name
+                    data[i].name,
+                    self.node_id,
+                    self.svr_id
                 ));
             }
             return self._groups;
@@ -427,6 +431,54 @@ class ThingerGroup extends ThingerAsset {
         super("group");
         this.id = id;
         this.name = name;
+        this.node_id = node_id;
+        this.svr_id = svr_id;
+    }
+
+}
+
+class ThingerProducts extends ThingerAssets {
+
+    constructor(name="",node_id,svr_id="") {
+        const _url = "assets/products";
+        super(`${_url}?name=${name}`,node_id,svr_id);
+    }
+
+    getProducts() {
+        if (this._products !== undefined) return Promise.resolve(this._products);
+
+        this._products = [];
+        const self = this;
+        return super.request()
+        .then(function(data) {
+            for (let i in data) {
+                self._products.push(
+                  new ThingerProduct(
+                    data[i].product,
+                    data[i].name,
+                    self.node_id,
+                    self.svr_id,
+                    data[i].enabled // After node_id and svr_id as types and groups don't have a similar property
+                ));
+            }
+            return self._products;
+        });
+
+    }
+
+    async getAssets() {
+        return this.getProducts();
+    }
+
+}
+
+class ThingerProduct extends ThingerAsset {
+
+    constructor(id, name, node_id, svr_id = "",active=false) {
+        super("product");
+        this.id = id;
+        this.name = name;
+        this.active = active;
         this.node_id = node_id;
         this.svr_id = svr_id;
     }
@@ -538,6 +590,7 @@ class ThingerFile {
 const assetClass = new Map([
     ['devices', ThingerDevices], ['device', ThingerDevice],
     ['types', ThingerTypes], ['type', ThingerType],
-    ['groups', ThingerGroups], ['group', ThingerGroup]
+    ['groups', ThingerGroups], ['group', ThingerGroup],
+    ['products', ThingerProducts], ['product', ThingerProduct]
     ]);
 

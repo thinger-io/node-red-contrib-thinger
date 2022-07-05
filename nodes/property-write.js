@@ -17,15 +17,15 @@ module.exports = function(RED) {
             var data = config.value || msg.payload || msg.value;
 
             const apiVersion = (asset == "devices" ? "v3" : "v1");
-            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${asset}/${assetId}/properties`;
+            let url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${asset}/${assetId}/properties`;
 
             if (typeof server.request === "function") {
                 // Check if property exists
                 let exists = false;
                 let res;
                 res = await server.request(node,`${url}`, 'GET');
-                for (let i in res) {
-                    if (res[i].property === property) {
+                for (let i in res.payload) {
+                    if (res.payload[i].property === property) {
                         exists = true;
                         break;
                     }
@@ -35,10 +35,13 @@ module.exports = function(RED) {
 
                 // Update if exist or create it
                 let method;
-                if ( exists )
+                if ( exists ) {
                     method = 'PUT';
-                else
+                    url = `${url}/${property}`;
+                    delete data.property;
+                } else
                     method = 'POST';
+
                 try {
                     res = await server.request(node, url, method, data);
                 } catch (err) {

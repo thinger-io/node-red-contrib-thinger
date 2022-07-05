@@ -47,6 +47,11 @@ module.exports = function(RED) {
                 data.asset_group = group;
             }
 
+            let product = config.product || msg.product;
+            if (product) {
+                data.product = product;
+            }
+
             // It fails when no credentials are passed as expected by the backend
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/devices`;
 
@@ -61,12 +66,12 @@ module.exports = function(RED) {
                 // Update if exist or create it
                 try {
                   if ( exists ) {
-                    let device = data.device;
-                    delete data.device;
-                    delete data.type;
-                    res = await server.request(node,`${url}/${device}`,'PUT',data);
+                      let device = data.device;
+                      delete data.device;
+                      delete data.type;
+                      res = await server.request(node,`${url}/${device}`,'PUT',data);
                   } else {
-                        res = await server.request(node, url, 'POST', data);
+                      res = await server.request(node, url, 'POST', data);
                   }
                 } catch(err) {
                     node.error(err);

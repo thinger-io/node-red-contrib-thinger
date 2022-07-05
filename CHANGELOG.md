@@ -9,6 +9,11 @@ All notable changes to this project will be documented in this file.
 - Errors from backend now show more detail in the cause of the error
 - Compatibility with Node-RED 3.0.0
 - Simple example flows
+- New Thinger Product asset interaction with events, property read and write and assignment a product to a device and bucket
+
+### Changed
+- Improved user interaction in frontend
+- Bucket create node is able to update existing bucket
 
 ### Fix
 - Device write handling plain text as well as JSON
@@ -19,9 +24,6 @@ All notable changes to this project will be documented in this file.
 - Device resources only shown after focusing on device field
 - Field filters were not filtering by name and only by id
 - Write property failed when passing JSON object as value from the input message
-
-### Changed
-- Improved user interaction in frontend
 
 ## [1.3.2] - 2022-03-14
 ### Added

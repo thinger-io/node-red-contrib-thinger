@@ -75,7 +75,7 @@
                         const property = $(this).val();
 
                         const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                        const asset = new (assetClass.get(`${assetType}`))(assetId,"","",false,node_id,svr_id);
+                        const asset = new (assetClass.get(`${assetType}`))(assetId,"",node_id,svr_id); // If order is altered check devices, types, groups and products
 
                         if (assetId) {
                             asset.getProperties().then(function(data) {
@@ -106,6 +106,7 @@
                 <option value="device">device</option>
                 <option value="type">type</option>
                 <option value="group">group</option>
+                <option value="product">product</option>
             </select>
         </div>
     </div>
