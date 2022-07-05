@@ -1,8 +1,8 @@
 const WebSocket = require('ws');
 const jwt = require('jsonwebtoken');
 
-const Request = require('../lib/utils/request.js');
 const Utils = require('../lib/utils/utils.js');
+const Request = require('../lib/utils/request.js');
 
 const RECONNECT_TIMEOUT_MS = 10000;
 
@@ -56,6 +56,9 @@ module.exports = function(RED) {
             return;
         }
 
+        let maxSockets = config.maxSockets;
+        const ThingerRequest = new Request(token,maxSockets);
+
         // As precaution, but should not be the desired handler: will handle all rejections from requests
         //process.on('unhandledRejection', e => {
             //this.error("Unhandled Rejection");
@@ -107,7 +110,7 @@ module.exports = function(RED) {
         // function used by all nodes
         node.request = function(caller, url, method, data) {
             if (typeof caller === 'undefined') caller = node;
-            return Request.request(url, method, token, data)
+            return ThingerRequest.request(url, method, data)
               .then(res => {
                   caller.log(`${res.status} ${method} ${url} ${ typeof data === 'object' ? JSON.stringify(data) : typeof data !== 'undefined' ? data : '' }`);
                   return res;
@@ -485,8 +488,10 @@ module.exports = function(RED) {
             let data = {};
             if (typeof server !== 'undefined')
                 data = (await server.request(server, url, method)).payload;
-            else
-                data = (await  Request.request(url, method)).payload;
+            else {
+                let ThingerRequest = new Request();
+                data = (await  ThingerRequest.request(url, method)).payload;
+            }
             // order assets
             if (req.params.resource === "assets") {
                 data = Utils.sortObjectArray(data,"asset");

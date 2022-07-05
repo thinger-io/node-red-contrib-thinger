@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Compatibility with Node-RED 3.0.0
 - Simple example flows
 - New Thinger Product asset interaction with events, property read and write and assignment a product to a device and bucket
+- Added configuration of maximum concurrent sockets against a server connection
 
 ### Changed
 - Improved user interaction in frontend
