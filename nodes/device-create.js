@@ -37,6 +37,12 @@ module.exports = function(RED) {
                 data.description = description;
             }
 
+            if (typeof msg.enabled !== 'undefined') {
+                data.enabled = msg.enabled;
+            } else {
+                data.enabled = typeof config.enabled === 'boolean' ? config.enabled : true;
+            }
+
             let type = config.assetType || msg.asset_type;
             if (type) {
                 data.asset_type = type;

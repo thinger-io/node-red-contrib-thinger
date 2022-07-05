@@ -21,6 +21,7 @@
             deviceId: {value: ""},
             deviceName: {value: ""},
             description: {value: ""},
+            enabled: {value: ""},
             assetType: {value: ""},
             assetGroup: {value: ""},
             product: {value: ""},
@@ -105,6 +106,11 @@
                 });
             });
 
+            // Load values into fields
+            if (this.enabled === "") {
+                $("#node-input-enabled").prop("checked", true)
+            }
+
         }
     });
 </script>
@@ -153,6 +159,14 @@
     </div>
 
     <div class="form-row">
+        <label for="node-input-enabled" style="vertical-align: bottom; margin-bottom: 0px;"><i class="fa fa-power-off"></i> Enabled</label>
+        <label class="switch">
+          <input type="checkbox" id="node-input-enabled" checked>
+          <div class="slider round"></div>
+        </label>
+    </div>
+
+    <div class="form-row">
         <label for="node-input-assetType"><i class="fa fa-list-ul"></i> Asset Type</label>
         <input type="text" id="node-input-assetType" placeholder="Select Type...">
     </div>
@@ -188,6 +202,8 @@
         <dd> the name of the device to create.</dd>
         <dt class="optional">description <span class="property-type">string</span></dt>
         <dd> the description of the device to create.</dd>
+        <dt>enabled <span class="property-type">boolean</span></dt>
+        <dd> the status of the bucket on creation.</dd>
         <dt class="optional">asset_type <span class="property-type">string</span></dt>
         <dd> the type of thinger asset.</dd>
         <dt class="optional">asset_group <span class="property-type">string</span></dt>
@@ -214,7 +230,7 @@
 
     <h3>Details</h3>
     <p>The node allows the configuration via the edit dialog or through an input message.
-    The values assigned through the dialog will have priority over the message.</p>
+    The values assigned through the dialog will have priority over the message, with the exception the <code>msg.enabled</code>.</p>
 
     <p>The field <code>msg.type</code> allows different values depending on the desired device. Find and explanation of each one below:
       <ul>

@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Simple example flows
 - New Thinger Product asset interaction with events, property read and write and assignment a product to a device and bucket
 - Added configuration of maximum concurrent sockets against a server connection
+- Added enabled property in device create node
 
 ### Changed
 - Improved user interaction in frontend
