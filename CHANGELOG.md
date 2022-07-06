@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Improved user interaction in frontend
 - Bucket create node is able to update existing bucket
+- Updated icons of each node and set new Thinger.io color palette
 
 ### Fix
 - Device write handling plain text as well as JSON
