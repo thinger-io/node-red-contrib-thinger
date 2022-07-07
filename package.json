@@ -1,41 +1,41 @@
 {
-	"name": "node-red-contrib-thinger",
-	"version": "1.4.0",
-	"description": "Node-Red library for Thinger.io Platform",
-	"keywords": [
-		"node-red",
-		"thinger.io",
-		"IoT",
-		"arduino",
-		"raspberry"
-	],
-	"homepage": "https://docs.thinger.io/plugins/node-red",
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/thinger-io/Node-RED"
-	},
-	"dependencies": {
-		"ws": ">=0.8.1",
-		"jsonwebtoken": ">=8.3.0"
-	},
-	"node-red": {
-		"nodes": {
-			"asset-iterator": "nodes/asset-iterator.js",
-			"bucket-create": "nodes/bucket-create.js",
-			"bucket-read": "nodes/bucket-read.js",
-			"bucket-write": "nodes/bucket-write.js",
-			"device-callback": "nodes/device-callback.js",
-			"device-create": "nodes/device-create.js",
-			"device-read": "nodes/device-read.js",
-			"device-stream": "nodes/device-stream.js",
-			"device-write": "nodes/device-write.js",
-			"endpoint-call": "nodes/endpoint-call.js",
-			"property-read": "nodes/property-read.js",
-			"property-write": "nodes/property-write.js",
-			"storage-read": "nodes/storage-read.js",
-			"server-events": "nodes/server-events.js",
-			"thinger-server": "nodes/thinger-server.js"
-		}
-	}
+  "name": "node-red-contrib-thinger",
+  "version": "1.4.0-alpha.1",
+  "description": "Node-Red library for Thinger.io Platform",
+  "keywords": [
+    "node-red",
+    "thinger.io",
+    "IoT",
+    "arduino",
+    "raspberry"
+  ],
+  "homepage": "https://docs.thinger.io/plugins/node-red",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thinger-io/Node-RED"
+  },
+  "dependencies": {
+    "ws": ">=0.8.1",
+    "jsonwebtoken": ">=8.3.0"
+  },
+  "node-red": {
+    "nodes": {
+      "asset-iterator": "nodes/asset-iterator.js",
+      "bucket-create": "nodes/bucket-create.js",
+      "bucket-read": "nodes/bucket-read.js",
+      "bucket-write": "nodes/bucket-write.js",
+      "device-callback": "nodes/device-callback.js",
+      "device-create": "nodes/device-create.js",
+      "device-read": "nodes/device-read.js",
+      "device-stream": "nodes/device-stream.js",
+      "device-write": "nodes/device-write.js",
+      "endpoint-call": "nodes/endpoint-call.js",
+      "property-read": "nodes/property-read.js",
+      "property-write": "nodes/property-write.js",
+      "storage-read": "nodes/storage-read.js",
+      "server-events": "nodes/server-events.js",
+      "thinger-server": "nodes/thinger-server.js"
+    }
+  }
 }
