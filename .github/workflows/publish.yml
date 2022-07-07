@@ -59,7 +59,7 @@ jobs:
         git push
 
     - name: publish
-      run: npm publish --tag ${env.npm_tag_version} --access public
+      run: npm publish --tag ${{ env.npm_tag_version }} --access public
       env:
         NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
