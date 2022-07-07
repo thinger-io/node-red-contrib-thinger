@@ -2,60 +2,85 @@ name: "publish"
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master, develop ]
 
 jobs:
   publish:
     name: publish
     runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
-      - name: node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 14
-          registry-url: https://registry.npmjs.org
-      - name: publish
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
-  release:
-    name: release
-    runs-on: ubuntu-latest
     steps:
 
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    - name: Extract branch name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      id: extract_branch
 
-      - name: Get tag version
-        run: |
-          echo "tag_version=`awk '/^## \[[0-9]+/' CHANGELOG.md | awk 'NR==1 && -F"\[\]" {print $2}' 2>/dev/null | tail -c +2 | head -c -2`" >> $GITHUB_ENV
+    - name: checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: ${{ steps.extract_branch.outputs.branch }}
 
-      - name: Get changelog body
-        id: get_changelog
-        run: |
-          release_body=$(cat << EOF
-          $(awk '/^## \[[0-9]+/,EOF' CHANGELOG.md | awk '(NR>1)' | awk '1;/^## \[[0-9]+/{exit}' | sed '$d')
-          EOF
-          )
-          release_body="${release_body//'%'/'%25'}"
-          release_body="${release_body//$'\n'/'%0A'}"
-          release_body="${release_body//$'\r'/'%0D'}"
-          echo "::set-output name=RELEASE_BODY::$release_body"
-
-      - name: Create GitHub release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ env.tag_version }}
-          name: ${{ env.tag_version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body: |
-            ${{ steps.get_changelog.outputs.RELEASE_BODY }}
+    - name: node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+        registry-url: https://registry.npmjs.org
 
 
+    - run: npm ci
 
+    - name: Get tag version
+      run: |
+        echo "tag_version=`awk '/^## \[[0-9]+/' CHANGELOG.md | awk 'NR==1 && -F"\[\]" {print $2}' 2>/dev/null | tail -c +2 | head -c -2`" >> $GITHUB_ENV
+
+    - name: Check if tag is for develop and if it already exists
+      run: |
+        git fetch --prune --tags
+        if [ ${{ steps.extract_branch.outputs.branch }} == 'develop' ]; then
+            for i in {1..100}; do
+                if [ `git tag --list | grep ${{ env.tag_version }}"-alpha.${i}" | wc -l` -eq 0 ]; then
+                    tag_version=${{ env.tag_version }}"-alpha.${i}"
+                    echo "tag_version=${tag_version}" >> $GITHUB_ENV
+                    echo "npm_tag_version=${tag_version}" >> $GITHUB_ENV
+                    break;
+                fi
+            done
+        elif [ ${{steps.extract_branch.outputs.branch }} == 'master' ]; then
+            echo "npm_tag_version=latest" >> $GITHUB_ENV
+        elif [ `git tag --list | grep -q ${{ env.tag_version }}` -ne 0 ]; then exit 1; fi
+
+    - name: Update package.json version, package-lock.json and commit
+      run: |
+        jq '.version = "'"$npm_tag_version"'"' package.json > package.tmp && mv package.tmp package.json
+        npm install --package-lock-only
+        git add package.json package-lock.json
+        git commit -m "Updated package and package-lock with ${npm_version}"
+        git push
+
+    - name: publish
+      run: npm publish --tag ${env.npm_tag_version} --access public
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+    - name: Get changelog body
+      id: get_changelog
+      run: |
+        release_body=$(cat << EOF
+        $(awk '/^## \[[0-9]+/,EOF' CHANGELOG.md | awk '(NR>1)' | awk '1;/^## \[[0-9]+/{exit}' | sed '$d')
+        EOF
+        )
+        release_body="${release_body//'%'/'%25'}"
+        release_body="${release_body//$'\n'/'%0A'}"
+        release_body="${release_body//$'\r'/'%0D'}"
+        echo "::set-output name=RELEASE_BODY::$release_body"
+
+    - name: Create GitHub release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ env.tag_version }}
+        name: ${{ env.tag_version }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          ${{ steps.get_changelog.outputs.RELEASE_BODY }}
