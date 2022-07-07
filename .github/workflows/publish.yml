@@ -40,7 +40,7 @@ jobs:
                 if [ `git tag --list | grep ${{ env.tag_version }}"-alpha.${i}" | wc -l` -eq 0 ]; then
                     tag_version=${{ env.tag_version }}"-alpha.${i}"
                     echo "tag_version=${tag_version}" >> $GITHUB_ENV
-                    echo "npm_tag_version=${tag_version}" >> $GITHUB_ENV
+                    echo "npm_tag_version=develop" >> $GITHUB_ENV
                     break;
                 fi
             done
