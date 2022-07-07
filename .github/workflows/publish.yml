@@ -28,9 +28,6 @@ jobs:
         node-version: 16
         registry-url: https://registry.npmjs.org
 
-
-    - run: npm ci
-
     - name: Get tag version
       run: |
         echo "tag_version=`awk '/^## \[[0-9]+/' CHANGELOG.md | awk 'NR==1 && -F"\[\]" {print $2}' 2>/dev/null | tail -c +2 | head -c -2`" >> $GITHUB_ENV
