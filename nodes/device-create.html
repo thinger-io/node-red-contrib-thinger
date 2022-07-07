@@ -187,67 +187,44 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="device-create">
-    <p>Creates or updates a device given the configuration.</p>
+<script type="text/markdown" data-help-name="device-create">
+Creates or updates a device given the configuration.
 
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt class="optional">type <span class="property-type">string</span></dt>
-        <dd> the type of the device to create (<samp>Generic</samp>, <samp>HTTP</samp> or <samp>MQTT</samp>).</dd>
-        <dt>device <span class="property-type">string</span></dt>
-        <dd> the id of the device to create.</dd>
-        <dt class="optional">credentials <span class="property-type">string</span></dt>
-        <dd> the credentials to authenticate the device.</dd>
-        <dt class="optional">name <span class="property-type">string</span></dt>
-        <dd> the name of the device to create.</dd>
-        <dt class="optional">description <span class="property-type">string</span></dt>
-        <dd> the description of the device to create.</dd>
-        <dt>enabled <span class="property-type">boolean</span></dt>
-        <dd> the status of the bucket on creation.</dd>
-        <dt class="optional">asset_type <span class="property-type">string</span></dt>
-        <dd> the type of thinger asset.</dd>
-        <dt class="optional">asset_group <span class="property-type">string</span></dt>
-        <dd> the type of thinger group.</dd>
-        <dt class="optional">product <span class="property-type">string</span></dt>
-        <dd> the type of thinger product.</dd>
-    </dl>
+### Inputs
+: *type* (string) : the type of the device to create (<samp>Generic</samp>, <samp>HTTP</samp> or <samp>MQTT</samp>).
+: device (string) : the id of the device to create.
+: *credentials* (string) : the credentials to authenticate the device.
+: *name* (string) : the name of the device to create.
+: *description* (string) : the description of the device to create.
+: enabled (boolean) : the status of the bucket on creation.
+: *asset_type* (string) : the type of thinger asset.
+: *asset_group* (string) : the type of thinger group.
+: *product* (string) : the type of thinger product.
 
-     <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li>Standard output
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard output of the command.</dd>
-             </dl>
-         </li>
-         <!-- li>Standard error
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard error of the command.</dd>
-             </dl>
-         </li -->
-     </ol>
+### Outputs
 
-    <h3>Details</h3>
-    <p>The node allows the configuration via the edit dialog or through an input message.
-    The values assigned through the dialog will have priority over the message, with the exception the <code>msg.enabled</code>.</p>
+1. Standard output
+: payload (object) : the standard output of the command.
 
-    <p>The field <code>msg.type</code> allows different values depending on the desired device. Find and explanation of each one below:
-      <ul>
-        <li><strong>Generic device</strong>: devices with Thinger.io software client in it (WiFi, Ethernet or GSM).</li>
-        <li><strong>HTTP device</strong>: allows creating a virtual device to integrate data via REST API Callback (Sigfox, LoRa or cURL).</li>
-        <li><strong>MQTT devices</strong>: for MQTT devices that will work with the Thinger.io embedded broker.</li>
-      </ul>
-    </p>
+2. Standard error
+: payload (string) : the standard error of the command.
 
-    <p> The field <code>msg.credentials</code> is used if device type is Generic or HTTP. Has to be of 16 chars of length and can contain <samp>A-Z</samp>,<samp>a-z</samp>,<samp>0-9</samp> and <samp>!@#$%^&*()</samp></p>
+### Details
+The node allows the configuration via the edit dialog or through an input message.
+The values assigned through the dialog will have priority over the message, with the exception the `msg.enabled`.
 
-    <h3>References</h3>
-    <ul>
-        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
-        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
-        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
-        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
-    </ul>
+The field `msg.type` allows different values depending on the desired device. Find and explanation of each one below:
+- **Generic device**: devices with Thinger.io software client in it (WiFi, Ethernet or GSM).
+- **HTTP device**: allows creating a virtual device to integrate data via REST API Callback (Sigfox, LoRa or cURL).
+- **MQTT devices**: for MQTT devices that will work with the Thinger.io embedded broker.
+
+The field `msg.credentials` is used if device type is Generic or HTTP. Has to be of 16 chars of length and can contain <samp>A-Z</samp>,<samp>a-z</samp>,<samp>0-9</samp> and <samp>!@#$%^&*()</samp>
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
 </script>
 

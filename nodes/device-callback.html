@@ -89,51 +89,37 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="device-callback">
-    <p>Calls the callback endpoint of an HTTP device.</p>
+<script type="text/markdown" data-help-name="device-callback">
+Calls the callback endpoint of an HTTP device.
 
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>device <span class="property-type">string</span></dt>
-        <dd> the id of the device to call.</dd>
-        <dt class="optional">prefix <span class="property-type">string</span></dt>
-        <dd> the prefix for the id of the device and bucket on auto provisioning.</dd>
-        <dt class="optional">asset_type <span class="property-type">string</span></dt>
-        <dd> the type of thinger asset on autoprovisiong.</dd>
-        <dt class="optional">asset_group <span class="property-type">string</span></dt>
-        <dd> the type of thinger group on auto provisioning.</dd>
-    </dl>
+### Inputs
 
-     <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li>Standard output
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard output of the command.</dd>
-             </dl>
-         </li>
-         <!-- li>Standard error
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard error of the command.</dd>
-             </dl>
-         </li -->
-     </ol>
+: device (string) : the id of the device to call.
+: *prefix* (string) : the prefix for the id of the device and bucket on auto provisioning.
+: *asset_type* (string) : the type of thinger asset on autoprovisiong.
+: *asset_group* (string) : the type of thinger group on auto provisioning.
 
-    <h3>Details</h3>
-    <p>The node allows the configuration via the edit dialog or through an input message.
-    The values assigned through the dialog will have priority over the message.</p>
+### Outputs
 
-    <p>In case the device does not exist it will be autoprovisioned, as well as a data bucket with the same id as the device. After, the call to the callback will execute.</p>
+1. Standard output
+: payload (object) : the standard output of the command.
 
-    <p>The fields <code>msg.prefix</code>, <code>msg.asset_type</code> and <code>msg.asset_group</code> are only available through the input message and used only in the case of autoprivisioning.
-    The default value for prefix on autoprovisoning if no value is passed is <samp>NR_</samp>.</p>
+2. Standard error
+: payload (string) : the standard error of the command.
 
-    <h3>References</h3>
-    <ul>
-        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
-        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
-        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
-        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
-    </ul>
+### Details
+The node allows the configuration via the edit dialog or through an input message.
+The values assigned through the dialog will have priority over the message.
+
+In case the device does not exist it will be autoprovisioned, as well as a data bucket with the same id as the device. After, the call to the callback will execute.
+
+The fields `msg.prefix`, `msg.asset_type` and `msg.asset_group` are only available through the input message and used only in the case of autoprivisioning.
+The default value for prefix on autoprovisoning if no value is passed is <samp>NR_</samp>.
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
 </script>

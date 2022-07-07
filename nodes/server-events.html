@@ -156,52 +156,38 @@
     </>
 </script>
 
-<script type="text/x-red" data-help-name="server-events">
-    <p>Subscribes to the thinger server events API.</p>
+<script type="text/markdown" data-help-name="server-events">
+Subscribes to the thinger server events API.
 
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>asset <span class="property-type">string</span></dt>
-        <dd> the type of asset.</dd>
-        <dt>event <span class="property-type">string</span></dt>
-        <dd> the name of the event to detect.</dd>
-        <dt>filter <span class="property-type">string</span></dt>
-        <dd> the asset filter for said event.</dd>
-        <dt class="optional">filters <span class="property-type">string</span></dt>
-        <dd> additional filters that may apply to the event.</dd>
-    </dl>
+### Inputs
 
-     <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li>Standard output
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard output of the command.</dd>
-             </dl>
-         </li>
-         <!-- li>Standard error
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard error of the command.</dd>
-             </dl>
-         </li -->
-     </ol>
+: asset (string) : the type of asset.
+: event (string) : the name of the event to detect.
+: *filter* (string) : the asset filter for said event.
+: *filters* (object) : additional filters that may apply to the event.
 
-    <h3>Details</h3>
-    <p>The field <code>filter</code> and in some cases also the field <code>filters</code> allow basic regular expressions.</p>
+### Outputs
 
-    <p>The filters field is only used in some cases where additional filters can be applied to an event. Its value will be a JSON object for which the name of the property corresponds to the filter name and the property value to the filter to apply.</p>
+1. Standard output
+: payload (object) : the standard output of the command.
 
-    <p>Note that as this node is an Inject node it does not allow its configuration through and input message.</p>
+2. Standard error
+: payload (string) : the standard error of the command.
 
-    <h3>Examples</h3>
-    To match a device called <code>esp_8266</code>, some valid filters are <code>.*8266</code> or <code>esp_.*2.*</code>. Keep in mind that these filters migth match with other devices as well if the filter is not well defined. Additional information can be found <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Cheatsheet">here</a>.
+### Details
+The field `msg.filter` and in some cases also the field `msg.filters` allow basic regular expressions.
 
-    <h3>References</h3>
-    <ul>
-        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
-        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
-        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
-        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
-    </ul>
+The filters field is only used in some cases where additional filters can be applied to an event. Its value will be a JSON object for which the name of the property corresponds to the filter name and the property value to the filter to apply.
+
+Note that as this node is an Inject node it does not allow its configuration through and input message.
+
+### Examples
+To match a device called <samp>esp_8266</samp>, some valid filters are <samp>.*8266</samp> or <samp>esp_.*2.*</samp>. Keep in mind that these filters migth match with other devices as well if the filter is not well defined. Additional information can be found [here]("https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Cheatsheet").
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
 </script>

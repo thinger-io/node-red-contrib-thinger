@@ -298,82 +298,55 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="bucket-create">
-    <p>Creates a new data bucket.</p>
+<script type="text/markdown" data-help-name="bucket-create">
+Creates a new data bucket.
 
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>id <span class="property-type">string</span></dt>
-        <dd> the id of the bucket to create.</dd>
-        <dt class="optional">bucket <span class="property-type">string</span></dt>
-        <dd> the name of the bucket to create.</dd>
-        <dt class="optional">description <span class="property-type">string</span></dt>
-        <dd> the description of the bucket to create.</dd>
-        <dt>enabled <span class="property-type">boolean</span></dt>
-        <dd> the status of the bucket on creation.</dd>
-        <dt>source <span class="property-type">string</span></dt>
-        <dd> the data source of the bucket (<samp>device</samp>, <samp>write</samp>, <samp>api</samp> or <samp>mqtt</samp>).</dd>
-        <dt class="optional">extra_source <span class="property-type">string</span></dt>
-        <dd> the device in case of a device source or MQTT topic in case of mqtt source.</dd>
-        <dt class="optional">resource <span class="property-type">string</span></dt>
-        <dd> the device resource in case of a device source.</dd>
-        <dt class="optional">update <span class="property-type">string</span></dt>
-        <dd> the refresh mode for <samp>device</samp> source (<samp>interval</samp>, <samp>events</samp> or <samp>none</samp>).</dd>
-        <dt class="optional">interval <span class="property-type">string</span></dt>
-        <dd> the time interval for when source is <samp>device</samp> (1d for 1 day, 1w for 1w and so on).</dd>
-        <dt class="optional">asset_type <span class="property-type">string</span></dt>
-        <dd> the type of thinger asset.</dd>
-        <dt class="optional">asset_group <span class="property-type">string</span></dt>
-        <dd> the type of thinger group.</dd>
-        <dt class="optional">product <span class="property-type">string</span></dt>
-        <dd> the type of thinger product.</dd>
-    </dl>
+### Inputs
 
-     <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li>Standard output
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard output of the command.</dd>
-             </dl>
-         </li>
-         <!-- li>Standard error
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard error of the command.</dd>
-             </dl>
-         </li -->
-     </ol>
+: id (string) : the id of the bucket to create.
+: *bucket* (string) : the name of the bucket to create.
+: *description* (string) : the description of the bucket to create.
+: enabled (boolean) : the status of the bucket on creation.
+: source (string) : the data source of the bucket (<samp>device</samp>, <samp>write</samp>, <samp>api</samp> or <samp>mqtt</samp>).
+: *extra_source* (string) : the device in case of a device source or MQTT topic in case of mqtt source.
+: *resource* (string) : the device resource in case of a device source.
+: *update* (string) : the refresh mode for <samp>device</samp> source (<samp>interval</samp>, <samp>events</samp> or <samp>none</samp>).
+: *interval* (string) : the time interval for when source is <samp>device</samp> (1d for 1 day, 1w for 1w and so on).
+: *asset_type* (string) : the type of thinger asset.
+: *asset_group* (string) : the type of thinger group.
+: *product* (string) : the type of thinger product.
 
-    <h3>Details</h3>
-    <p>The node allows the configuration via the edit dialog or through an input message.
-    The values assigned through the dialog will have priority over the message, with the exception the <code>msg.enabled</code>.</p>
+### Outputs
 
-    <p>Each <code>msg.source</code> will retrieve the data one way or another:
-       <ul>
-          <li><a href="https://docs.thinger.io/features/buckets#from-device-resource">From Device Resource</a>: <samp>device</samp></li>
-          <li><a href="https://docs.thinger.io/features/buckets#from-device-write-call">From Device Write Call</a>: <samp>write</samp></li>
-          <li><a href="https://docs.thinger.io/features/buckets#from-api-request-for-3rd-parties">From API Request</a>: <samp>api</samp></li>
-          <li><a href="https://docs.thinger.io/features/buckets#from-mqtt-topic">From MQTT Topic</a>: <samp>mqtt</samp></li>
-      </ul>
-    </p>
+1. Standard output
+: payload (object) : the standard output of the command.
 
-    <p>The field <code>msg.extra_source</code> is only needed when selecting <samp>From device resource</samp> or <samp>From MQTT topic</samp> in <code>msg.source</code>. The node also accepts <code>msg.device</code> in case of <samp>device</samp> and <code>msg.topic</code> in case of <samp>mqtt</samp> as replacement of the field <code>msg.extra_source</code></p>
+2. Standard error
+: payload (string) : the standard error of the command.
 
-    <p>The field <code>msg.update</code> represents the Refresh mode when <code>msg.source</code> is <samp>device</samp>. The possible values are explained below:
-      <ul>
-        <li><strong>Sampling Interval</strong>: retrieves data form the device resource in a specific timing. It needs an additional field, <code>msg.interval</code> indicating the interval as '1d' for one day, '1m' as one minute and so on.</li>
-        <li><strong>Stream by Device</strong>: allows the device to stream the information when required.</li>
-        <li><strong>None</strong>: to not set a refresh mode.</li>
-      </ul>
-    </p>
+### Details
 
-    <h3>References</h3>
-    <ul>
-        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
-        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
-        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
-        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
-    </ul>
+The node allows the configuration via the edit dialog or through an input message.
+The values assigned through the dialog will have priority over the message, with the exception the `msg.enabled`.
+
+Each `msg.source` will retrieve the data one way or another:
+- [From Device Resource]("https://docs.thinger.io/features/buckets#from-device-resource"): <samp>device</samp>
+- [From Device Write]("https://docs.thinger.io/features/buckets#from-device-write-call"): <samp>write</samp>
+- [From API Request]("https://docs.thinger.io/features/buckets#from-api-request-for-3rd-parties"): <samp>api</samp>
+- [From MQTT Topic]("https://docs.thinger.io/features/buckets#from-mqtt-topic"): mqtt
+
+The field `msg.extra_source` is only needed when selecting <samp>From device resource</samp> or <samp>From MQTT topic</samp> in `msg.source`. The node also accepts `msg.device` in case of <samp>device</samp> and `msg.topic` in case of <samp>mqtt</samp> as replacement of the field `msg.extra_source`.
+
+The field `msg.update` represents the Refresh mode when `msg.source` is <samp>device</samp>. The possible values are explained below:
+- **Sampling Interval**: retrieves data form the device resource in a specific timing. It needs an additional field, <code>msg.interval</code> indicating the interval as '1d' for one day, '1m' as one minute and so on.
+- **Stream by Device**: allows the device to stream the information when required.
+- **None**: to not set a refresh mode.
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
 </script>
 

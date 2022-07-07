@@ -155,62 +155,42 @@
 
 </script>
 
-<script type="text/x-red" data-help-name="storage-read">
-    <p>Reads a file from a storage.</p>
+<script type="text/markdown" data-help-name="storage-read">
+Reads a file from a storage.
 
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>storage <span class="property-type">string</span></dt>
-        <dd> the id of the storage to read from.</dd>
-        <dt class="optional">file <span class="property-type">string</span></dt>
-        <dd> the file path or directory path of the storage to read.</dd>
-        <dt class="optional">data <span class="property-type">string</span></dt>
-        <dd> sets the data to retrieve, file content or file data.</dd>
-        <dt class="optional">recursive <span class="property-type">string</span></dt>
-        <dd> allows the configuration of depth for recursiveness.</dd>
-        <dt class="optional">min_depth <span class="property-type">string</span></dt>
-        <dd> do not apply any tests or actions at levels less than.</dd>
-        <dt class="optional">max_depth <span class="property-type">string</span></dt>
-        <dd> descend at most levels of directories below the starting points.</dd>
-    </dl>
+### Inputs
+: storage (string) : the id of the storage to read from.
+: *file* (string) : the file path or directory path of the storage to read.
+: *data* (string) : sets the data to retrieve, file content or file data.
+: *recursive* (string) : allows the configuration of depth for recursiveness.
+: *min_depth* (string) : do not apply any tests or actions at levels less than.
+: *max_depth* (string) : descend at most levels of directories below the starting points.
 
-     <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li>Standard output
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard output of the command.</dd>
-             </dl>
-         </li>
-         <!-- li>Standard error
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard error of the command.</dd>
-             </dl>
-         </li -->
-     </ol>
+### Outputs
 
-    <h3>Details</h3>
-    <p>This node is able to retrieve any text file (plain, csv, json, ...) and images (in base64). Any other file will be returned as a Buffer.
+1. Standard output
+: payload (object) : the standard output of the command.
 
-    The node presents different functionalities depending on the configuration:
-    <ul>
-        <li>When file is selected and data type is set to <samp>file content</samp>, the <code>msg.payload</code> property will be the content of the file.</li>
-        <li>When file is selected and data type is set to <samp>file details</samp>, the <code>msg.payload</code> property will be the details of the file.</li>
-        <li>When directory or path is selected and data type is set to <samp>file content</samp>, the <code>msg.payload</code> property will be an array with the details and the contents of the file.</li>
-        <li>When directory or path is selected and data type is set to <samp>file details</samp>, the <code>msg.payload</code> property will be an array with the details.</li>
-        <li>The <code>msg.recursive</code> in combination with <code>msg.max_depth</code> and <code>msg.min_depth</code>, allows the retrieval of multiple files at once.</li>
-    </ul>
+2. Standard error
+: payload (string) : the standard error of the command.
 
-    The node allows the configuration via the edit dialog or through an input message.
-    The values assigned through the dialog will have priority over the message.
-    </p>
+### Details
+This node is able to retrieve any text file (plain, csv, json, ...) and images (in base64). Any other file will be returned as a Buffer.
 
-    <h3>References</h3>
-    <ul>
-        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
-        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
-        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
-        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
-    </ul>
+The node presents different functionalities depending on the configuration:
+- When file is selected and data type is set to <samp>file content</samp>, the `msg.payload` property will be the content of the file.
+- When file is selected and data type is set to <samp>file details</samp>, the `msg.payload` property will be the details of the file.
+- When directory or path is selected and data type is set to <samp>file content</samp>, the `msg.payload` property will be an array with the details and the contents of the file.
+- When directory or path is selected and data type is set to <samp>file details</samp>, the `msg.payload` property will be an array with the details.
+- The `msg.recursive` in combination with `msg.max_depth` and `msg.min_depth`, allows the retrieval of multiple files at once.
+
+The node allows the configuration via the edit dialog or through an input message.
+The values assigned through the dialog will have priority over the message.
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
 </script>

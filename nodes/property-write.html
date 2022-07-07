@@ -169,50 +169,36 @@
 
 </script>
 
-<script type="text/x-red" data-help-name="property-write">
-    <p>Writes or modifies a property to either a device, type or group.</p>
+<script type="text/markdown" data-help-name="property-write">
+Writes or modifies a property to either a device, type or group.
 
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>asset <span class="property-type">string</span></dt>
-        <dd> the type of asset (<samp>device</samp>, <samp>type</samp> or <samp>group</samp>).</dd>
-        <dt>asset_id <span class="property-type">string</span></dt>
-        <dd> the id of the asset to read the property from.</dd>
-        <dt>property <span class="property-type">string</span></dt>
-        <dd> the name of the property to read its value.</dd>
-        <dt>payload <span class="property-type">string</span></dt>
-        <dd> the payload of the value of the property.</dd>
-    </dl>
+### Inputs
 
-     <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li>Standard output
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard output of the command.</dd>
-             </dl>
-         </li>
-         <!-- li>Standard error
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard error of the command.</dd>
-             </dl>
-         </li -->
-     </ol>
+: asset (string) : the type of asset (<samp>device</samp>, <samp>type</samp> or <samp>group</samp>).
+: asset_id (string) : the id of the asset to read the property from.
+: property (string) : the name of the property to read its value.
+: payload (string) : the payload of the value of the property.
 
-    <h3>Details</h3>
-    <p>The node allows the configuration via the edit dialog or through an input message.
-    The values assigned through the dialog will have priority over the message.</p>
+### Outputs
 
-    <p>The values of the field <code>msg.asset_id</code> must exist in the Thinger platform, otherwise the flow will fail</p>
+1. Standard output
+: payload (object) : the standard output of the command.
 
-    <p>The values of the fields <code>msg.property</code> and <code>msg.payload</code> may not exist in the Thinger platform, as they will be created on write.</p>
+2. Standard error
+: payload (string) : the standard error of the command.
 
-    <h3>References</h3>
-    <ul>
-        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
-        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
-        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
-        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
-    </ul>
+### Details
+The node allows the configuration via the edit dialog or through an input message.
+The values assigned through the dialog will have priority over the message.
+
+The values of the field `msg.asset_id` must exist in the Thinger platform, otherwise the flow will fail.
+
+The values of the fields `msg.property` and `msg.payload` may not exist in the Thinger platform, as they will be created on write.
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
 </script>
