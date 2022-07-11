@@ -4,14 +4,15 @@
 
     RED.nodes.registerType('asset-iterator', {
         category: 'thinger',
-        color: '#1e8cfb',
+        color: '#62b0fe', // #1F8EFE at 30% lightened
         defaults: {
             server: {type:"thinger-server", required:true},
             name: {value:""},
             asset: {value: ""},
             filter: {value: ""}, // regex
             assetType: {value: ""},
-            assetGroup: {value: ""}
+            assetGroup: {value: ""},
+            rate: {value: 0}
         },
         icon:"asset.svg",
         inputs: 1,
@@ -140,6 +141,13 @@
         </div>
     </div>
 
+    <div class="node-row-rate">
+        <div class="form-row">
+            <label for="node-input-rate"><i class="fa fa-clock-o"></i> Rate (s)</label>
+            <input type="number" id="node-input-rate" placeholder=0 style="width:15%; !important" min=0>
+        </div>
+    </div>
+
     <div class="form-row">
         <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
         <input type="text" id="node-input-server" placeholder="Select Server">
@@ -155,6 +163,7 @@ Reads and iterates over the assets that match the filters, returning one message
 : asset_filter (string) : the filter of the assets to match.
 : *asset_type* (string) : the type of thinger asset.
 : *asset_group* (string) : the type of thinger group.
+: *rate* (int) : the number of seconds between each message.
 
 ### Outputs
 
