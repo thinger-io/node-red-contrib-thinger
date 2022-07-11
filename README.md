@@ -20,7 +20,7 @@ Have a valid [Thinger.io](https://thinger.io/) cloud [instance](https://pricing.
 #### Local
 Have a local instance of [Node-RED](https://nodered.org/) with the following characteristics:
 - [Node.js](https://nodejs.org) - v12.0 or newer
-- [Node-RED](https://NodeRED.org) - v1.0.0 or newer
+- [Node-RED](https://NodeRED.org) - v2.0.0 or newer
 
 ### Installation
 
@@ -53,6 +53,7 @@ Below is a brief description of the actions allowed:
 - Reading properties of devices, types or groups (property read node).
 - Writing and modifying properties of devices, types or groups (property write node).
 - Detecting different events of devices, buckets, endpoints and others (server events node).
+- Read files (plain, csv, json, images, ...) from storages (read storage node).
 
 ## License
 
