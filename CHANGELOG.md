@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Added configuration of maximum concurrent sockets against a server connection
 - Added enabled property in device create node
 - Added rate limit in asset iterator node to indicate the number of seconds between each message
+- Improved error handling in nodes so errors can be caught with the 'catch' node
 
 ### Changed
 - Improved user interaction in frontend

@@ -1,5 +1,7 @@
 module.exports = function(RED) {
 
+    "use strict";
+
     function StorageReadNode(config) {
         RED.nodes.createNode(this, config);
 
@@ -10,7 +12,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // unregister listener on close
-        node.on('input', async function(msg, send) {
+        node.on('input', async function(msg, send, done) {
 
             let storage = config.storage || msg.storage;
             let file = config.file || msg.file || "";
@@ -28,8 +30,15 @@ module.exports = function(RED) {
 
               // Get all files of storage
               let res = await server.request(node, url, method);
-              if (res.status !== 200) {
-                  node.error(res.error);
+              if (!res.status.toString().startsWith('20')) {
+                  msg.payload = {};
+                  msg.payload.storage = storage;
+                  msg.payload.file = file;
+                  msg.payload.data = data;
+                  msg.payload.recursive = recursive;
+                  msg.payload.min_depth = minDepth;
+                  msg.payload.max_depth = maxDepth;
+                  done(res.error);
                   return;
               }
 
@@ -68,11 +77,12 @@ module.exports = function(RED) {
               else
                   msg.payload = files;
 
-              node.send(msg);
+              send(msg);
+              done();
 
             }
             else
-              node.error("Check Thinger Server Configuration");
+              done("Check Thinger Server Configuration");
         });
     }
 

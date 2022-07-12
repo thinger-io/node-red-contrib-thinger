@@ -1,54 +1,57 @@
 module.exports = function(RED) {
 
-    function handleResponse(node, res, msg, assetType, assetGroup) {
-        for (var i in res) {
-            let type = res[i].asset_type;
-            let group = res[i].asset_group;
-
-            let newMsg = {};
-            Object.assign(newMsg, msg);
-            if (res.length > 1) { // if more than one asset create new message with its own id
-                delete newMsg._msgid;
-            }
-
-            if (assetType === undefined && assetGroup === undefined) {
-                newMsg.payload = res[i];
-            } else if (assetType === type && assetGroup === group) {
-                newMsg.payload = res[i];
-            } else if (assetType === type && assetGroup === undefined) {
-                newMsg.payload = res[i];
-            } else if (assetType === undefined && assetGroup == group) {
-                newMsg.payload = res[i];
-            } else {
-                continue;
-            }
-
-            node.buffer.push(newMsg);
-
-            if (node.intervalId === -1) {
-                node.intervalId = setInterval(sendMsgFromBuffer, node.rate, node);
-                sendMsgFromBuffer(node); // send 1st message without waiting for timeout
-            }
-        }
-    }
-
-    function sendMsgFromBuffer(node) {
-        if (node.buffer.length === 0 && typeof node.lastSent !== 'undefined') {
-          clearInterval(node.intervalId);
-          node.intervalId = -1;
-          node.lastSent = undefined;
-          node.status({fill:"blue", shape:"dot", text:"done"});
-        } else if (node.buffer.length > 0) {
-          const msg = node.buffer.shift();
-          node.lastSent = msg;
-          node.send(msg);
-          node.status({fill:"blue", shape:"ring", text:node.buffer.length});
-        }
-    }
-
+    "use strict";
 
     function AssetIteratorNode(config) {
+
         RED.nodes.createNode(this, config);
+
+        function handleResponse(msg, res, assetType, assetGroup) {
+            for (var i in res) {
+                let type = res[i].asset_type;
+                let group = res[i].asset_group;
+
+                let newMsg = RED.util.cloneMessage(msg.msg);
+                //Object.assign(newMsg, msg);
+                if (res.length > 1) { // if more than one asset create new message with its own id
+                    delete newMsg._msgid;
+                }
+
+                if (assetType === undefined && assetGroup === undefined) {
+                    newMsg.payload = res[i];
+                } else if (assetType === type && assetGroup === group) {
+                    newMsg.payload = res[i];
+                } else if (assetType === type && assetGroup === undefined) {
+                    newMsg.payload = res[i];
+                } else if (assetType === undefined && assetGroup == group) {
+                    newMsg.payload = res[i];
+                } else {
+                    continue;
+                }
+
+                node.buffer.push({msg: newMsg, send: msg.send, done: msg.done});
+
+                if (node.intervalId === -1) {
+                    node.intervalId = setInterval(sendMsgFromBuffer, node.rate, node);
+                    sendMsgFromBuffer(); // send 1st message without waiting for timeout
+                }
+            }
+        }
+
+        function sendMsgFromBuffer() {
+            if (node.buffer.length === 0 && typeof node.lastSent !== 'undefined') {
+              clearInterval(node.intervalId);
+              node.intervalId = -1;
+              node.lastSent = undefined;
+              node.status({fill:"blue", shape:"dot", text:"done"});
+            } else if (node.buffer.length > 0) {
+              const m = node.buffer.shift();
+              node.lastSent = m.msg;
+              m.send(m.msg);
+              node.status({fill:"blue", shape:"ring", text:node.buffer.length});
+              m.done();
+            }
+        }
 
         // get node
         var node = this;
@@ -96,7 +99,7 @@ module.exports = function(RED) {
                     do {
                       const res = await server.request(node,`${url}&index=${index}`,'GET');
                       res_length = res.payload.length;
-                      handleResponse(node, res.payload, msg, assetType, assetGroup);
+                      handleResponse({msg: msg, send: send, done: done}, res.payload, assetType, assetGroup);
                       index += res_length;
                     } while (res_length == count);
 
@@ -109,11 +112,17 @@ module.exports = function(RED) {
                     }
                 } catch(e) {
                     node.status({fill:"red", shape:"dot", text:"error"});
-                    node.error(e);
+                    delete e.stack;
+                    msg.payload = {};
+                    msg.payload.asset = asset;
+                    msg.payload.asset_filter = filter;
+                    msg.payload.asset_type = assetType;
+                    msg.payload.asset_group = assetGroup;
+                    done(e);
                 }
 
             } else
-                node.error("Check Thinger Server Configuration");
+                done("Check Thinger Server Configuration");
         });
     }
 

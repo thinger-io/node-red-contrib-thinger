@@ -1,5 +1,7 @@
 module.exports = function(RED) {
 
+    "use strict";
+
     /**
      * Will return the interval passed as (1s, 1m) in seconds
      */
@@ -38,7 +40,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket read on close
-        node.on("input", async function(msg, send) {
+        node.on("input", async function(msg, send, done) {
 
             let json = {};
             json.bucket = config.bucketId || msg.id;
@@ -106,15 +108,18 @@ module.exports = function(RED) {
                       res = await server.request(node, url, 'POST', json);
                   }
                 } catch(err) {
-                    node.error(err);
+                    delete err.stack;
+                    msg.payload = json;
+                    done(err);
                     return;
                 }
 
                 msg.payload = res.payload;
                 send(msg);
+                done();
             }
             else
-              node.error("Check Thinger Server Configuration");
+              done("Check Thinger Server Configuration");
         });
     }
 

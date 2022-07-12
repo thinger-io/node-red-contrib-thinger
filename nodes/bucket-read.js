@@ -1,5 +1,7 @@
 module.exports = function(RED) {
 
+    "use strict";
+
     /**
      * Will return the date of the timestamp based on prior value and units
      */
@@ -41,7 +43,6 @@ module.exports = function(RED) {
      */
     function readBucket(server, node, bucket, queryParameters, limit, result) {
 
-
         // Maximum value of items on the query parameter is 1000
         queryParameters.set('items',limit > 1000 || limit < 0 ? 1000 : limit);
 
@@ -60,6 +61,11 @@ module.exports = function(RED) {
         if (typeof server.request === "function")
             return server.request(node, url, method)
             .then(function(res) {
+
+                // Throw if response fails
+                if (!res.status.toString().startsWith('20'))
+                    throw res.error;
+
                 if (!result) {
                     result = [];
                 }
@@ -83,9 +89,9 @@ module.exports = function(RED) {
                  return result;
 
               })
-              .catch(e => node.error(e));
+              //.catch(e => node.error(e));
           else
-              node.error("Check Thinger Server Configuration");
+              throw "Check Thinger Server Configuration";
      }
 
     function BucketReadNode(config) {
@@ -98,8 +104,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket read on close
-        node.on("input",function(msg, send) {
-
+        node.on("input",function(msg, send, done) {
 
             let bucket = config.bucket || msg.bucket;
 
@@ -174,8 +179,14 @@ module.exports = function(RED) {
                 }
                 msg.payload = result;
                 send(msg);
+                done();
               })
-              .catch(e => node.error(e));
+              .catch(e => {
+                delete e.stack;
+                msg.payload = Object.fromEntries(queryParameters);
+                msg.payload.bucket = bucket;
+                done(e)}
+              );
 
           });
     }

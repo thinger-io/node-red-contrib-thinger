@@ -1,5 +1,7 @@
 module.exports = function(RED) {
 
+    "use strict";
+
     function EndpointCallNode(config) {
         RED.nodes.createNode(this, config);
 
@@ -10,7 +12,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call endpoint on message reception
-        node.on("input",function(msg, send) {
+        node.on("input",function(msg, send, done) {
 
             let endpoint = config.endpoint || msg.endpoint;
 
@@ -20,13 +22,26 @@ module.exports = function(RED) {
             if (typeof server.request === "function") {
               server.request(node, url, method, msg.payload)
               .then(res => {
+
+                  // Throw if response fails
+                  if (!res.status.toString().startsWith('20'))
+                    throw res.error;
+
                   msg.payload = res.payload;
-                  node.send(msg);
+                  send(msg);
+                  done();
               })
-              .catch(e => node.error(e));
+              .catch(e => {
+                  delete e.stack;
+                  let payload = msg.payload;
+                  msg.payload = {};
+                  msg.payload.endpoint = endpoint;
+                  msg.payload.data = payload;
+                  done(e);
+              });
             }
             else
-              node.error("Check Thinger Server Configuration");
+              done("Check Thinger Server Configuration");
         });
     }
 

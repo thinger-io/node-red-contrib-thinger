@@ -1,5 +1,7 @@
 module.exports = function(RED) {
 
+    "use strict";
+
     function DeviceCreateNode(config) {
         RED.nodes.createNode(this, config);
 
@@ -9,7 +11,7 @@ module.exports = function(RED) {
         // get server configuration
         var server = RED.nodes.getNode(config.server);
 
-        node.on("input", async function(msg, send) {
+        node.on("input", async function(msg, send, done) {
 
             let data = {};
 
@@ -80,15 +82,18 @@ module.exports = function(RED) {
                       res = await server.request(node, url, 'POST', data);
                   }
                 } catch(err) {
-                    node.error(err);
+                    delete err.stack;
+                    msg.payload = data;
+                    done(err);
                     return;
                 }
 
                 msg.payload = res.payload;
                 send(msg);
+                done();
             }
             else
-              node.error("Check Thinger Server Configuration");
+              done("Check Thinger Server Configuration");
 
         });
     }
