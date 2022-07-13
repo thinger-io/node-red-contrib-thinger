@@ -1,7 +1,7 @@
 <script type="text/javascript">
     RED.nodes.registerType('device-read', {
         category: 'thinger',
-        color: '#1e8cfb',
+        color: '#62b0fe', // #1F8EFE at 30% lightened
         defaults: {
             name: {value: ""},
             device: {value: ""},
@@ -87,11 +87,7 @@ Reads a resource value from a connected device.
 
 ### Outputs
 
-1. Standard output
 : payload (object) : the standard output of the command.
-
-2. Standard error
-: payload (string) : the standard error of the command.
 
 ### Details
 The node allows the configuration via the edit dialog or through an input message.

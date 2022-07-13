@@ -3,7 +3,7 @@
 
     RED.nodes.registerType('server-events', {
         category: 'thinger',
-        color: '#1e8cfb',
+        color: '#62b0fe', // #1F8EFE at 30% lightened
         defaults: {
             name: {value:""},
             asset: {value:""},
@@ -168,11 +168,7 @@ Subscribes to the thinger server events API.
 
 ### Outputs
 
-1. Standard output
 : payload (object) : the standard output of the command.
-
-2. Standard error
-: payload (string) : the standard error of the command.
 
 ### Details
 The field `msg.filter` and in some cases also the field `msg.filters` allow basic regular expressions.

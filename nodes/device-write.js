@@ -1,5 +1,7 @@
 module.exports = function(RED) {
 
+    "use strict";
+
     function DeviceWriteNode(config) {
         RED.nodes.createNode(this, config);
 
@@ -10,7 +12,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket write on message reception
-        node.on("input",function(msg, send) {
+        node.on("input",function(msg, send, done) {
 
             let device = config.device || msg.device;
             let resource = config.resource || msg.resource;
@@ -23,15 +25,27 @@ module.exports = function(RED) {
               server.request(node, url, method, data)
               .then(res => {
 
+                // Throw if response fails
+                if (!res.status.toString().startsWith('20'))
+                  throw res.error;
+
                  if (res && res.length != 0)
                     msg.payload = res.payload;
 
-                  node.send(msg);
+                    send(msg);
+                    done();
               })
-              .catch(e => node.error(e));
+              .catch(e => {
+                  delete e.stack;
+                  msg.payload = {};
+                  msg.payload.device = device;
+                  msg.payload.resource = resource;
+                  msg.payload.data = data;
+                  done(e);
+              });
             }
             else
-              node.error("Check Thinger Server Configuration");
+              done("Check Thinger Server Configuration");
         });
     }
 

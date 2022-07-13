@@ -1,7 +1,7 @@
 <script type="text/javascript">
     RED.nodes.registerType('endpoint-call', {
         category: 'thinger',
-        color: '#1e8cfb',
+        color: '#62b0fe', // #1F8EFE at 30% lightened
         defaults: {
             name: {value:""},
             endpoint: {value: ""},
@@ -68,11 +68,7 @@ Calls a server endpoint with the supplied input payload.
 
 ### Outputs
 
-1. Standard output
 : payload (object) : the standard output of the command.
-
-2. Standard error
-: payload (string) : the standard error of the command.
 
 ### Details
 The node allows the configuration of the endpoint via the edit dialog or through an input message.

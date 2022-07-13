@@ -8,6 +8,8 @@ const RECONNECT_TIMEOUT_MS = 10000;
 
 module.exports = function(RED) {
 
+    "use strict";
+
     function ThingerServerNode(configa) {
         let devices = {};
         let config = undefined;

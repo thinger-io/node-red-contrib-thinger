@@ -1,5 +1,7 @@
 module.exports = function(RED) {
 
+    "use strict";
+
     function PropertyReadNode(config) {
         RED.nodes.createNode(this, config);
 
@@ -10,7 +12,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call property read on input
-        node.on("input",function(msg, send) {
+        node.on("input",function(msg, send, done) {
             let asset = (config.asset || msg.asset)+"s";
             let assetId = config.assetId || msg.asset_id;
             let property = config.property || msg.property;
@@ -20,15 +22,29 @@ module.exports = function(RED) {
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${asset}/${assetId}/properties/${property}`;
 
             if (typeof server.request === "function") {
+
               server.request(node, url, method)
               .then(res => {
+
+                  // Throw if response fails
+                  if (!res.status.toString().startsWith('20'))
+                    throw res.error;
+
                   msg.payload = res.payload;
-                  node.send(msg);
+                  send(msg);
+                  done();
               })
-              .catch(e => node.error(e));
+              .catch(e => {
+                  delete e.stack;
+                  msg.payload = {};
+                  msg.payload.asset = asset;
+                  msg.payload.asset_id = assetId;
+                  msg.payload.property = property;
+                  done(e);
+              });
             }
             else
-              node.error("Check Thinger Server Configuration");
+              done("Check Thinger Server Configuration");
         });
     }
 

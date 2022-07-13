@@ -75,9 +75,19 @@ jobs:
         release_body="${release_body//$'\r'/'%0D'}"
         echo "::set-output name=RELEASE_BODY::$release_body"
 
+    - name: Set pre-release boolean
+      id: is_prerelease
+      run: |
+        prerelease=false
+        if [ ${{ steps.extract_branch.outputs.branch }} == 'develop' ]; then
+            prerelease=true
+        fi
+        echo "::set-output name=prerelease::$prerelease"
+
     - name: Create GitHub release
       uses: ncipollo/release-action@v1
       with:
+        prerelease: ${{ steps.is_prerelease.outputs.prerelease }}
         tag: ${{ env.tag_version }}
         name: ${{ env.tag_version }}
         token: ${{ secrets.GITHUB_TOKEN }}

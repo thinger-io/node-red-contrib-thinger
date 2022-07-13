@@ -1,5 +1,7 @@
 module.exports = function(RED) {
 
+    "use strict";
+
     async function provisionDevice(server,node,prefix,device,assetType,assetGroup) {
         // create auto provisioned device
         let data = {};
@@ -70,7 +72,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket write on message reception
-        node.on("input",async function(msg, send) {
+        node.on("input",async function(msg, send, done) {
 
             let device = config.device || msg.device;
 
@@ -90,22 +92,34 @@ module.exports = function(RED) {
 
             if (typeof server.request === "function") {
 
-                const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${device}/callback`;
+                try {
+                    const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${device}/callback`;
 
-                // Check if device exists if not autoprovision resources
-                const res1 = await server.request(node,url,'GET');
-                if ( !res1.payload ) {
+                    // Check if device exists if not autoprovision resources
+                    const res1 = await server.request(node,url,'GET');
+                    if ( !res1.payload ) {
 
-                    await provisionBucket(server,node,prefix,device,assetType,assetGroup);
-                    await provisionDevice(server,node,prefix,device,assetType,assetGroup);
+                        await provisionBucket(server,node,prefix,device,assetType,assetGroup);
+                        await provisionDevice(server,node,prefix,device,assetType,assetGroup);
+                    }
+
+                    const res = await server.request(node,`${url}/data`,'POST',data);
+                    msg.payload = res.payload;
+                    send(msg);
+                    done();
+
+                } catch(err) {
+                    delete err.stack;
+                    msg.payload = {};
+                    msg.payload.device = device;
+                    msg.payload.assetType = assetType;
+                    msg.payload.assetGroup = assetGroup;
+                    msg.payload.prefix = prefix;
+                    msg.payload.data = data;
+                    done(err);
                 }
-
-                const res = await server.request(node,`${url}/data`,'POST',data);
-                msg.payload = res.payload;
-                node.send(msg);
-
             } else
-                node.error("Check Thinger Server Configuration");
+                done("Check Thinger Server Configuration");
         });
     }
 
