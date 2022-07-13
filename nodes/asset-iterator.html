@@ -12,7 +12,8 @@
             filter: {value: ""}, // regex
             assetType: {value: ""},
             assetGroup: {value: ""},
-            rate: {value: 0}
+            rate: {value: 0},
+            rateUnits: {value: "s"}
         },
         icon:"asset.svg",
         inputs: 1,
@@ -145,6 +146,10 @@
         <div class="form-row">
             <label for="node-input-rate"><i class="fa fa-clock-o"></i> Rate (s)</label>
             <input type="number" id="node-input-rate" placeholder=0 style="width:15%; !important" min=0>
+            <select id="node-input-rateUnits" style="width:25%; !important">
+                <option value="ms">milliseconds</option>
+                <option value="s" default>seconds</option>
+            </select>
         </div>
     </div>
 
@@ -164,6 +169,7 @@ Reads and iterates over the assets that match the filters, returning one message
 : *asset_type* (string) : the type of thinger asset.
 : *asset_group* (string) : the type of thinger group.
 : *rate* (int) : the number of seconds between each message.
+: *rate_units* (string) : the units to interpret the rate value (s or ms).
 
 ### Outputs
 

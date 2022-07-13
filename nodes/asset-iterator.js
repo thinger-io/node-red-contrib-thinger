@@ -71,8 +71,9 @@ module.exports = function(RED) {
             let asset = (config.asset || msg.asset)+"s";
             let filter = config.filter || msg.asset_filter || "";
 
+            let rateUnits = config.rateUnits || msg.rate_units || "s";
             node.rate = config.rate || msg.rate || 0;
-            node.rate = parseInt(node.rate) * 1000;
+            node.rate = (rateUnits === 's') ? parseInt(node.rate)*1000 : parseInt(node.rate);
 
             let assetType = config.assetType || msg.asset_type;
             let assetGroup = config.assetGroup || msg.asset_group;

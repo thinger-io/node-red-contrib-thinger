@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file.
 - New Thinger Product asset interaction with events, property read and write and assignment a product to a device and bucket
 - Added configuration of maximum concurrent sockets against a server connection
 - Added enabled property in device create node
-- Added rate limit in asset iterator node to indicate the number of seconds between each message
+- Added rate limit in asset iterator node to indicate the number of seconds or milliseconds between each message
 - Improved error handling in nodes so errors can be caught with the 'catch' node
 
 ### Changed
