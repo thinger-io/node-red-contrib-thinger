@@ -16,6 +16,7 @@ module.exports = function(RED) {
 
             let storage = config.storage || msg.storage;
             let file = config.file || msg.file || "";
+            file = file.replace(/^\//, ''); // remove leading /
             let data = config.data || msg.data || "content";
             let recursive = config.recursive || msg.recursive || false;
             let minDepth = config.minDepth || msg.min_depth || 0;
