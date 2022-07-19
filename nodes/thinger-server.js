@@ -114,11 +114,25 @@ module.exports = function(RED) {
             if (typeof caller === 'undefined') caller = node;
             return ThingerRequest.request(url, method, data)
               .then(res => {
-                  caller.log(`${res.status} ${method} ${url} ${ typeof data === 'object' ? JSON.stringify(data) : typeof data !== 'undefined' ? data : '' }`);
+                  let body = data;
+                  if (typeof data !== 'undefined') {
+                      if (Buffer.isBuffer(data))
+                          body = data.toString('hex');
+                      else if (typeof data === 'object')
+                          body = JSON.stringify(data);
+                  } else body = '';
+                  caller.log(`${res.status} ${method} ${url} ${Utils.truncateString(body, 1024)}`);
                   return res;
               })
               .catch(err => {
-                  caller.log(`${err.status} ${method} ${url} ${ typeof data === 'object' ? JSON.stringify(data) : typeof data !== 'undefined' ? data : '' }`);
+                  let body = data;
+                  if (typeof data !== 'undefined') {
+                      if (Buffer.isBuffer(data))
+                          body = data.toString('hex');
+                      else if (typeof data === 'object')
+                          body = JSON.stringify(data);
+                  } else body = '';
+                  caller.log(`${err.status} ${method} ${url} ${Utils.truncateString(body, 1024)}`);
                   throw err; // handle from parent caller
               });
         };

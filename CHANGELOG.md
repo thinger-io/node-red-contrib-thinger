@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 ## [1.4.0] - 2022-04-15
 ### Added
 - New read storage node
+- New write storage node
 - Errors from backend now show more detail in the cause of the error
 - Compatibility with Node-RED 3.0.0
 - Simple example flows
