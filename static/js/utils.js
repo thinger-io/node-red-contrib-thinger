@@ -27,11 +27,10 @@ class ThingerUtils {
         let chars = "0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         let length = 15;
 
-        let password = Array.from(crypto.getRandomValues(new Uint32Array(length)))
+        return Array.from(crypto.getRandomValues(new Uint32Array(length)))
           .map((x) => chars[x % chars.length])
           .join('');
 
-        return password;
     }
 
 }
