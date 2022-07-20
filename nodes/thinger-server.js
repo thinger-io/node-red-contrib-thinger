@@ -67,7 +67,7 @@ module.exports = function(RED) {
         //    node.error(e);
         //});
 
-        node.on('close', function(removed, done) {
+        node.on('close', function(_removed, done) {
             // clear reconnection timeout
             clearTimeout(timeout);
 
@@ -77,32 +77,32 @@ module.exports = function(RED) {
             done();
         });
 
-        node.openWebsocket = function(node, path, on_open, on_message, on_close, on_error){
+        node.openWebsocket = function(caller, path, on_open, on_message, on_close, on_error){
             const url = `${config.ssl ? "wss://" : "ws://"}${config.host}/v1/users/${config.username}${path}?authorization=${config.token}`;
-            node.log(`opening websocket to: ${url}`);
+            caller.log(`opening websocket to: ${url}`);
             let wss = new WebSocket(url);
 
             wss.on('error', function(e){
-                node.status({fill:"red", shape:"dot", text: 'websocket error'});
-                node.error(e && e.message ? e.message : "websocket error");
+                caller.status({fill:"red", shape:"dot", text: 'websocket error'});
+                caller.error(e && e.message ? e.message : "websocket error");
                 if(on_error) on_error(e);
             });
 
             wss.on('open', function open() {
-                node.status({fill:"green", shape:"dot", text: 'connected'});
+                caller.status({fill:"green", shape:"dot", text: 'connected'});
                 if(on_open) on_open();
             });
 
             wss.on('message', function incoming(data) {
                 // parse incoming data
                 let payload = JSON.parse(data);
-                node.status({fill:"blue",shape:"dot",text:"connected"});
+                caller.status({fill:"blue",shape:"dot",text:"connected"});
                 if(on_message) on_message(payload);
-                node.status({fill:"green",shape:"dot",text:"connected"});
+                caller.status({fill:"green",shape:"dot",text:"connected"});
             });
 
             wss.on('close', function close() {
-                node.status({fill:"red", shape:"dot", text: 'disconnected'});
+                caller.status({fill:"red", shape:"dot", text: 'disconnected'});
                 if(on_close) on_close();
             });
 

@@ -3,8 +3,6 @@ module.exports = function(RED) {
 
     "use strict";
 
-    const Request = require('../lib/utils/request.js');
-
     function BucketWriteNode(config) {
         RED.nodes.createNode(this, config);
 
@@ -15,7 +13,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket write on message reception
-        node.on("input", function(msg, send, done) {
+        node.on("input", function(msg, _send, done) {
 
             let bucket = config.bucket || msg.bucket;
             var value = config.value || msg.payload || msg.value;

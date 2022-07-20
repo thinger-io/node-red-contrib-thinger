@@ -1,6 +1,6 @@
 // Extended jquery functions
 $.fn.removeClassStartingWith = function (filter) {
-    $(this).removeClass(function (index, className) {
+    $(this).removeClass(function (_index, className) {
         return (className.match(new RegExp("\\S*" + filter + "\\S*", 'g')) || []).join(' ')
     });
     return this;
@@ -22,14 +22,14 @@ class ThingerUtils {
     */
     static generateCredentials() {
 
+        const crypto = window.crypto;
+
         let chars = "0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         let length = 15;
-        let password = "";
 
-        for (var i = 0; i <= length; i++) {
-            var randomNumber = Math.floor(Math.random() * chars.length);
-            password += chars.substring(randomNumber, randomNumber +1);
-        }
+        let password = Array.from(crypto.getRandomValues(new Uint32Array(length)))
+          .map((x) => chars[x % chars.length])
+          .join('');
 
         return password;
     }

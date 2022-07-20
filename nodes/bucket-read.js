@@ -24,7 +24,7 @@ module.exports = function(RED) {
                 priorTs = new Date(ts.setDate(ts.getDate() - value*7));
                 break;
             case 'y':
-                prioTs = new Date(ts.setFullYear(ts.getFullYear() - value));
+                priorTs = new Date(ts.setFullYear(ts.getFullYear() - value));
                 break;
         }
         return priorTs;
@@ -91,7 +91,7 @@ module.exports = function(RED) {
               })
               //.catch(e => node.error(e));
           else
-              throw "Check Thinger Server Configuration";
+              throw new Error("Check Thinger Server Configuration");
      }
 
     function BucketReadNode(config) {
@@ -171,9 +171,9 @@ module.exports = function(RED) {
             var result = [];
 
             readBucket(server, node, bucket, queryParameters, limit, result)
-              .then(function(result) {
+              .then(function(data) {
                 if (isSimpleSorting) { // sort last N items asc if needed
-                    result = result.sort(function(a,b) {
+                    result = data.sort(function(a,b) {
                         return a.ts - b.ts;
                     });
                 }

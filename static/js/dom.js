@@ -52,7 +52,7 @@ class ThingerDOM {
         label.prop('placeholder', placeholder);
     }
 
-    static changeInputField(asset,field="assetId",changeIcon=true) {
+    static changeInputField(asset,field="assetId") {
         let fieldIcon = $(".node-row-"+field+" > div > label > i");
         let fieldLabel = $(".node-row-"+field+" > div > label");
         let fieldInput = $(".node-row-"+field+" > div > input");
@@ -94,7 +94,7 @@ class ThingerDOM {
 
         // if its created remove it before creating it again
         if ($('.red-form-options').length !== 0) {
-            ThingerDOM.#destroyOptions(field); // here field is of no use really
+            ThingerDOM.#destroyOptions();
         }
 
         let addEvents = typeof selected === 'undefined' ? false : true; // when showOptions is already a callback of a previous showOptions, event listeners should not be added
@@ -163,7 +163,7 @@ class ThingerDOM {
             if (!($(".red-form-options").is(e.target) || $(`#node-input-${field}`).is(e.target))// if the target of the click is the container...
             && $(".red-form-options").has(e.target).length === 0) // ... or a descendant of the container
             {
-              ThingerDOM.#destroyOptions(field);
+              ThingerDOM.#destroyOptions();
               $(`#node-input-${field}`).off('keydown'); // fallback in case it is destroyed before
             }
         });
@@ -171,7 +171,7 @@ class ThingerDOM {
         $(`#node-input-${field}`).keydown(function(e) {
             if (e.key === "Tab")
             {
-                ThingerDOM.#destroyOptions(field);
+                ThingerDOM.#destroyOptions();
             }
         });
 
@@ -222,7 +222,7 @@ class ThingerDOM {
 
     }
 
-    static #destroyOptions(field) {
+    static #destroyOptions() {
         // Remove previously set handlers or the will acumulate
         $(document).off('mouseup');
         $(".red-form-options").remove();
@@ -241,7 +241,7 @@ class ThingerDOM {
         }
 
         // Handle destruction of element
-        ThingerDOM.#destroyOptions(field);
+        ThingerDOM.#destroyOptions();
     }
 
     static #filterOptions(obj) {
