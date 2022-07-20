@@ -2,21 +2,19 @@ module.exports = function(RED) {
 
     "use strict";
 
-    var os = require("os");
-
-    var base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+    const Utils = require('../lib/utils/utils.js');
 
     function StorageWriteNode(config) {
         RED.nodes.createNode(this, config);
 
         // get node
-        var node = this;
+        const node = this;
 
         // get server configuration
-        var server = RED.nodes.getNode(config.server);
+        const server = RED.nodes.getNode(config.server);
 
         // unregister listener on close
-        node.on('input', async function(msg, send, done) {
+        node.on('input', async function(msg, _send, done) {
 
             let storage = config.storage || msg.storage;
             let file = config.file || msg.file || "";
@@ -42,15 +40,15 @@ module.exports = function(RED) {
                   // Clean file list only to what we need
                   let files = res.payload.filter(e => e.path.startsWith(file));
                   if (files.length === 1 && file[0].type === "directory") // file exists
-                      throw "File is a directory";
+                      throw new Error("File is a directory");
 
                   else if (files.length > 1) { // file might have the same name as a folder
-                      throw "File is a already existing directory";
+                      throw new Error("File is a directory");
                   } else if (files.length === 0) {
                       // File or path does not exist. Create?
                       if (createDir) {
                           // Recursively create path
-                          const regex = /[/]/g;
+                          const regex = /\//g;
                           let fileDepth = (file.match(regex) || []).length;
                           let i = 1;
 
@@ -67,7 +65,7 @@ module.exports = function(RED) {
                               i++;
                           }
                       } else {
-                          throw "File or directory does not exist";
+                          throw new Error("File or directory does not exist");
                       }
                   }
 
@@ -75,7 +73,7 @@ module.exports = function(RED) {
                   let newContent = msg.payload;
                   if (appendNewLine) {
                       if (Buffer.isBuffer(msg.payload)) newContent = Buffer.concat([msg.payload, Buffer.from('\n')]); 
-                      else if (base64regex.test(msg.payload)) newContent = msg.payload+Buffer.from('\n','utf-8').toString('base64');
+                      else if (Utils.isBase64(msg.payload)) newContent = msg.payload+Buffer.from('\n','utf-8').toString('base64');
                       else newContent = msg.payload+'\n';
                   }
 
@@ -96,10 +94,10 @@ module.exports = function(RED) {
                   } else if (action === "delete") {
                       msg.payload = await server.request(node, `${url}/${file}`, 'DELETE').payload;
                   } else {
-                      throw "File action is not recognized";
+                      throw new Error("File action is not recognized");
                   }
 
-                  send(msg);
+                  //send(msg);
                   done();
 
               } catch(e) {

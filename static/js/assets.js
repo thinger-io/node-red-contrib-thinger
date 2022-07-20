@@ -67,7 +67,7 @@ class ThingerAsset {
             }
             return self._properties;
         });
-    };
+    }
 
     getPropertyValue(id) {
         const property = this._properties.find(e=>e.id === id);

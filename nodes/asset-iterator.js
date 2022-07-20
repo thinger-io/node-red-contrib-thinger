@@ -12,18 +12,16 @@ module.exports = function(RED) {
                 let group = res[i].asset_group;
 
                 let newMsg = RED.util.cloneMessage(msg.msg);
-                //Object.assign(newMsg, msg);
                 if (res.length > 1) { // if more than one asset create new message with its own id
                     delete newMsg._msgid;
                 }
 
-                if (assetType === undefined && assetGroup === undefined) {
-                    newMsg.payload = res[i];
-                } else if (assetType === type && assetGroup === group) {
-                    newMsg.payload = res[i];
-                } else if (assetType === type && assetGroup === undefined) {
-                    newMsg.payload = res[i];
-                } else if (assetType === undefined && assetGroup == group) {
+                if (
+                  (assetType === undefined && assetGroup === undefined) ||
+                  (assetType === type && assetGroup === group) ||
+                  (assetType === type && assetGroup === undefined) ||
+                  (assetType === undefined && assetGroup == group)
+                ) {
                     newMsg.payload = res[i];
                 } else {
                     continue;

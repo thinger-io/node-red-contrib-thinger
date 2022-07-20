@@ -29,11 +29,11 @@ module.exports = function(RED) {
                 if (!res.status.toString().startsWith('20'))
                   throw res.error;
 
-                 if (res && res.length != 0)
-                    msg.payload = res.payload;
+                if (res && res.length != 0)
+                  msg.payload = res.payload;
 
-                    send(msg);
-                    done();
+                 send(msg);
+                 done();
               })
               .catch(e => {
                   delete e.stack;
