@@ -3,12 +3,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [1.4.0] - 2022-04-15
+## [1.4.0] - 2022-07-27
 ### Added
 - New read storage node
 - New write storage node
 - Errors from backend now show more detail in the cause of the error
-- Compatibility with Node-RED 3.0.0
+- Compatibility with Node-RED 3.0
 - Simple example flows
 - New Thinger Product asset interaction with events, property read and write and assignment a product to a device and bucket
 - Added configuration of maximum concurrent sockets against a server connection
