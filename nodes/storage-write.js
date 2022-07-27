@@ -78,7 +78,7 @@ module.exports = function(RED) {
                   }
 
                   if (action === "append") {
-                      let content = await server.request(node, `${url}/${file}`, method);
+                      let content = (await server.request(node, `${url}/${file}`, method)).payload;
                       if (Buffer.isBuffer(content)) {
                           if (Buffer.isBuffer(newContent)) msg.payload = Buffer.concat([content, newContent]);
                           else msg.payload = `${content.toString('utf-8')}${newContent}`;
