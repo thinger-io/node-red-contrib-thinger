@@ -1,5 +1,7 @@
 module.exports = function(RED) {
 
+    "use strict";
+
     function EndpointCallNode(config) {
         RED.nodes.createNode(this, config);
 
@@ -10,20 +12,36 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call endpoint on message reception
-        node.on("input",function(msg, send) {
+        node.on("input",function(msg, send, done) {
 
             let endpoint = config.endpoint || msg.endpoint;
 
-            if (typeof server.callEndpoint === "function") {
+            const method = 'POST';
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/endpoints/${endpoint}/call`;
 
-                    server.callEndpoint(endpoint, msg.payload, function(res) {
-                        msg.payload = res;
-                        node.send(msg);
-                    })
-                    .catch(e => node.error(e));
+            if (typeof server.request === "function") {
+              server.request(node, url, method, msg.payload)
+              .then(res => {
 
-            } else
-                node.error("Check Thinger Server Configuration");
+                  // Throw if response fails
+                  if (!res.status.toString().startsWith('20'))
+                    throw res.error;
+
+                  msg.payload = res.payload;
+                  send(msg);
+                  done();
+              })
+              .catch(e => {
+                  delete e.stack;
+                  let payload = msg.payload;
+                  msg.payload = {};
+                  msg.payload.endpoint = endpoint;
+                  msg.payload.data = payload;
+                  done(e);
+              });
+            }
+            else
+              done("Check Thinger Server Configuration");
         });
     }
 

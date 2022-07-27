@@ -1,0 +1,181 @@
+[
+    {
+        "id": "737170721128eec2",
+        "type": "tab",
+        "label": "Create bucket on device create",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "60ee12688bba946d",
+        "type": "server-events",
+        "z": "737170721128eec2",
+        "name": "On device create",
+        "asset": "device",
+        "event": "device_create",
+        "filter": "",
+        "filters": {},
+        "bucket": "",
+        "device": "",
+        "endpoint": "",
+        "state": "",
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 140,
+        "y": 120,
+        "wires": [
+            [
+                "f44699ad25636821"
+            ]
+        ]
+    },
+    {
+        "id": "98bbfefa1a97f36f",
+        "type": "bucket-create",
+        "z": "737170721128eec2",
+        "name": "",
+        "bucketId": "",
+        "bucket": "",
+        "description": "",
+        "enabled": true,
+        "source": "",
+        "extraSource": "",
+        "resource": "",
+        "update": "",
+        "interval": "",
+        "assetType": "",
+        "assetGroup": "",
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 390,
+        "y": 120,
+        "wires": [
+            [
+                "0d2290c87bfc42c8"
+            ]
+        ]
+    },
+    {
+        "id": "f44699ad25636821",
+        "type": "change",
+        "z": "737170721128eec2",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "id",
+                "pt": "msg",
+                "to": "payload.device",
+                "tot": "msg"
+            },
+            {
+                "t": "move",
+                "p": "payload.device",
+                "pt": "msg",
+                "to": "extra_source",
+                "tot": "msg"
+            },
+            {
+                "t": "move",
+                "p": "payload.name",
+                "pt": "msg",
+                "to": "bucket",
+                "tot": "msg"
+            },
+            {
+                "t": "move",
+                "p": "payload.description",
+                "pt": "msg",
+                "to": "description",
+                "tot": "msg"
+            },
+            {
+                "t": "move",
+                "p": "payload.enabled",
+                "pt": "msg",
+                "to": "enabled",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "source",
+                "pt": "msg",
+                "to": "device",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "update",
+                "pt": "msg",
+                "to": "interval",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "interval",
+                "pt": "msg",
+                "to": "1m",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "resource",
+                "pt": "msg",
+                "to": "location",
+                "tot": "str"
+            },
+            {
+                "t": "delete",
+                "p": "payload",
+                "pt": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 265,
+        "y": 120,
+        "wires": [
+            [
+                "98bbfefa1a97f36f"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "0d2290c87bfc42c8",
+        "type": "debug",
+        "z": "737170721128eec2",
+        "name": "debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 515,
+        "y": 120,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "336c5ede1e85bb8f",
+        "type": "comment",
+        "z": "737170721128eec2",
+        "name": "On device create, create bucket with the same name\\n and save location resource from device into bucket",
+        "info": "",
+        "x": 250,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "ec0dd4b1ef5aa9a8",
+        "type": "thinger-server",
+        "host": "$(THINGER_HOST)",
+        "name": "local",
+        "ssl": false
+    }
+]

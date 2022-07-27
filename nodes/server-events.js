@@ -1,5 +1,7 @@
 module.exports = function(RED) {
-    'use strict';
+
+    "use strict";
+
     const RECONNECT_TIMEOUT_MS = 5000;
 
     function ServerEventsNode(config) {

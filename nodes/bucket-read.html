@@ -51,7 +51,7 @@
 
     RED.nodes.registerType('bucket-read', {
         category: 'thinger',
-        color: '#74b9ff',
+        color: '#62b0fe', // #1F8EFE at 30% lightened
         defaults: {
             name: {value:""},
             bucket: {value: ""},
@@ -68,7 +68,7 @@
             sort: {value: ""},
             server: {type:"thinger-server", required:true}
         },
-        icon:"thinger_logo_white.png",
+        icon:"bucket.svg",
         inputs: 1,
         outputs: 1,
         inputLabels: "event",
@@ -81,6 +81,8 @@
         },
         oneditprepare: function() {
 
+            const node_id = this.id;
+
             // Defaults set on prepare instead of properties to allow for configuration on input message
             $("#node-input-sort").val(this.sort || "asc");
             loadDateField(this.minTs,"start");
@@ -89,13 +91,16 @@
 
             // Event handlers and requests
             $("#node-input-bucket").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
                 const field = "bucket";
                 const bucket = $(this).val();
-                let buckets = new ThingerBuckets(bucket);
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let buckets = new ThingerBuckets(bucket,node_id,svr_id);
                 buckets.getBuckets().then(function(data) {
                     ThingerDOM.showOptions(field, data, bucket, function(value) {
                         // buckets filtering callback
-                        buckets = new ThingerBuckets(value);
+                        buckets = new ThingerBuckets(value,node_id,svr_id);
                         buckets.getBuckets().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });
@@ -290,73 +295,45 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="bucket-read">
-    <p>Reads data from a data bucket.</p>
+<script type="text/markdown" data-help-name="bucket-read">
+Reads data from a data bucket.
 
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>bucket <span class="property-type">string</span></dt>
-        <dd> the id of the bucket to read from.</dd>
-        <dt>filter <span class="property-type">string</span></dt>
-        <dd> the type of filter to apply the to the read operation (<samp>relative</samp>, <samp>absolute</samp> or <samp>simple</samp>).</dd>
-        <dt class="optional">timespan_sequence <span class="property-type">string</span></dt>
-        <dd> the sequence for <samp>relative</samp> filter (<samp>latest</samp> or <samp>previous</samp>).</dd>
-        <dt class="optional">timespan_value <span class="property-type">int</span></dt>
-        <dd> the value for <samp>relative</samp> filter.</dd>
-        <dt class="optional">timespan_units <span class="property-type">char</span></dt>
-        <dd> the time units for <samp>relative</samp> filter (s for seconds, m for minutes and so on; h, d, w, m, y).</dd>
-        <dt class="optional">min_ts <span class="property-type">Date</span></dt>
-        <dd> the minimun data or timestamp of the time period for <samp>absolute</samp> time filter.</dd>
-        <dt class="optional">max_ts <span class="property-type">Date</span></dt>
-        <dd> the maximum date or timestamp of the time period for <samp>absolute</samp> time filter.</dd>
-        <dt class="optional">limit <span class="property-type">int</span></dt>
-        <dd> the number of items to retrieve when filter is <samp>relative</samp> or <samp>absolute</samp>.</dd>
-        <dt class="optional">items <span class="property-type">int</span></dt>
-        <dd> the number of last items to retrieve when filter is <samp>simple</samp>.</dd>
-        <dt>sort <span class="property-type">string</span></dt>
-        <dd> the sorting order for the retrieved items (<samp>asc</samp> or <samp>desc</samp>).</dd>
-        <dt class="optional">aggregation <span class="property-type">string</span></dt>
-        <dd> the value for aggregating the retrieved data (<samp>1d</samp> for 1 day and so on).</dd>
-        <dt class="optional">aggregation_type <span class="property-type">string</span></dt>
-        <dd> the type of aggregation to apply over the data (<samp>median</samp>, <samp>mean</samp>, <samp>max</samp>, <samp>min</samp>, <samp>count</samp> or <samp>sum</samp>).</dd>
-    </dl>
+### Inputs
 
-     <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li>Standard output
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard output of the command.</dd>
-             </dl>
-         </li>
-         <!-- li>Standard error
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard error of the command.</dd>
-             </dl>
-         </li -->
-     </ol>
+: bucket (string) : the id of the bucket to read from.
+: filter (string) : the type of filter to apply the to the read operation (<samp>relative</samp>, <samp>absolute</samp> or <samp>simple</samp>).
+: *timespan_sequence* (string) : the sequence for <samp>relative</samp> filter (<samp>latest</samp> or <samp>previous</samp>).
+: *timespan_value* (int) : the value for <samp>relative</samp> filter.
+: *timespan_units* (char) : the time units for <samp>relative</samp> filter (s for seconds, m for minutes and so on; h, d, w, m, y).
+: *min_ts* (Date) : the minimun data or timestamp of the time period for <samp>absolute</samp> time filter.
+: *max_ts* (Date) : the maximum date or timestamp of the time period for <samp>absolute</samp> time filter.
+: *limit* (int) : the number of items to retrieve when filter is <samp>relative</samp> or <samp>absolute</samp>.
+: *items* (int) : the number of last items to retrieve when filter is <samp>simple</samp>.
+: sort (string) : the sorting order for the retrieved items (<samp>asc</samp> or <samp>desc</samp>).
+: *aggregation* (string) : the value for aggregating the retrieved data (<samp>1d</samp> for 1 day and so on).
+: *aggregation_type* (string) : the type of aggregation to apply over the data (<samp>median</samp>, <samp>mean</samp>, <samp>max</samp>, <samp>min</samp>, <samp>count</samp> or <samp>sum</samp>).
 
-    <h3>Details</h3>
-    <p>The node allows the configuration via the edit dialog or through an input message.
-    The values assigned through the dialog will have priority over the message.</p>
+### Outputs
 
-    <p>Each <code>msg.filter</code> will retrieve the data one way or another:
-       <ul>
-          <li><strong>Relative</strong>: based on relative time with lastest or previous to a date value. Ex.: previous 3 days.</li>
-          <li><strong>Absolute</strong>: based of abolute times. Ex.: from 2021/01/01 to 2021/12/31.</li>
-          <li><strong>Simple</strong>: last N items.</li>
-      </ul>
-    </p>
+: payload (object) : the standard output of the command.
 
-    <p>The fields <code>msg.max_ts</code> and <code>msg.min_ts</code> allow any string which javascript Date objects can interpret, find more info <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#several_ways_to_create_a_date_object">here</a>. It is recommended to use Epoch timestamp or UTC date for clarity.</p>
+### Details
 
-    <h3>References</h3>
-    <ul>
-        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
-        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
-        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
-        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
-    </ul>
+The node allows the configuration via the edit dialog or through an input message.
+The values assigned through the dialog will have priority over the message.
+
+Each `msg.filter` will retrieve the data one way or another:
+- **Relative**: based on relative time with lastest or previous to a date value. Ex.: previous 3 days.
+- **Absolute**: based of abolute times. Ex.: from 2021/01/01 to 2021/12/31.
+- **Simple**: last N items.
+
+The fields `msg.max_ts` and `msg.min_ts` allow any string which javascript Date objects can interpret, find more info [here]("https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#several_ways_to_create_a_date_object"). It is recommended to use Epoch timestamp or UTC date for clarity.
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
 </script>
 

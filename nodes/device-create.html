@@ -11,7 +11,7 @@
 
     RED.nodes.registerType('device-create', {
         category: 'thinger',
-        color: '#74b9ff',
+        color: '#62b0fe', // #1F8EFE at 30% lightened
         credentials: {
             deviceCredentials: {type: "password"}
         },
@@ -19,14 +19,15 @@
             name: {value:""},
             deviceType: {value: ""},
             deviceId: {value: ""},
-            deviceCredentials: {type: "password"},
             deviceName: {value: ""},
             description: {value: ""},
+            enabled: {value: ""},
             assetType: {value: ""},
             assetGroup: {value: ""},
+            product: {value: ""},
             server: {type:"thinger-server", required:true}
         },
-        icon:"thinger_logo_white.png",
+        icon:"device.svg",
         inputs: 1,
         outputs: 1,
         inputLabels: "event",
@@ -38,6 +39,8 @@
             return "device create";
         },
         oneditprepare: function() {
+
+            const node_id = this.id;
 
             var firstTime = true;
 
@@ -56,30 +59,57 @@
             });
 
             $("#node-input-assetType").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
                 const field = "assetType";
                 const type = $(this).val();
-                let types = new ThingerTypes(type);
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let types = new ThingerTypes(type,node_id,svr_id);
                 types.getTypes().then(function(data) {
                     ThingerDOM.showOptions(field, data, type, function(value) {
                         // types filtering callback
-                        types = new ThingerTypes(value);
+                        types = new ThingerTypes(value,node_id,svr_id);
                         types.getTypes().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });
             });
 
             $("#node-input-assetGroup").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
                 const field = "assetGroup";
                 const group = $(this).val();
-                let groups = new ThingerGroups(group);
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let groups = new ThingerGroups(group,node_id,svr_id);
                 groups.getGroups().then(function(data) {
                     ThingerDOM.showOptions(field, data, group, function(value) {
                         // groups filtering callback
-                        groups = new ThingerGroups(value);
+                        groups = new ThingerGroups(value,node_id,svr_id);
                         groups.getGroups().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });
             });
+
+            $("#node-input-product").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                const field = "product";
+                const product = $(this).val();
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let products = new ThingerProducts(product,node_id,svr_id);
+                products.getProducts().then(function(data) {
+                    ThingerDOM.showOptions(field, data, product, function(value) {
+                        // products filtering callback
+                        products = new ThingerProducts(value,node_id,svr_id);
+                        products.getProducts().then((data) => {ThingerDOM.showOptions(field,data)});
+                    });
+                });
+            });
+
+            // Load values into fields
+            if (this.enabled === "") {
+                $("#node-input-enabled").prop("checked", true)
+            }
 
         }
     });
@@ -129,6 +159,14 @@
     </div>
 
     <div class="form-row">
+        <label for="node-input-enabled" style="vertical-align: bottom; margin-bottom: 0px;"><i class="fa fa-power-off"></i> Enabled</label>
+        <label class="switch">
+          <input type="checkbox" id="node-input-enabled" checked>
+          <div class="slider round"></div>
+        </label>
+    </div>
+
+    <div class="form-row">
         <label for="node-input-assetType"><i class="fa fa-list-ul"></i> Asset Type</label>
         <input type="text" id="node-input-assetType" placeholder="Select Type...">
     </div>
@@ -139,68 +177,50 @@
     </div>
 
     <div class="form-row">
+        <label for="node-input-product"><i class="fa fa-shopping-bag"></i> Product</label>
+        <input type="text" id="node-input-product" placeholder="Select Product...">
+    </div>
+
+    <div class="form-row">
         <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
         <input type="text" id="node-input-server" placeholder="Select Server">
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="device-create">
-    <p>Creates or updates a device given the configuration.</p>
+<script type="text/markdown" data-help-name="device-create">
+Creates or updates a device given the configuration.
 
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>type <span class="property-type">string</span></dt>
-        <dd> the type of the device to create (<samp>Generic</samp>, <samp>HTTP</samp> or <samp>MQTT</samp>).</dd>
-        <dt>device <span class="property-type">string</span></dt>
-        <dd> the id of the device to create.</dd>
-        <dt>credentials <span class="property-type">string</span></dt>
-        <dd> the credentials to authenticate the device.</dd>
-        <dt class="optional">name <span class="property-type">string</span></dt>
-        <dd> the name of the device to create.</dd>
-        <dt class="optional">description <span class="property-type">string</span></dt>
-        <dd> the description of the device to create.</dd>
-        <dt class="optional">asset_type <span class="property-type">string</span></dt>
-        <dd> the type of thinger asset.</dd>
-        <dt class="optional">asset_group <span class="property-type">string</span></dt>
-        <dd> the type of thinger group.</dd>
-    </dl>
+### Inputs
+: *type* (string) : the type of the device to create (<samp>Generic</samp>, <samp>HTTP</samp> or <samp>MQTT</samp>).
+: device (string) : the id of the device to create.
+: *credentials* (string) : the credentials to authenticate the device.
+: *name* (string) : the name of the device to create.
+: *description* (string) : the description of the device to create.
+: enabled (boolean) : the status of the bucket on creation.
+: *asset_type* (string) : the type of thinger asset.
+: *asset_group* (string) : the type of thinger group.
+: *product* (string) : the type of thinger product.
 
-     <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li>Standard output
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard output of the command.</dd>
-             </dl>
-         </li>
-         <!-- li>Standard error
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard error of the command.</dd>
-             </dl>
-         </li -->
-     </ol>
+### Outputs
 
-    <h3>Details</h3>
-    <p>The node allows the configuration via the edit dialog or through an input message.
-    The values assigned through the dialog will have priority over the message.</p>
+: payload (object) : the standard output of the command.
 
-    <p>The field <code>msg.type</code> allows different values depending on the desired device. Find and explanation of each one below:
-      <ul>
-        <li><strong>Generic device</strong>: devices with Thinger.io software client in it (WiFi, Ethernet or GSM).</li>
-        <li><strong>HTTP device</strong>: allows creating a virtual device to integrate data via REST API Callback (Sigfox, LoRa or cURL).</li>
-        <li><strong>MQTT devices</strong>: for MQTT devices that will work with the Thinger.io embedded broker.</li>
-      </ul>
-    </p>
+### Details
+The node allows the configuration via the edit dialog or through an input message.
+The values assigned through the dialog will have priority over the message, with the exception the `msg.enabled`.
 
-    <p> The field <code>msg.credentials</code> is used if device type is Generic or HTTP. Has to be of 16 chars of length and can contain <samp>A-Z</samp>,<samp>a-z</samp>,<samp>0-9</samp> and <samp>!@#$%^&*()</samp></p>
+The field `msg.type` allows different values depending on the desired device. Find and explanation of each one below:
+- **Generic device**: devices with Thinger.io software client in it (WiFi, Ethernet or GSM).
+- **HTTP device**: allows creating a virtual device to integrate data via REST API Callback (Sigfox, LoRa or cURL).
+- **MQTT devices**: for MQTT devices that will work with the Thinger.io embedded broker.
 
-    <h3>References</h3>
-    <ul>
-        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
-        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
-        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
-        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
-    </ul>
+The field `msg.credentials` is used if device type is Generic or HTTP. Has to be of 16 chars of length and can contain <samp>A-Z</samp>,<samp>a-z</samp>,<samp>0-9</samp> and <samp>!@#$%^&*()</samp>
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
 </script>
 

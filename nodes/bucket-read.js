@@ -1,5 +1,7 @@
 module.exports = function(RED) {
 
+    "use strict";
+
     /**
      * Will return the date of the timestamp based on prior value and units
      */
@@ -22,7 +24,7 @@ module.exports = function(RED) {
                 priorTs = new Date(ts.setDate(ts.getDate() - value*7));
                 break;
             case 'y':
-                prioTs = new Date(ts.setFullYear(ts.getFullYear() - value));
+                priorTs = new Date(ts.setFullYear(ts.getFullYear() - value));
                 break;
         }
         return priorTs;
@@ -39,40 +41,57 @@ module.exports = function(RED) {
      * After the first query, which will be done by descending order the next items will be retrieved
      * from the last timestamp. It it needs to be sorted by ascending it will be outside this function.
      */
-    function readBucket(server, bucket, queryParameters, limit, result) {
+    function readBucket(server, node, bucket, queryParameters, limit, result) {
 
         // Maximum value of items on the query parameter is 1000
         queryParameters.set('items',limit > 1000 || limit < 0 ? 1000 : limit);
 
+        // Query parameters to string
+        var queryParametersString = "";
+        queryParameters.forEach(function(value,key) {
+            if (value) {
+                queryParametersString += key+"="+value+"&";
+            }
+        });
+
+        const method = 'GET';
+        const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/buckets/${bucket}/data?${queryParametersString}`;
+
         // Recursive call to readBucket until done
-        if (typeof server.readBucket === "function")
-            return server.readBucket(bucket, queryParameters)
+        if (typeof server.request === "function")
+            return server.request(node, url, method)
             .then(function(res) {
+
+                // Throw if response fails
+                if (!res.status.toString().startsWith('20'))
+                    throw res.error;
+
                 if (!result) {
                     result = [];
                 }
-                result = result.concat(res);
 
-                limit = (res.length > 0 ? limit - res.length : 0);
+                result = result.concat(res.payload);
 
-                if (limit != 0 && res.length == 1000) { // There is more
+                limit = (res.payload.length > 0 ? limit - res.payload.length : 0);
+
+                if (limit != 0 && res.payload.length == 1000) { // There is more
                     switch (queryParameters.get("sort")) {
                         case "asc":
-                            queryParameters.set("min_ts",res[999].ts-1);
+                            queryParameters.set("min_ts",res.payload[999].ts-1);
                             break;
                         case "desc":
-                            queryParameters.set("max_ts",res[999].ts-1);
+                            queryParameters.set("max_ts",res.payload[999].ts-1);
                             break;
                      }
 
-                     return readBucket(server, bucket, queryParameters, limit, result);
+                     return readBucket(server, node, bucket, queryParameters, limit, result);
                  }
                  return result;
 
               })
-              .catch(console.log);
+              //.catch(e => node.error(e));
           else
-              node.error("Check Thinger Server Configuration");
+              throw new Error("Check Thinger Server Configuration");
      }
 
     function BucketReadNode(config) {
@@ -85,8 +104,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket read on close
-        node.on("input",function(msg, send) {
-
+        node.on("input",function(msg, send, done) {
 
             let bucket = config.bucket || msg.bucket;
 
@@ -152,17 +170,23 @@ module.exports = function(RED) {
             }
             var result = [];
 
-            readBucket(server, bucket, queryParameters, limit, result)
-              .then(function(result) {
+            readBucket(server, node, bucket, queryParameters, limit, result)
+              .then(function(data) {
                 if (isSimpleSorting) { // sort last N items asc if needed
-                    result = result.sort(function(a,b) {
+                    result = data.sort(function(a,b) {
                         return a.ts - b.ts;
                     });
                 }
                 msg.payload = result;
                 send(msg);
+                done();
               })
-              .catch(e => node.error(e));
+              .catch(e => {
+                delete e.stack;
+                msg.payload = Object.fromEntries(queryParameters);
+                msg.payload.bucket = bucket;
+                done(e)}
+              );
 
           });
     }

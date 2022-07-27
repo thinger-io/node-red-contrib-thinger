@@ -3,6 +3,34 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.4.0] - 2022-07-27
+### Added
+- New read storage node
+- New write storage node
+- Errors from backend now show more detail in the cause of the error
+- Compatibility with Node-RED 3.0
+- Simple example flows
+- New Thinger Product asset interaction with events, property read and write and assignment a product to a device and bucket
+- Added configuration of maximum concurrent sockets against a server connection
+- Added enabled property in device create node
+- Added rate limit in asset iterator node to indicate the number of seconds or milliseconds between each message
+- Improved error handling in nodes so errors can be caught with the 'catch' node
+
+### Changed
+- Improved user interaction in frontend
+- Bucket create node is able to update existing bucket
+- Updated icons of each node and set new Thinger.io color palette
+
+### Fix
+- Device write handling plain text as well as JSON
+- Having two or more thinger backends configured was not working properly
+- Bad Request from backend in bucket write node was returning more than one error message
+- Property write and read nodes were not filtering options
+- Device stream was returning undefined in payload
+- Device resources only shown after focusing on device field
+- Field filters were not filtering by name and only by id
+- Write property failed when passing JSON object as value from the input message
+
 ## [1.3.2] - 2022-03-14
 ### Added
 - Example of regex in server events node
@@ -116,7 +144,8 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
-[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.3.2...HEAD
+[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.4.0...HEAD
+[1.4.0]: https://github.com/thinger-io/Node-RED/compare/1.3.2...1.4.0
 [1.3.2]: https://github.com/thinger-io/Node-RED/compare/1.3.1...1.3.2
 [1.3.1]: https://github.com/thinger-io/Node-RED/compare/1.3.0...1.3.1
 [1.3.0]: https://github.com/thinger-io/Node-RED/compare/1.2.3...1.3.0

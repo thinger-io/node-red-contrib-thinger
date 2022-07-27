@@ -4,16 +4,18 @@
 
     RED.nodes.registerType('asset-iterator', {
         category: 'thinger',
-        color: '#74b9ff',
+        color: '#62b0fe', // #1F8EFE at 30% lightened
         defaults: {
+            server: {type:"thinger-server", required:true},
             name: {value:""},
             asset: {value: ""},
             filter: {value: ""}, // regex
             assetType: {value: ""},
             assetGroup: {value: ""},
-            server: {type:"thinger-server", required:true}
+            rate: {value: 0},
+            rateUnits: {value: "s"}
         },
-        icon:"thinger_logo_white.png",
+        icon:"asset.svg",
         inputs: 1,
         outputs: 1,
         align: 'left',
@@ -25,16 +27,21 @@
         },
         oneditprepare: function() {
 
-            const user = new ThingerUser();
-            const assets = new ThingerAssets(null,user.role);
+            const node_id = this.id;
 
-            let _asset = this.asset;
+            let _asset = this.asset ? this.asset : "";
 
-            assets.getAssets().then((data) => {
-                ThingerDOM.fillSelect("asset",data);
-                ThingerDOM.selectOption("asset",this.asset);
+            $("#node-input-server").change(function() {
+                let server_id = this.value ? this.value : "";;
+
+                const user = new ThingerUser(server_id);
+                const assets = typeof user.role !== 'undefined' ? new ThingerAssets(null,node_id,server_id,user.role) : new ThingerAssets(null,node_id,server_id);
+
+                assets.getAssets().then((data) => {
+                    ThingerDOM.fillSelect("asset",data);
+                    ThingerDOM.selectOption("asset",_asset);
+                });
             });
-
 
             $("#node-input-asset").change(function() {
 
@@ -55,28 +62,33 @@
                 }
             });
 
-
             $("#node-input-assetType").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
                 const field = "assetType";
                 const type = $(this).val();
-                let types = new ThingerTypes(type);
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let types = new ThingerTypes(type,node_id,svr_id);
                 types.getTypes().then(function(data) {
                     ThingerDOM.showOptions(field, data, type, function(value) {
                         // types filtering callback
-                        types = new ThingerTypes(value);
+                        types = new ThingerTypes(value,node_id,svr_id);
                         types.getTypes().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });
             });
 
             $("#node-input-assetGroup").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
                 const field = "assetGroup";
                 const group = $(this).val();
-                let groups = new ThingerGroups(group);
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let groups = new ThingerGroups(group,node_id,svr_id);
                 groups.getGroups().then(function(data) {
                     ThingerDOM.showOptions(field, data, group, function(value) {
                         // groups filtering callback
-                        groups = new ThingerGroups(value);
+                        groups = new ThingerGroups(value,node_id,svr_id);
                         groups.getGroups().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });
@@ -130,51 +142,47 @@
         </div>
     </div>
 
+    <div class="node-row-rate">
+        <div class="form-row">
+            <label for="node-input-rate"><i class="fa fa-clock-o"></i> Rate (s)</label>
+            <input type="number" id="node-input-rate" placeholder=0 style="width:15%; !important" min=0>
+            <select id="node-input-rateUnits" style="width:25%; !important">
+                <option value="ms">milliseconds</option>
+                <option value="s" default>seconds</option>
+            </select>
+        </div>
+    </div>
+
     <div class="form-row">
         <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
         <input type="text" id="node-input-server" placeholder="Select Server">
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="asset-iterator">
-    <p>Reads and iterates over the assets that match the filters, returning one message per asset.</p>
+<script type="text/markdown" data-help-name="asset-iterator">
+Reads and iterates over the assets that match the filters, returning one message per asset.
 
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>asset <span class="property-type">string</span></dt>
-        <dd> the type of asset.</dd>
-        <dt>asset_filter <span class="property-type">string</span></dt>
-        <dd> ther filter of the assets to match.</dd>
-        <dt class="optional">asset_type <span class="property-type">string</span></dt>
-        <dd> the type of thinger asset.</dd>
-        <dt class="optional">asset_group <span class="property-type">string</span></dt>
-        <dd> the type of thinger group.</dd>
-    </dl>
+### Inputs
 
-     <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li>Standard output
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard output of the command.</dd>
-             </dl>
-         </li>
-         <!-- li>Standard error
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard error of the command.</dd>
-             </dl>
-         </li -->
-     </ol>
+: asset (string) : the type of asset.
+: asset_filter (string) : the filter of the assets to match.
+: *asset_type* (string) : the type of thinger asset.
+: *asset_group* (string) : the type of thinger group.
+: *rate* (int) : the number of seconds between each message.
+: *rate_units* (string) : the units to interpret the rate value (s or ms).
 
-    <h3>Details</h3>
-    <p>The values of the field <code>msg.asset_filter</code> allows basic regular expressions. If the response contains more than one asset new message will be created for each, altering the property <code>msg._msgid</code> inserted by Node-RED.</p>
+### Outputs
 
-    <h3>References</h3>
-    <ul>
-        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
-        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
-        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
-        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
-    </ul>
+: payload (object) : the standard output of the command.
+
+### Details
+The values of the field `msg.asset_filter` allows basic regular expressions.
+If the response contains more than one asset new message will be created for each, altering the property `msg._msgid` inserted by Node-RED.
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
 </script>

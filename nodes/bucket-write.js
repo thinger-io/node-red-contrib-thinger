@@ -1,4 +1,7 @@
+
 module.exports = function(RED) {
+
+    "use strict";
 
     function BucketWriteNode(config) {
         RED.nodes.createNode(this, config);
@@ -10,7 +13,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket write on message reception
-        node.on("input",function(msg) {
+        node.on("input", function(msg, _send, done) {
 
             let bucket = config.bucket || msg.bucket;
             var value = config.value || msg.payload || msg.value;
@@ -18,15 +21,30 @@ module.exports = function(RED) {
                 value = JSON.parse(value);
             }
 
-            if (typeof server.writeBucket === "function") {
-              try {
-                  server.writeBucket(bucket, value);
-              } catch(e) {
-                  node.error(e);
-              }
+            const method = 'POST';
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/buckets/${bucket}/data`;
+
+            if (typeof server.request === "function") {
+              server.request(node, url, method, value)
+                .then((res) => {
+
+                  // Throw if response fails
+                  if (!res.status.toString().startsWith('20'))
+                      throw res.error;
+
+                  done();
+                })
+                .catch(e => {
+                  delete e.stack;
+                  msg.payload = {}
+                  msg.payload.bucket = bucket;
+                  msg.payload.value = value;
+                  done(e);
+                });
             }
             else
-              node.error("Check Thinger Server Configuration");
+              done("Check Thinger Server Configuration");
+
         });
     }
 

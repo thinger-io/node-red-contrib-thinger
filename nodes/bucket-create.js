@@ -1,5 +1,7 @@
 module.exports = function(RED) {
 
+    "use strict";
+
     /**
      * Will return the interval passed as (1s, 1m) in seconds
      */
@@ -38,7 +40,7 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket read on close
-        node.on("input",function(msg, send) {
+        node.on("input", async function(msg, send, done) {
 
             let json = {};
             json.bucket = config.bucketId || msg.id;
@@ -56,6 +58,11 @@ module.exports = function(RED) {
             let group = config.assetGroup || msg.asset_group;
             if (group) {
                 json.asset_group = group;
+            }
+
+            let product = config.product || msg.product;
+            if (product) {
+                json.product = product;
             }
 
             let jsonConfig = {}
@@ -81,14 +88,38 @@ module.exports = function(RED) {
             }
             json.config = jsonConfig;
 
-            if (typeof server.createBucket === "function") {
-                server.createBucket(json, function(res) {
-                  msg.payload = res;
-                  send(msg);
-                })
-                .catch(e => node.error(e));
-            } else
-                node.error("Check Thinger Server Configuration");
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/buckets`;
+
+            if (typeof server.request === "function") {
+                // Check if bucket exists
+                let exists = true;
+                let res;
+                res = await server.request(node,`${url}/${json.bucket}`, 'GET');
+                if (res.status !== 200)
+                    exists = false;
+
+                // Update if exist or create it
+                try {
+                  if ( exists ) {
+                      let bucket = json.bucket;
+                      delete json.bucket;
+                      res = await server.request(node,`${url}/${bucket}`,'PUT',json);
+                  } else {
+                      res = await server.request(node, url, 'POST', json);
+                  }
+                } catch(err) {
+                    delete err.stack;
+                    msg.payload = json;
+                    done(err);
+                    return;
+                }
+
+                msg.payload = res.payload;
+                send(msg);
+                done();
+            }
+            else
+              done("Check Thinger Server Configuration");
         });
     }
 

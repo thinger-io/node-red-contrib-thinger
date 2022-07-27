@@ -1,0 +1,178 @@
+<script type="text/javascript">
+    RED.nodes.registerType('storage-write', {
+        category: 'thinger',
+        color: '#62b0fe', // #1F8EFE at 30% lightened
+        defaults: {
+            name: {value: ""},
+            storage: {value: ""},
+            file: {value: ""},
+            action: {value: ""},
+            appendNewLine: {value: true},
+            createDir: {value: false},
+            server: {type:"thinger-server", required:true}
+        },
+        icon:"storage.svg",
+        inputs: 1,
+        outputs:0,
+        inputLabels: "event",
+        label: function() {
+            return this.name || ((this.storage && this.file) ? (this.storage + "/" + this.file) : "storage write");
+        },
+        paletteLabel: function() {
+            return "storage write";
+        },
+        oneditprepare: function() {
+
+            const node_id = this.id;
+
+            $("#node-input-storage").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                const field = "storage";
+                const storage = $(this).val();
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let storages = new ThingerStorages(storage,node_id,svr_id);
+                storages.getStorages().then(function(data) {
+                    ThingerDOM.showOptions(field,data,storage,function(value) {
+                        // devices filtering callback
+                        storages = new ThingerStorages(value,node_id,svr_id);
+                        storages.getStorages().then((data) => {ThingerDOM.showOptions(field, data)});
+                    });
+                });
+            });
+
+            $("#node-input-file").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                const field = "file";
+                const file = $(this).val();
+                const storage = $("#node-input-storage").val()
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let storages = new ThingerStorages(storage,node_id,svr_id);
+                storages.getStorages().then(function() {
+                    storages.getStorageFiles(storage).then((data) => {
+                        ThingerDOM.showOptions(field, data, file)
+                    });
+                });
+            });
+
+            $("#node-input-file").change(function(e,obj) {
+
+                if (typeof obj !== "undefined" && obj.textContent !== "") {
+                  if (obj.textContent.endsWith('directory')) {
+                    $(".node-row-recursive").show();
+                    $(".node-row-recursive").trigger("change");
+                  } else {
+                    $(".node-row-recursive").hide();
+                    $("#node-input-recursive").prop("checked", false);
+                    $("#node-input-recursive").trigger("change");
+                  }
+                } else if ($(this).val() !== "") {
+
+                    const file = $(this).val();
+                    const storage = $("#node-input-storage").val()
+                    const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                    let storages = new ThingerStorages(storage,node_id,svr_id);
+                    storages.getStorages().then(function() {
+                      storages.getStorageFiles(storage).then((data) => {
+                          const fileDetails = data.find(e=>e.id === file);
+                          $("#node-input-file").trigger("change",{"textContent":fileDetails.name});
+                      });
+                    });
+                }
+            });
+
+            $("#node-input-action").change(function() {
+                if ($(this).val() !== "delete") {
+                    $(".node-row-appendNewLine").show();
+                    $(".node-row-createDir").show();
+                } else {
+                    $(".node-row-appendNewLine").hide();
+                    $(".node-row-createDir").hide();
+                }
+            });
+
+            $("#node-input-action").val(this.action || "append");
+
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="storage-write">
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-storage"><i class="fa fa-archive"></i> Storage</label>
+        <input type="text" id="node-input-storage" placeholder="Storage Identifier">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-file"><i class="fa fa-file"></i> File</label>
+        <input type="text" id="node-input-file" placeholder="File Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-action"><i class="fa fa-random"></i> Action</label>
+        <select id="node-input-action" style="width:30%; !important">
+            <option value="append" selected>append to file</option>
+            <option value="overwrite">overwrite file</option>
+            <option value="delete">delete file</option>
+        </select>
+    </div>
+
+    <div class="form-row node-row-appendNewLine">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-appendNewLine" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-appendNewLine" style="width: 70%;">Add new line (\n) to each payload?</label>
+    </div>
+
+    <div class="form-row node-row-createDir">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-createDir" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-createDir" style="width: 70%;">Create file/directory if it doesn't exist?</label>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+
+</script>
+
+<script type="text/markdown" data-help-name="storage-write">
+Writes a file to a storage.
+
+### Inputs
+: storage (string) : the id of the storage to write from.
+: *file* (string) : the file path or directory path of the storage to write.
+: *action* (string) : sets the action to execute on the file (append, overwrite or delete).
+: *append_new_line* (boolean) : decides if a new line character should be added each time.
+: *create_dir* (boolean) : decides if the file and/or directory should be created if it does not already exist.
+
+### Outputs
+
+: payload (object) : the standard output of the command.
+
+### Details
+This node is able to write any text file (plain, csv, json, ...) or a Byte Buffer to any file.
+
+Each message payload will be added to the end of the file, optionally appending a newline (\n) character between each one.
+
+It can be configured to overwrite the entire file rather than append. For example, when writing binary data to a file, such as an image, this option should be used and the option to append a newline should be disabled.
+
+Alternatively, this node can be configured to delete the file.
+
+The node allows the configuration via the edit dialog or through an input message.
+The values assigned through the input message will have priority over the config dialog.
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
+</script>

@@ -2,7 +2,7 @@
 
     RED.nodes.registerType('property-write', {
         category: 'thinger',
-        color: '#74b9ff',
+        color: '#62b0fe', // #1F8EFE at 30% lightened
         defaults: {
             name: {value:""},
             asset: {value: ""},
@@ -11,7 +11,7 @@
             value: {value: ""},
             server: {type:"thinger-server", required:true}
         },
-        icon:"thinger_logo_white.png",
+        icon:"property.svg",
         inputs: 1,
         outputs: 1,
         align: 'left',
@@ -34,6 +34,8 @@
                 var editor_value = JSON.parse(editor.getValue());
                 editor.setValue(JSON.stringify(editor_value,null,'\t'));
             }
+
+            const node_id =  this.node_id;
 
             // Save original assetId row to restore in case of asset change
             var originalAssetId = $(".node-row-assetId")[0].outerHTML;
@@ -58,17 +60,21 @@
                 var assetType = $(this).val();
 
                 if (assetType) {
+                    // Field appearance
                     ThingerDOM.changeInputField(assetType,"assetId");
-
-                    let assets = new (assetClass.get(`${assetType}s`))();
 
                     // Options and filtering
                     $("#node-input-assetId").focus(function() {
+                        if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
                         const field = "assetId";
                         const assetId = $(this).val();
+
+                        const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                        let assets = new (assetClass.get(`${assetType}s`))(assetId,node_id,svr_id);
                         assets.getAssets().then(function(data) {
                             ThingerDOM.showOptions(field,data,assetId,function(value) {
-                                assets = new (assetClass.get(`${assetValue}s`))(value);
+                                assets = new (assetClass.get(`${assetType}s`))(value,node_id,svr_id);
                                 assets.getAssets().then((data) => {ThingerDOM.showOptions(field, data)});
                             });
                         });
@@ -76,9 +82,14 @@
 
                     // Properties
                     $('#node-input-property').focus(function() {
+                        if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
                         const assetId = $("#node-input-assetId").val();
                         const property = $(this).val();
-                        const asset = new (assetClass.get(`${assetType}`))(assetId);
+
+                        const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                        const asset = new (assetClass.get(`${assetType}`))(assetId,"",node_id,svr_id); // If order is altered check devices, types, groups, and products
+
                         if (assetId) {
                             asset.getProperties().then(function(data) {
                                 ThingerDOM.showOptions("property",data,property);
@@ -89,7 +100,6 @@
                             });
                         }
                     });
-
 
                 }
             });
@@ -128,6 +138,7 @@
                 <option value="device">device</option>
                 <option value="type">type</option>
                 <option value="group">group</option>
+                <option value="product">product</option>
             </select>
         </div>
     </div>
@@ -158,50 +169,32 @@
 
 </script>
 
-<script type="text/x-red" data-help-name="property-write">
-    <p>Writes or modifies a property to either a device, type or group.</p>
+<script type="text/markdown" data-help-name="property-write">
+Writes or modifies a property to either a device, type or group.
 
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>asset <span class="property-type">string</span></dt>
-        <dd> the type of asset (<samp>device</samp>, <samp>type</samp> or <samp>group</samp>).</dd>
-        <dt>asset_id <span class="property-type">string</span></dt>
-        <dd> the id of the asset to read the property from.</dd>
-        <dt>property <span class="property-type">string</span></dt>
-        <dd> the name of the property to read its value.</dd>
-        <dt>payload <span class="property-type">string</span></dt>
-        <dd> the payload of the value of the property.</dd>
-    </dl>
+### Inputs
 
-     <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li>Standard output
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard output of the command.</dd>
-             </dl>
-         </li>
-         <!-- li>Standard error
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard error of the command.</dd>
-             </dl>
-         </li -->
-     </ol>
+: asset (string) : the type of asset (<samp>device</samp>, <samp>type</samp> or <samp>group</samp>).
+: asset_id (string) : the id of the asset to read the property from.
+: property (string) : the name of the property to read its value.
+: payload (string) : the payload of the value of the property.
 
-    <h3>Details</h3>
-    <p>The node allows the configuration via the edit dialog or through an input message.
-    The values assigned through the dialog will have priority over the message.</p>
+### Outputs
 
-    <p>The values of the field <code>msg.asset_id</code> must exist in the Thinger platform, otherwise the flow will fail</p>
+: payload (object) : the standard output of the command.
 
-    <p>The values of the fields <code>msg.property</code> and <code>msg.payload</code> may not exist in the Thinger platform, as they will be created on write.</p>
+### Details
+The node allows the configuration via the edit dialog or through an input message.
+The values assigned through the dialog will have priority over the message.
 
-    <h3>References</h3>
-    <ul>
-        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
-        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
-        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
-        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
-    </ul>
+The values of the field `msg.asset_id` must exist in the Thinger platform, otherwise the flow will fail.
+
+The values of the fields `msg.property` and `msg.payload` may not exist in the Thinger platform, as they will be created on write.
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
 </script>

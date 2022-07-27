@@ -1,14 +1,14 @@
 <script type="text/javascript">
     RED.nodes.registerType('device-read', {
         category: 'thinger',
-        color: '#74b9ff',
+        color: '#62b0fe', // #1F8EFE at 30% lightened
         defaults: {
             name: {value: ""},
             device: {value: ""},
             resource: {value: ""},
             server: {type:"thinger-server", required:true}
         },
-        icon:"thinger_logo_white.png",
+        icon:"device.svg",
         inputs: 1,
         outputs:1,
         inputLabels: "event",
@@ -20,28 +20,38 @@
         },
         oneditprepare: function() {
 
-            $("#node-input-device").focus(function() {
-                const field1 = "device";
-                const device1 = $(this).val();
-                let devices = new ThingerDevices(device1);
-                devices.getDevices().then(function(data) {
-                    ThingerDOM.showOptions(field1,data,device1,function(value) {
-                        // devices filtering callback
-                        devices = new ThingerDevices(value);
-                        devices.getDevices().then((data) => {ThingerDOM.showOptions(field1, data)});
-                    });
+            const node_id = this.id;
 
-                    $("#node-input-resource").off('focus');
-                    $("#node-input-resource").focus(function() {
-                        const field2 = "resource";
-                        const resource = $(this).val();
-                        const device2 = $("#node-input-device").val()
-                        devices.getDeviceOutputResources(device2).then(function(data) {
-                            ThingerDOM.showOptions(field2,data,resource);
-                        });
-                    })
+            $("#node-input-device").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                const field = "device";
+                const device = $(this).val();
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let devices = new ThingerDevices(device,node_id,svr_id);
+                devices.getDevices().then(function(data) {
+                    ThingerDOM.showOptions(field,data,device,function(value) {
+                        // devices filtering callback
+                        devices = new ThingerDevices(value,node_id,svr_id);
+                        devices.getDevices().then((data) => {ThingerDOM.showOptions(field, data)});
+                    });
                 });
             });
+
+            $("#node-input-resource").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                const field = "resource";
+                const resource = $(this).val();
+                const device = $("#node-input-device").val()
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let devices = new ThingerDevices(device,node_id,svr_id);
+                devices.getDevices().then(function() {
+                    devices.getDeviceOutputResources(device).then(function(data) {
+                        ThingerDOM.showOptions(field,data,resource);
+                    });
+                });
+             });
 
         }
     });
@@ -67,42 +77,26 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="device-read">
-    <p>Reads a resource value from a connected device.</p>
+<script type="text/markdown" data-help-name="device-read">
+Reads a resource value from a connected device.
 
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>device <span class="property-type">string</span></dt>
-        <dd> the id of the device to read from.</dd>
-        <dt>resource <span class="property-type">string</span></dt>
-        <dd> the resource of the device to read from.</dd>
-    </dl>
+### Inputs
 
-     <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li>Standard output
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard output of the command.</dd>
-             </dl>
-         </li>
-         <!-- li>Standard error
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard error of the command.</dd>
-             </dl>
-         </li -->
-     </ol>
+: device (string) : the id of the device to read from.
+: resource (string) : the resource of the device to read from.
 
-    <h3>Details</h3>
-    <p>The node allows the configuration via the edit dialog or through an input message.
-    The values assigned through the dialog will have priority over the message.</p>
+### Outputs
 
-    <h3>References</h3>
-    <ul>
-        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
-        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
-        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
-        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
-    </ul>
+: payload (object) : the standard output of the command.
+
+### Details
+The node allows the configuration via the edit dialog or through an input message.
+The values assigned through the dialog will have priority over the message.
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
 </script>

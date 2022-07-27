@@ -1,0 +1,85 @@
+[
+    {
+        "id": "62f5e2c73f4b75a1",
+        "type": "tab",
+        "label": "Read file from storage",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "d01d504cd02f139c",
+        "type": "inject",
+        "z": "62f5e2c73f4b75a1",
+        "name": "",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 95,
+        "y": 120,
+        "wires": [
+            [
+                "2a8b3860a5737d23"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "2a8b3860a5737d23",
+        "type": "storage-read",
+        "z": "62f5e2c73f4b75a1",
+        "name": "Read image into base64",
+        "storage": "storage",
+        "file": "node-red-example-2.png",
+        "data": "content",
+        "recursive": false,
+        "minDepth": 0,
+        "maxDepth": -1,
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 270,
+        "y": 120,
+        "wires": [
+            [
+                "920ca8fe8681b134"
+            ]
+        ]
+    },
+    {
+        "id": "920ca8fe8681b134",
+        "type": "debug",
+        "z": "62f5e2c73f4b75a1",
+        "name": "debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 455,
+        "y": 120,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "9b0ab93f5460f855",
+        "type": "comment",
+        "z": "62f5e2c73f4b75a1",
+        "name": "Read image from storage into base64",
+        "info": "",
+        "x": 210,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "ec0dd4b1ef5aa9a8",
+        "type": "thinger-server",
+        "host": "$(THINGER_HOST)",
+        "name": "local",
+        "ssl": false
+    }
+]

@@ -1,0 +1,84 @@
+[
+    {
+        "id": "f97f6a87507994fb",
+        "type": "tab",
+        "label": "Call endpoint on device disconnection",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "972e3775ba838783",
+        "type": "server-events",
+        "z": "f97f6a87507994fb",
+        "name": "",
+        "asset": "device",
+        "event": "device_state_change",
+        "filter": "",
+        "filters": {
+            "state": "disconnected"
+        },
+        "bucket": "",
+        "device": "",
+        "endpoint": "",
+        "state": "disconnected",
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 160,
+        "y": 120,
+        "wires": [
+            [
+                "ef4947ea565b03aa"
+            ]
+        ]
+    },
+    {
+        "id": "ef4947ea565b03aa",
+        "type": "endpoint-call",
+        "z": "f97f6a87507994fb",
+        "name": "call device_disconnected",
+        "endpoint": "device_disconnected",
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 430,
+        "y": 120,
+        "wires": [
+            [
+                "48db731665910be4"
+            ]
+        ]
+    },
+    {
+        "id": "48db731665910be4",
+        "type": "debug",
+        "z": "f97f6a87507994fb",
+        "name": "debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 595,
+        "y": 120,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "1d983f0b99c68ed0",
+        "type": "comment",
+        "z": "f97f6a87507994fb",
+        "name": "Call device disconnection endpoint when device disconnects",
+        "info": "",
+        "x": 280,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "ec0dd4b1ef5aa9a8",
+        "type": "thinger-server",
+        "host": "$(THINGER_HOST)",
+        "name": "local",
+        "ssl": false
+    }
+]

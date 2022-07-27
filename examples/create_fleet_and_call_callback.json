@@ -1,0 +1,148 @@
+[
+    {
+        "id": "286caec7b8f4b2f4",
+        "type": "tab",
+        "label": "Create fleet of HTTP devices and call callback",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "1f21e7312eea4f55",
+        "type": "inject",
+        "z": "286caec7b8f4b2f4",
+        "name": "",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 85,
+        "y": 120,
+        "wires": [
+            [
+                "039120b4947aea2d"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "039120b4947aea2d",
+        "type": "function",
+        "z": "286caec7b8f4b2f4",
+        "name": "loop",
+        "func": "\nfor (let i = 0; i < 1; i++) {\n    let new_msg = {};\n    new_msg.device = `device_${i}`;\n    new_msg.name = `device_${i}`;\n    new_msg.description = \"Autoprovisioned from Node-RED\";\n    node.send(new_msg);\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 180,
+        "y": 120,
+        "wires": [
+            [
+                "6f1b851a47fe357b"
+            ]
+        ]
+    },
+    {
+        "id": "a34fc95c27ef6ef4",
+        "type": "debug",
+        "z": "286caec7b8f4b2f4",
+        "name": "debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 705,
+        "y": 120,
+        "wires": [],
+        "l": false
+    },
+    {
+        "id": "6f1b851a47fe357b",
+        "type": "device-create",
+        "z": "286caec7b8f4b2f4",
+        "name": "",
+        "deviceType": "HTTP",
+        "deviceId": "",
+        "deviceName": "",
+        "description": "",
+        "assetType": "",
+        "assetGroup": "",
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 330,
+        "y": 120,
+        "wires": [
+            [
+                "c6766668fbe6cd90"
+            ]
+        ]
+    },
+    {
+        "id": "0d372642376aa1e9",
+        "type": "device-callback",
+        "z": "286caec7b8f4b2f4",
+        "name": "",
+        "device": "",
+        "body": "",
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 580,
+        "y": 120,
+        "wires": [
+            [
+                "a34fc95c27ef6ef4"
+            ]
+        ]
+    },
+    {
+        "id": "c6766668fbe6cd90",
+        "type": "change",
+        "z": "286caec7b8f4b2f4",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"value\": 2}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 445,
+        "y": 120,
+        "wires": [
+            [
+                "0d372642376aa1e9"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "d755b5aee82c5751",
+        "type": "comment",
+        "z": "286caec7b8f4b2f4",
+        "name": "Create fleet of HTTP and call their callback after creation",
+        "info": "",
+        "x": 260,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "ec0dd4b1ef5aa9a8",
+        "type": "thinger-server",
+        "host": "$(THINGER_HOST)",
+        "name": "local",
+        "ssl": false
+    }
+]

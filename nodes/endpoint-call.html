@@ -1,13 +1,13 @@
 <script type="text/javascript">
     RED.nodes.registerType('endpoint-call', {
         category: 'thinger',
-        color: '#74b9ff',
+        color: '#62b0fe', // #1F8EFE at 30% lightened
         defaults: {
             name: {value:""},
             endpoint: {value: ""},
             server: {type:"thinger-server", required:true}
         },
-        icon:"thinger_logo_white.png",
+        icon:"server.svg",
         inputs: 1,
         outputs: 1,
         align: 'left',
@@ -19,15 +19,20 @@
         },
         oneditprepare: function() {
 
+            const node_id = this.id;
+
             // Event handlers and requests
             $("#node-input-endpoint").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
                 const field = "endpoint";
                 const endpoint = $(this).val();
-                let endpoints = new ThingerEndpoints(endpoint);
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let endpoints = new ThingerEndpoints(endpoint,node_id,svr_id);
                 endpoints.getEndpoints().then(function(data) {
                     ThingerDOM.showOptions(field, data, endpoint, function(value) {
                         // endpoints filtering callback
-                        endpoints = new ThingerEndpoints(value);
+                        endpoints = new ThingerEndpoints(value,node_id,svr_id);
                         endpoints.getEndpoints().then((data) => {ThingerDOM.showOptions(field,data)});
                     });
                 });
@@ -53,43 +58,28 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="endpoint-call">
-    <p>Calls a server endpoint with the supplied input payload.</p>
+<script type="text/markdown" data-help-name="endpoint-call">
+Calls a server endpoint with the supplied input payload.
 
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>device <span class="property-type">string</span></dt>
-        <dd> the id of the endpoint to call.</dd>
-        <dt>payload <span class="property-type">string</span></dt>
-        <dd> the payload of the message to send.</dd>
-    </dl>
+### Inputs
 
-     <h3>Outputs</h3>
-     <ol class="node-ports">
-         <li>Standard output
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard output of the command.</dd>
-             </dl>
-         </li>
-         <!-- li>Standard error
-             <dl class="message-properties">
-                 <dt>payload <span class="property-type">string</span></dt>
-                 <dd>the standard error of the command.</dd>
-             </dl>
-         </li -->
-     </ol>
+: endpoint (string) : the id of the endpoint to call.
+: payload (string) : the payload of the message to send.
 
-    <h3>Details</h3>
-    <p>The node allows the configuration of the endpoint via the edit dialog or through an input message.
-    The values assigned through the dialog will have priority over the message.</p>
-    <p>The input <code>msg.payload</code> is not available through the edit dialog and can only be passed through the input.</p>
+### Outputs
 
-    <h3>References</h3>
-    <ul>
-        <li><a href="https://docs.thinger.io/plugins/node-red">Thinger Node-RED Plugin</a> - full description of the plugin</li>
-        <li><a href="https://github.com/thinger-io/Node-RED">GitHub</a> - the nodes github repository</li>
-        <li><a href="https://www.npmjs.com/package/node-red-contrib-thinger">npm</a> - the nodes npm repository</li>
-        <li><a href="https://thinger.io/">Thinger.io</a> - full description of the plugin</li>
-    </ul>
+: payload (object) : the standard output of the command.
+
+### Details
+The node allows the configuration of the endpoint via the edit dialog or through an input message.
+The values assigned through the dialog will have priority over the message.
+
+The input `msg.payload` is not available through the edit dialog and can only be passed through the input.
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
 </script>

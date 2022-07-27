@@ -1,5 +1,7 @@
 module.exports = function(RED) {
 
+    "use strict";
+
     function DeviceWriteNode(config) {
         RED.nodes.createNode(this, config);
 
@@ -10,26 +12,40 @@ module.exports = function(RED) {
         var server = RED.nodes.getNode(config.server);
 
         // call bucket write on message reception
-        node.on("input",function(msg, send) {
+        node.on("input",function(msg, send, done) {
 
             let device = config.device || msg.device;
             let resource = config.resource || msg.resource;
-            var value = config.value || msg.payload || msg.value;
-            if (typeof(value) === 'string') {
-                value = JSON.parse(value);
+            var data = config.value || msg.payload || msg.value;
+
+            const method = 'POST';
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${device}/resources/${resource}`;
+
+            if (typeof server.request === "function") {
+              server.request(node, url, method, data)
+              .then(res => {
+
+                // Throw if response fails
+                if (!res.status.toString().startsWith('20'))
+                  throw res.error;
+
+                if (res && res.length != 0)
+                  msg.payload = res.payload;
+
+                 send(msg);
+                 done();
+              })
+              .catch(e => {
+                  delete e.stack;
+                  msg.payload = {};
+                  msg.payload.device = device;
+                  msg.payload.resource = resource;
+                  msg.payload.data = data;
+                  done(e);
+              });
             }
-
-            if (typeof server.writeDevice === "function") {
-                server.writeDevice(device, resource, value, function(res) {
-
-                    if (res && res.length != 0)
-                        msg.payload = res;
-
-                    send(msg);
-                })
-                .catch(e => node.error(e));
-            } else
-                node.error("Check Thinger Server Configuration");
+            else
+              done("Check Thinger Server Configuration");
         });
     }
 
