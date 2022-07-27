@@ -1,0 +1,85 @@
+[
+    {
+        "id": "a40e4ceda3265b9d",
+        "type": "tab",
+        "label": "Save image",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "5dc8d9cd4cbcdc1a",
+        "type": "inject",
+        "z": "a40e4ceda3265b9d",
+        "name": "",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 370,
+        "y": 240,
+        "wires": [
+            [
+                "34661f965b265d5c"
+            ]
+        ]
+    },
+    {
+        "id": "34661f965b265d5c",
+        "type": "http request",
+        "z": "a40e4ceda3265b9d",
+        "name": "download image",
+        "method": "GET",
+        "ret": "bin",
+        "paytoqs": "ignore",
+        "url": "http://infocar.dgt.es/etraffic/data/camaras/18.jpg",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 560,
+        "y": 240,
+        "wires": [
+            [
+                "966b59a23a480762"
+            ]
+        ]
+    },
+    {
+        "id": "966b59a23a480762",
+        "type": "storage-write",
+        "z": "a40e4ceda3265b9d",
+        "name": "",
+        "storage": "storage",
+        "file": "dgt/tordesillas.jpg",
+        "action": "overwrite",
+        "appendNewLine": true,
+        "createDir": true,
+        "server": "ec0dd4b1ef5aa9a8",
+        "x": 810,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "96b2c0a3214eaba7",
+        "type": "comment",
+        "z": "a40e4ceda3265b9d",
+        "name": "Save an image from the web into an storage",
+        "info": "",
+        "x": 470,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "ec0dd4b1ef5aa9a8",
+        "type": "thinger-server",
+        "host": "${THINGER_HOST}",
+        "name": "local",
+        "ssl": false,
+        "maxSockets": "0"
+    }
+]
