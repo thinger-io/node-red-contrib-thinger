@@ -114,7 +114,6 @@ module.exports = function(RED) {
             queryParameters.set('agg_type',config.aggregationType || msg.aggregation_type);
             queryParameters.set('sort',config.sort || msg.sort);
 
-
             // Timeframe filters
             let filter = config.filter || msg.filter;
             var isFilterTime = true;
@@ -147,7 +146,7 @@ module.exports = function(RED) {
                     minTs = new Date(config.minTs || msg.min_ts).getTime();
                     break;
                 case "simple":
-                    //if selection of last N items, the query will be done as desc and sorted to asc after
+                    //if selection of last N items, the query will be done as desc and sorted to asc after, otherwise, result would not be last
                     if (queryParameters.get('sort') == "asc") {
                         queryParameters.set('sort','desc');
                         isSimpleSorting = true;
@@ -173,11 +172,11 @@ module.exports = function(RED) {
             readBucket(server, node, bucket, queryParameters, limit, result)
               .then(function(data) {
                 if (isSimpleSorting) { // sort last N items asc if needed
-                    result = data.sort(function(a,b) {
+                    data = data.sort(function(a,b) {
                         return a.ts - b.ts;
                     });
                 }
-                msg.payload = result;
+                msg.payload = data;
                 send(msg);
                 done();
               })

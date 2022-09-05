@@ -193,7 +193,7 @@ class ThingerDevice extends ThingerAsset {
         let inputResources = [];
         return this.getResources().then(function (data) {
             for (let i in data) {
-                if (data[i].isInput() || data[i].isInputOutput()) {
+                if (data[i].withoutParams() || data[i].isInput() || data[i].isInputOutput()) { // no params still need a way to be called
                     inputResources.push(data[i]);
                 }
             }
@@ -241,6 +241,18 @@ class ThingerResource {
     constructor(id,fn) {
         this.id = id;
         this.fn = fn;
+        if (fn === 1)
+          this.name = "no parameters";
+        else if (fn === 2)
+          this.name = "input";
+        else if (fn === 3)
+          this.name = "output";
+        else if (fn === 4)
+          this.name = "input/output";
+    }
+
+    withoutParams() {
+        return this.fn === 1;
     }
 
     isInput() {
