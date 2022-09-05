@@ -68,6 +68,16 @@
                 });
             });
 
+            $("#node-input-resource").change(function(e, obj) {
+                if (typeof obj !== "undefined" && obj.textContent.endsWith("no parameters")) {
+                    //editor.clear();
+                    editor.setValue("");
+                    editor.updateOptions({ readOnly: true });
+                } else {
+                    editor.updateOptions({ readOnly: false });
+                }
+            });
+
         },
         oneditsave: function() {
             // remove pretty characters and save
@@ -99,7 +109,7 @@
     </div>
     <div class="form-row">
         <label for="node-input-resource"><i class="fa fa-gear"></i> Resource</label>
-        <input type="text" id="node-input-resource" placeholder="Device Identifier">
+        <input type="text" id="node-input-resource" placeholder="Resource Identifier">
     </div>
     <div class="form-row">
         <label for="node-input-value" style="vertical-align: top;"><i class="fa fa-pencil-square"></i> Value</label>
