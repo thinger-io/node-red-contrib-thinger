@@ -47,7 +47,7 @@ module.exports = function(RED) {
         queryParameters.set('items',limit > 1000 || limit < 0 ? 1000 : limit);
 
         // Query parameters to string
-        var queryParametersString = "";
+        let queryParametersString = "";
         queryParameters.forEach(function(value,key) {
             if (value) {
                 queryParametersString += key+"="+value+"&";

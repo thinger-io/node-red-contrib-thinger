@@ -46,7 +46,7 @@ class ThingerAsset {
 
     constructor(type,node_id,svr_id="") {
         this.type = type;
-        this.node_id = node_id,
+        this.node_id = node_id;
         this.svr_id = svr_id;
     }
 

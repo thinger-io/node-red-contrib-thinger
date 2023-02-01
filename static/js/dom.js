@@ -74,10 +74,14 @@ class ThingerDOM {
             case 'oauth_client':  fieldIcon.addClass("fa fa-key");              break;
             case 'product':       fieldIcon.addClass("fa fa-shopping-bag");     break;
             case 'project':       fieldIcon.addClass("fa fa-folder");           break;
+            case 'proxy':         fieldIcon.addClass("fa fa-map-signs");        break;
+            case 'role':          fieldIcon.addClass("fa fa-shield");           break;
             case 'storage':       fieldIcon.addClass("fa fa-hdd-o");            break;
+            case 'sync':          fieldIcon.addClass("fa fa-refresh");          break;
             case 'token':         fieldIcon.addClass("fa fa-lock");             break;
             case 'type':          fieldIcon.addClass("fa fa-list-ul");          break;
             case 'user':          fieldIcon.addClass("fa fa-users");            break;
+            default:              fieldIcon.addClass("fa fa-filter");           break;
         }
 
         fieldLabel.empty();

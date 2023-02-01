@@ -81,11 +81,11 @@ module.exports = function(RED) {
             let assetGroup = msg.asset_group || "";
 
             let prefix = "";
-            if (msg.prefix || (msg.device && !config.device)) {
-                prefix = msg.prefix ? msg.prefix : "NR_";
+            if (msg.hasOwnProperty(prefix) || (msg.device && !config.device)) {
+                prefix = msg.hasOwnProperty("prefix") ? msg.prefix : "NR_";
             }
 
-            var data = config.body || msg.payload || msg.body;
+            let data = config.body || msg.payload || msg.body;
             if (typeof(data) === 'string') {
                 data = JSON.parse(data);
             }
@@ -93,17 +93,18 @@ module.exports = function(RED) {
             if (typeof server.request === "function") {
 
                 try {
-                    const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${device}/callback`;
+                    const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${prefix}${device}/callback`;
 
                     // Check if device exists if not autoprovision resources
-                    const res1 = await server.request(node,url,'GET');
-                    if ( !res1.payload ) {
+                    let res = await server.request(node,`${url}/data`,'POST',data);
+                    if ( res.status !== 200 ) {
 
                         await provisionBucket(server,node,prefix,device,assetType,assetGroup);
                         await provisionDevice(server,node,prefix,device,assetType,assetGroup);
+                        res = await server.request(node,`${url}/data`,'POST',data);
+
                     }
 
-                    const res = await server.request(node,`${url}/data`,'POST',data);
                     msg.payload = res.payload;
                     send(msg);
                     done();
