@@ -491,7 +491,7 @@ module.exports = function(RED) {
             server = RED.nodes.getNode(req.query.svr_id);
         }
 
-        if (typeof server === undefined || !server) {
+        if (typeof server === "undefined" || !server) {
             host = 'backend.thinger.io'
         } else {
             host = server.config.host;

@@ -7,7 +7,7 @@ module.exports = function(RED) {
         RED.nodes.createNode(this, config);
 
         function handleResponse(msg, res, assetType, assetGroup) {
-            for (var i in res) {
+            for (const i in res) {
                 let type = res[i].asset_type;
                 let group = res[i].asset_group;
 

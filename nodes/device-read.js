@@ -24,12 +24,13 @@ module.exports = function(RED) {
               server.request(node, url, method, msg.payload)
               .then(res => {
                 // Throw if response fails
-                if (!res.status.toString().startsWith('20'))
+                if (!res.status.toString().startsWith('20')) {
                     throw res.error;
+                }
 
-                  msg.payload = res.payload;
-                  send(msg);
-                  done();
+                msg.payload = res.payload;
+                send(msg);
+                done();
               })
               .catch(e => {
                   delete e.stack;

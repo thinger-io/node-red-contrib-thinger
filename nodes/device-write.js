@@ -16,7 +16,7 @@ module.exports = function(RED) {
 
             let device = config.device || msg.device;
             let resource = config.resource || msg.resource;
-            var data = config.value || msg.payload || msg.value;
+            let data = config.value || msg.payload || msg.value;
 
             const method = 'POST';
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${device}/resources/${resource}`;
@@ -29,11 +29,12 @@ module.exports = function(RED) {
                 if (!res.status.toString().startsWith('20'))
                   throw res.error;
 
-                if (res && res.length != 0)
+                if (res && res.length != 0) {
                   msg.payload = res.payload;
+                }
 
-                 send(msg);
-                 done();
+                send(msg);
+                done();
               })
               .catch(e => {
                   delete e.stack;
