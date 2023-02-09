@@ -2,7 +2,7 @@ module.exports = function(RED) {
 
     "use strict";
 
-    async function provisionDevice(server,node,prefix,device,assetType,assetGroup) {
+    async function provisionDevice(server,node,prefix,device,assetType,assetGroup,product) {
         // create auto provisioned device
         let data = {};
         data.type = "HTTP";
@@ -15,6 +15,9 @@ module.exports = function(RED) {
         if (assetGroup) {
             data.asset_group = assetGroup;
         }
+        if (product) {
+            data.product = product;
+        }
 
         let url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/devices`;
 
@@ -26,11 +29,11 @@ module.exports = function(RED) {
         // set write bucket action for callback
         const dataAction = {
           "actions": {
-            "write_bucket": device
+            "write_bucket": `${prefix}${device}`
           }
         };
 
-        url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${device}/callback`;
+        url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${prefix}${device}/callback`;
         res = await server.request(node,url,'PUT',dataAction);
         if ( !res ) {
             return new Error(`Could not configure device callback to write bucket action`);
@@ -38,7 +41,7 @@ module.exports = function(RED) {
 
     }
 
-    async function provisionBucket(server,node,prefix,device,assetType,assetGroup) {
+    async function provisionBucket(server,node,prefix,device,assetType,assetGroup,product) {
         // create auto provisioned bucket
         let data = {};
         data.bucket = prefix+device;
@@ -51,6 +54,9 @@ module.exports = function(RED) {
         }
         if (assetGroup) {
             data.asset_group = assetGroup;
+        }
+        if (product) {
+            data.product = product;
         }
 
         const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/buckets`;
@@ -80,6 +86,8 @@ module.exports = function(RED) {
 
             let assetGroup = msg.asset_group || "";
 
+            let product = msg.product || "";
+
             let prefix = "";
             if (msg.hasOwnProperty(prefix) || (msg.device && !config.device)) {
                 prefix = msg.hasOwnProperty("prefix") ? msg.prefix : "NR_";
@@ -99,8 +107,8 @@ module.exports = function(RED) {
                     let res = await server.request(node,`${url}/data`,'POST',data);
                     if ( res.status !== 200 ) {
 
-                        await provisionBucket(server,node,prefix,device,assetType,assetGroup);
-                        await provisionDevice(server,node,prefix,device,assetType,assetGroup);
+                        await provisionBucket(server,node,prefix,device,assetType,assetGroup,product);
+                        await provisionDevice(server,node,prefix,device,assetType,assetGroup,product);
                         res = await server.request(node,`${url}/data`,'POST',data);
 
                     }
@@ -115,6 +123,7 @@ module.exports = function(RED) {
                     msg.payload.device = device;
                     msg.payload.assetType = assetType;
                     msg.payload.assetGroup = assetGroup;
+                    msg.payload.product = product;
                     msg.payload.prefix = prefix;
                     msg.payload.data = data;
                     done(err);

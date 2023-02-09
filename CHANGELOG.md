@@ -3,11 +3,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.4.3] - 2023-02-09
+### Fix
+- Device callback node failed linking autoprovisioned device and bucket if prefix is present
+- Missing assignment of product on device and bucket autoprovion in device callback node
+
 ## [1.4.2] - 2023-01-26
 ### Changed
 - Device callback node calls the callback and autoprovisions the device if it fails, instead of checking if it exists before calling callback
 ### Fix
-- Device callback node failed after autoprovioning resources
+- Device callback node failed after autoprovisioning resources
 - Missing icons for assets 'role' and 'proxy'
 
 ## [1.4.1] - 2022-09-05
@@ -156,7 +161,8 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
-[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.4.2...HEAD
+[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.4.3...HEAD
+[1.4.3]: https://github.com/thinger-io/Node-RED/compare/1.4.1...1.4.3
 [1.4.2]: https://github.com/thinger-io/Node-RED/compare/1.4.1...1.4.2
 [1.4.1]: https://github.com/thinger-io/Node-RED/compare/1.4.0...1.4.1
 [1.4.0]: https://github.com/thinger-io/Node-RED/compare/1.3.2...1.4.0
