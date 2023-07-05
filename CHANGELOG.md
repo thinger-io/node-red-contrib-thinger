@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.0] - 2023-07-05
+### Added
+- Filter by tags available in bucket read node
+- Add data tags in bucket create node
+- Add project to device create and bucket create nodes
+
+### Fix
+- Hidden device resources should not be shown
+- Asset iterator not able to query for alarms and proxies
+
 ## [1.4.3] - 2023-02-09
 ### Fix
 - Device callback node failed linking autoprovisioned device and bucket if prefix is present
@@ -161,8 +171,9 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
-[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.4.3...HEAD
-[1.4.3]: https://github.com/thinger-io/Node-RED/compare/1.4.1...1.4.3
+[Unreleased]: https://github.com/thinger-io/Node-RED/compare/1.5.0...HEAD
+[1.5.0]: https://github.com/thinger-io/Node-RED/compare/1.4.3...1.5.0
+[1.4.3]: https://github.com/thinger-io/Node-RED/compare/1.4.2...1.4.3
 [1.4.2]: https://github.com/thinger-io/Node-RED/compare/1.4.1...1.4.2
 [1.4.1]: https://github.com/thinger-io/Node-RED/compare/1.4.0...1.4.1
 [1.4.0]: https://github.com/thinger-io/Node-RED/compare/1.3.2...1.4.0

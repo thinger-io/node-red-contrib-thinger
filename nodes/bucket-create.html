@@ -20,6 +20,7 @@
             bucket: {value: ""},
             description: {value: ""},
             enabled: {value: ""},
+            tags: {value: "[]"},
             source: {value: ""},
             extraSource: {value: ""}, // mqtt topic or device
             resource: {value: ""},
@@ -28,6 +29,7 @@
             assetType: {value: ""},
             assetGroup: {value: ""},
             product: {value: ""},
+            projects: {value: "[]"},
             server: {type:"thinger-server", required:true}
         },
         icon:"bucket.svg",
@@ -63,38 +65,17 @@
                 }
             });
 
-            $("#node-input-device").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "device";
-                const device = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let devices = new ThingerDevices(device,node_id,svr_id);
-                devices.getDevices().then(function(data) {
-                    ThingerDOM.showOptions(field,data,device,function(value) {
-                        // devices filtering callback
-                        devices = new ThingerDevices(value,node_id,svr_id);
-                        devices.getDevices().then((data) => {ThingerDOM.showOptions(field, data)});
-                    });
-                });
-            });
-
-            $("#node-input-resource").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "resource";
-                const resource = $(this).val();
-                const device = $("#node-input-device").val()
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let devices = new ThingerDevices(device,node_id,svr_id);
-                devices.getDevices().then(function() {
-                    devices.getDeviceOutputResources(device).then(function(data) {
-                      ThingerDOM.showOptions(field,data,resource);
-                    });
-                });
+            $("#node-input-tags").typedInput({
+              type:"json",
+              types:["json"]
             })
 
-            $("#node-input-update").change(function() {
+            $("#node-input-projects").typedInput({
+              type:"json",
+              types:["json"]
+            })
+
+           $("#node-input-update").change(function() {
                 if ($(this).val() === "interval") {
                     $("#node-input-intervalValue").show();
                     $("#node-input-intervalUnits").show();
@@ -107,54 +88,6 @@
                     $("#node-input-intervalValue").val("");
                     $("#node-input-intervalUnits").val("m");
                 }
-            });
-
-            $("#node-input-assetType").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "assetType";
-                const type = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let types = new ThingerTypes(type,node_id,svr_id);
-                types.getTypes().then(function(data) {
-                    ThingerDOM.showOptions(field, data, type, function(value) {
-                        // types filtering callback
-                        types = new ThingerTypes(value,node_id,svr_id);
-                        types.getTypes().then((data) => {ThingerDOM.showOptions(field,data)});
-                    });
-                });
-            });
-
-            $("#node-input-assetGroup").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "assetGroup";
-                const group = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let groups = new ThingerGroups(group,node_id,svr_id);
-                groups.getGroups().then(function(data) {
-                    ThingerDOM.showOptions(field, data, group, function(value) {
-                        // groups filtering callback
-                        groups = new ThingerGroups(value,node_id,svr_id);
-                        groups.getGroups().then((data) => {ThingerDOM.showOptions(field,data)});
-                    });
-                });
-            });
-
-            $("#node-input-product").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "product";
-                const product = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let products = new ThingerProducts(product,node_id,svr_id);
-                products.getProducts().then(function(data) {
-                    ThingerDOM.showOptions(field, data, product, function(value) {
-                        // products filtering callback
-                        products = new ThingerProducts(value,node_id,svr_id);
-                        products.getProducts().then((data) => {ThingerDOM.showOptions(field,data)});
-                    });
-                });
             });
 
             // Load values into fields
@@ -170,6 +103,25 @@
             if (this.enabled === "") {
                 $("#node-input-enabled").prop("checked", true)
             }
+
+            // Register focus handlers (options select)
+            const optionsFields = ["device","assetType","assetGroup","product"];
+            ThingerDOM.registerFocusHandler(optionsFields, node_id);
+
+            $("#node-input-resource").focus(function() {
+                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                const field = "resource";
+                const resource = $(this).val();
+                const device = $("#node-input-device").val()
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                let devices = new ThingerDevices(device,node_id,svr_id);
+                devices.getDevices().then(function() {
+                    devices.getDeviceOutputResources(device).then(function(data) {
+                      ThingerDOM.showOptions(field,data,resource);
+                    });
+                });
+            })
 
         },
         oneditsave: function() {
@@ -219,6 +171,11 @@
           <input type="checkbox" id="node-input-enabled" checked>
           <div class="slider round"></div>
         </label>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tags"><i class="fa fa-tag"></i> Data tags</label>
+        <input type="text" id="node-input-tags" placeholder="Type tags..." style="width:70%; !important">
     </div>
 
     <div class="node-row-source">
@@ -273,28 +230,33 @@
     <div class="node-row-topic" style="display: none;">
         <div class="form-row">
             <label for="node-input-topic"><i class="fa fa-commenting-o"></i> MQTT Topic</label>
-            <input type="text" id="node-input-topic" placeholder="Enter MQTT Topic">
+            <input type="text" id="node-input-topic" placeholder="Enter MQTT topic">
         </div>
     </div>
 
     <div class="form-row">
         <label for="node-input-assetType"><i class="fa fa-list-ul"></i> Asset Type</label>
-        <input type="text" id="node-input-assetType" placeholder="Select Type...">
+        <input type="text" id="node-input-assetType" placeholder="Select type...">
     </div>
 
     <div class="form-row">
         <label for="node-input-assetGroup"><i class="fa fa-th"></i> Asset Group</label>
-        <input type="text" id="node-input-assetGroup" placeholder="Select Group...">
+        <input type="text" id="node-input-assetGroup" placeholder="Select group...">
     </div>
 
     <div class="form-row">
         <label for="node-input-product"><i class="fa fa-shopping-bag"></i> Product</label>
-        <input type="text" id="node-input-product" placeholder="Select Product...">
+        <input type="text" id="node-input-product" placeholder="Select product...">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-projects"><i class="fa fa-folder"></i> Projects</label>
+        <input type="text" id="node-input-projects" placeholder="Type projects..." style="width:70%; !important">
     </div>
 
     <div class="form-row">
         <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
-        <input type="text" id="node-input-server" placeholder="Select Server">
+        <input type="text" id="node-input-server" placeholder="Select server">
     </div>
 </script>
 
@@ -307,6 +269,7 @@ Creates a new data bucket.
 : *bucket* (string) : the name of the bucket to create.
 : *description* (string) : the description of the bucket to create.
 : enabled (boolean) : the status of the bucket on creation.
+: *tags* (array): the data tags, as array of strings, to add to the bucket, improving indexing and querying over these fields.
 : source (string) : the data source of the bucket (<samp>device</samp>, <samp>write</samp>, <samp>api</samp> or <samp>mqtt</samp>).
 : *extra_source* (string) : the device in case of a device source or MQTT topic in case of mqtt source.
 : *resource* (string) : the device resource in case of a device source.
@@ -315,6 +278,7 @@ Creates a new data bucket.
 : *asset_type* (string) : the type of thinger asset.
 : *asset_group* (string) : the type of thinger group.
 : *product* (string) : the type of thinger product.
+: *projects* (array) : the project to associate the device, as array of strings.
 
 ### Outputs
 

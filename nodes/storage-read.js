@@ -6,10 +6,10 @@ module.exports = function(RED) {
         RED.nodes.createNode(this, config);
 
         // get node
-        let node = this;
+        const node = this;
 
         // get server configuration
-        let server = RED.nodes.getNode(config.server);
+        const server = RED.nodes.getNode(config.server);
 
         // unregister listener on close
         node.on('input', async function(msg, send, done) {

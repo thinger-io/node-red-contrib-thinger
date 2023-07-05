@@ -52,10 +52,10 @@ module.exports = function(RED) {
         }
 
         // get node
-        var node = this;
+        const node = this;
 
         // get server configuration
-        var server = RED.nodes.getNode(config.server);
+        const server = RED.nodes.getNode(config.server);
 
         node.intervalId = -1;
         node.buffer = [];
@@ -66,7 +66,7 @@ module.exports = function(RED) {
         node.on("input", async function(msg, send, done) {
             node.status({fill:"blue", shape:"ring", text:"running"});
 
-            let asset = (config.asset || msg.asset)+"s";
+            let asset = (config.asset || msg.asset);
             let filter = config.filter || msg.asset_filter || "";
 
             let rateUnits = config.rateUnits || msg.rate_units || "s";
@@ -82,14 +82,13 @@ module.exports = function(RED) {
 
                 let data = (await server.request(node, assetsUrl, 'GET')).payload;
 
-                let user = "";
-                for (let i in data) {
-                    if (`${data[i].asset}s` === asset && data[i].role === "user")
-                        user = `users/${server.config.username}/`;
-                }
+                // Set path for asset
+                let path = data.find(e=>e.asset === asset).paths.list;
+                const userRegex = new RegExp(`\\(\\?<user>[^)]+\\)`);
+                path = path.replace(userRegex, server.config.username);
 
                 const count = 50;
-                const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/${user}${asset}?name=${filter}&count=${count}`;
+                const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${path}?name=${filter}&count=${count}`;
 
                 let index = 0;
                 let res_length = 0;

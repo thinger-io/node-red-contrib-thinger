@@ -27,61 +27,88 @@
         },
         oneditprepare: function() {
 
-            let server_id = this.server ? this.server : "";
+            const node_id = this.id;
 
-            const user = new ThingerUser(server_id);
-            const events = new ThingerEvents(user.role);
+            let _asset = this.asset ? this.asset : "";
+            let _event = this.event ? this.event : "";
+            let _filters = this.filters || {};
 
-            const _event = this.event;
+            // backwards compatibility code for bucket, device, endpoints and state fields
             let _filter = "";
             switch(true) {
               case /^bucket.*/.test(_event): _filter = this.bucket; break;
               case /^device.*/.test(_event): _filter = this.device; break;
               case /^endpoi.*/.test(_event): _filter = this.endpoint; break;
             }
-            if (this.filter !== undefined && this.filter !== "") // if filter property is set will be predominant
+            if (this.filter !== undefined && this.filter !== "") {// if filter property is set will be predominant
                 _filter = this.filter;
-            $("#node-input-filter").val(_filter);
+                if ( _asset !== undefined && _asset !== "" ) { // backwards compatibility until version 1.4.3: moving config.filter to config.filters
+                  _filters[_asset] = _filter;
+                }
+            }
             const _state = this.state;
-            const _filters = this.filters || {};
-            const _filterField = $(".node-row-filter")[0].outerHTML;
 
-            let firstLoad1 = true;
-
+            let events;
             // Fill asset options
-            ThingerDOM.fillSelect("asset",events.assets);
-            ThingerDOM.selectOption("asset",this.asset);
+            $("#node-input-server").change(function() {
+                const server_id = this.value ? this.value : "";;
 
-            let assetEvents = {};
-            $('#node-input-asset').change(function() {
-                // Set assets, empty event field and change filter field name
-                $("#node-input-event").val(firstLoad1 ? _event : '').change();
-                assetEvents = events.assetEvents($(this).val());
+                const user = new ThingerUser(server_id);
+                const assets = typeof user.role !== 'undefined' ? new ThingerAssets(null,node_id,server_id,user.role) : new ThingerAssets(null,node_id,server_id);
 
-                if (!firstLoad1) {
-                    $(".node-row-filter").replaceWith(_filterField);
-                }
-                if ($(this).val() !== "") {
-                    ThingerDOM.renameInputField("filter", $(this).val());
-                }
-                firstLoad1 = false;
+                assets.getAssets().then((data) => {
+                    ThingerDOM.fillSelect("asset",data);
+                    ThingerDOM.selectOption("asset",_asset);
+                });
+
+                // Initialize retrieval of events
+                events = typeof user.role !== 'undefined' ? new ThingerEvents(node_id,server_id,user.role) : new ThingerEvents(node_id, server_id);
+                events.getEvents().then(() => {
+                    if ( $("#node-input-event").val() !== "" ) $("#node-input-event").trigger('change');
+                });
+
             });
+
+            $('#node-input-asset').change(function() {
+                if ( $(this).val() && ! $("#node-input-event").val().startsWith($(this).val()) ) {
+                    $("#node-input-event").val("");
+                    _filters = {};
+                }
+
+                $(".node-row-additional-field").remove();
+                let field = $(this).val() || _asset;
+                if ( field && $(this).val() !== "" ) {
+                  ThingerDOM.addInputField(field, `${field} filter`, "server", "filter");
+                }
+
+            });
+
 
             $('#node-input-event').focus(function() {
                 if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                const field = "event";
+                const asset = $("#node-input-asset").val();
+                const event = $(this).val();
+
                 // Show existing events
-                ThingerDOM.showOptions("event",assetEvents,$(this).val());
+                let filteredEvents = events.getAssetEvents(asset);
+                ThingerDOM.showOptions("event", filteredEvents, $(this).val());
+
+                _filters = {};
+
             });
 
             $('#node-input-event').change(function() {
                 // Add additional fields with hints if needed
                 $(".node-row-additional-field").remove();
-                if ($(this).val() !== "" && events.exists($(this).val())) {
+
+                if ($(this).val() !== "" && events && events.exists($(this).val())) {
 
                     let filters = events.event($(this).val()).filters;
 
                     filters.forEach(filter => {
-                        ThingerDOM.addInputField(filter.field, "Filter", "filter", "filter");
+                        ThingerDOM.addInputField(filter.field, `${filter.field} filter`, "server", "filter");
                         if (filter.hasOwnProperty("hints")) {
                             $(`#node-input-${filter.field}`).focus(function() {
                                 if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
@@ -95,6 +122,13 @@
                         else 
                             $(`#node-input-${filter.field}`).val(_filters[filter.field]);
                     });
+
+                } else {
+                    let field = $("#node-input-asset").val() || _asset;
+                    if ( field ) {
+                      ThingerDOM.addInputField(field, `${field} filter`, "server", "filter");
+                      $(`#node-input-${field}`).val(_filters[field]);
+                    }
                 }
             });
         },
@@ -113,6 +147,7 @@
             this.device = "";
             this.endpoint = "";
             this.state = "";
+            this.filter = "";
         }
     });
 </script>
@@ -137,14 +172,6 @@
         <div class="form-row">
             <label for="node-input-event"><i class="fa fa-bolt"></i> Event</label>
             <input type="text" id="node-input-event" placeholder="Select Event...">
-        </div>
-    </div>
-
-    <!-- filter for default asset -->
-    <div class="node-row-filter">
-        <div class="form-row">
-            <label for="node-input-filter"><i class="fa fa-filter"></i> Filter</label>
-            <input type="text" id="node-input-filter" placeholder="Filter">
         </div>
     </div>
 

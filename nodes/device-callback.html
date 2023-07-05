@@ -35,7 +35,7 @@
             const node_id = this.id;
 
             // Event listeners
-            $("#node-input-device").click(function() {
+            $("#node-input-device").focus(function() {
                 const field = "device";
                 const device = $(this).val();
                 const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field

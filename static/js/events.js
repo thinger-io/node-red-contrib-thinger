@@ -2,58 +2,49 @@
 
 class ThingerEvents {
 
-    #_url = "server/events";
+    _url = "server/events";
 
-    constructor(role="user",svr_id="") {
-        var self = this;
-        $.ajax({
-            url: `${this.#_url}?svr_id=${svr_id}#`,
-            async: false, // TODO: make async
-            dataType: 'json',
-            success: function(data) {
-                self.events = [];
-                for (let i in data) {
-                    if (role === "admin" || data[i].role !== "admin") {
-                        self.events.push(
-                          new ThingerEvent(
-                            data[i].event,
-                            data[i].filters
-                        ));
-                    }
+    constructor(node_id,svr_id="",role="user") {
+        this.node_id = node_id;
+        this.svr_id = svr_id;
+        this.role = role;
+    }
+
+    async getEvents() {
+        if (this._events !== undefined) return Promise.resolve(this._events);
+
+        this._events = [];
+        const self = this;
+        return this.request()
+        .then(function(data) {
+            for (let i in data) {
+                if (self.role === "admin" || !data[i].hasOwnProperty("role") || data[i].role !== "admin") {
+                    self._events.push(
+                      new ThingerEvent(
+                        data[i].event,
+                        data[i].filters
+                    ));
                 }
             }
+            return self._events;
         });
-
-        this.#addAnyEvent();
-
     }
 
-    #addAnyEvent() {
-      this.assets.forEach(asset => {
-          this.events.unshift(new ThingerEvent("any", [{"field": asset}]));
-      });
+    request() {
+        if (this._url.includes('?'))
+            return $.getJSON(`${this._url}&node_id=${this.node_id}&svr_id=${this.svr_id}`);
+        else
+            return $.getJSON(`${this._url}?node_id=${this.node_id}&svr_id=${this.svr_id}`);
     }
 
-    get assets() {
-        if (this._assets !== undefined) return this._assets;
-
-        let assets = new Set(); // keeps unique values unlike arrays
-
-        this.events.forEach(event => {
-            assets.add(event.asset);
-        });
-
-        this._assets = assets;
-        return this._assets;
-    }
-
-    // returns the events associated with an asset
-    assetEvents(asset) {
+    getAssetEvents(asset) {
 
         const assetEvents = new Set();
 
-        this.events.forEach(event => {
-            if (event.asset === asset || asset === "") {
+        assetEvents.add("any");
+
+        this._events.forEach(event => {
+            if (event.name.startsWith(asset) || asset === "") {
                 assetEvents.add(event.name);
             }
         });
@@ -61,12 +52,12 @@ class ThingerEvents {
         return assetEvents;
     }
 
-    event(name) {
-        return this.events.find(e=>e.name === name);
+    exists(name) {
+        return this._events.find(e=>e.name === name) ? true : false;
     }
 
-    exists(name) {
-        return this.events.find(e=>e.name === name) ? true : false;
+    event(name) {
+        return this._events.find(e=>e.name === name);
     }
 
 }
@@ -78,8 +69,7 @@ class ThingerEvent {
         let filters_ = filters;
 
         this.name = name;
-        this.asset = filters_.shift().field; // It should never have hints associated
-        this.filters = filters_; // array of rest of filters with hints associated
+        this.filters = filters; // array of rest of filters with hints associated
 
         this.#addAnyHint();
 

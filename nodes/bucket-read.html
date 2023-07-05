@@ -53,8 +53,9 @@
         category: 'thinger',
         color: '#62b0fe', // #1F8EFE at 30% lightened
         defaults: {
-            name: {value:""},
+            name: {value: ""},
             bucket: {value: ""},
+            tags: {value: ""},
             filter: {value: ""},
             timespanSequence: {value: ""},
             timespanValue: {value: ""},
@@ -82,6 +83,7 @@
         oneditprepare: function() {
 
             const node_id = this.id;
+            let _tags = this.tags;
 
             // Defaults set on prepare instead of properties to allow for configuration on input message
             $("#node-input-sort").val(this.sort || "asc");
@@ -89,21 +91,42 @@
             loadDateField(this.maxTs,"end");
             var aggregationType = this.aggregationType;
 
-            // Event handlers and requests
-            $("#node-input-bucket").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+            $("#node-input-bucket").change(function() {
 
-                const field = "bucket";
+                $(".node-row-additional-field").remove();
+
                 const bucket = $(this).val();
                 const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+
                 let buckets = new ThingerBuckets(bucket,node_id,svr_id);
-                buckets.getBuckets().then(function(data) {
-                    ThingerDOM.showOptions(field, data, bucket, function(value) {
-                        // buckets filtering callback
-                        buckets = new ThingerBuckets(value,node_id,svr_id);
-                        buckets.getBuckets().then((data) => {ThingerDOM.showOptions(field,data)});
+                buckets.getBuckets().then(function() {
+                  let tags = buckets.getBucketTagsName(bucket);
+                  tags.forEach(tag => {
+                      // Create fields
+                      ThingerDOM.addInputField(`tag_${tag}`, `Select or search a ${tag}...`, "filter", "tag");
+                      // Set values from config
+                      if ( _tags && _tags !== "" ) {
+                        for (let key in _tags) {
+                          $(`#node-input-${key}`).val(_tags[key]);
+                        }
+                        _tags = {};
+                      }
+                      // Show options
+                      $(`#node-input-tag_${tag}`).focus(function() {
+                          if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                          let value = $(this).val();
+
+                          // Get values of tags
+                          buckets.getBucketTagsValue(bucket,tag).then(function(data) {
+                            ThingerDOM.showOptions(`tag_${tag}`, data,value);
+                          });
+
                     });
+                  });
+
                 });
+
             });
 
             $("#node-input-filter").change(function() {
@@ -156,8 +179,22 @@
                 }
             });
 
+            // Register focus handlers (options select)
+            const optionsFields = ["bucket"];
+            ThingerDOM.registerFocusHandler(optionsFields, node_id);
+
         },
         oneditsave: function() {
+          // save tags
+          this.tags = {};
+          $(".node-row-additional-field").each((index,element) => {
+                let input = element.children[0].children[1];
+                let id = input.id.split('-').pop();
+                let value = input.value;
+                if ( value && value !== "" ) // only add if it has value
+                  this.tags[id] = [value];
+          });
+
           // Save max ts and min ts in case of absolute
           if ($("#node-input-filter").val() == "absolute") {
               this.minTs = new Date($("#node-input-startdate").val()+"T"+$("#node-input-starttime").val()).toISOString();
@@ -189,9 +226,11 @@
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 
-    <div class="form-row">
-        <label for="node-input-bucket"><i class="fa fa-database"></i> Bucket</label>
-        <input type="text" id="node-input-bucket" placeholder="Bucket Identifier">
+    <div class="node-row-bucket">
+        <div class="form-row">
+            <label for="node-input-bucket"><i class="fa fa-database"></i> Bucket</label>
+            <input type="text" id="node-input-bucket" placeholder="Bucket Identifier">
+        </div>
     </div>
 
     <div class="node-row-filter">
@@ -301,6 +340,7 @@ Reads data from a data bucket.
 ### Inputs
 
 : bucket (string) : the id of the bucket to read from.
+: *tags* (object) : the tags of the bucket to query from as a json object with keys as <samp>tag_\<tag\> and values as array of strings of the desired values.
 : filter (string) : the type of filter to apply the to the read operation (<samp>relative</samp>, <samp>absolute</samp> or <samp>simple</samp>).
 : *timespan_sequence* (string) : the sequence for <samp>relative</samp> filter (<samp>latest</samp> or <samp>previous</samp>).
 : *timespan_value* (int) : the value for <samp>relative</samp> filter.
