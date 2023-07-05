@@ -6,10 +6,10 @@ module.exports = function(RED) {
         RED.nodes.createNode(this, config);
 
         // get node
-        var node = this;
+        const node = this;
 
         // get server configuration
-        var server = RED.nodes.getNode(config.server);
+        const server = RED.nodes.getNode(config.server);
 
         node.on("input", async function(msg, send, done) {
 
@@ -60,6 +60,15 @@ module.exports = function(RED) {
                 data.product = product;
             }
 
+            let project = config.project || msg.project;
+            if (project) {
+                data.project = project;
+            }
+
+            let projects = config.projects && config.projects !== "[]" ? RED.util.evaluateNodeProperty(config.projects, 'json', node) : msg.projects;
+            if ( typeof projects === 'object' && projects.length > 0 )
+              projects = projects.map(project => `${server.config.username}@${project}`); // body needs username
+
             // It fails when no credentials are passed as expected by the backend
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/devices`;
 
@@ -73,14 +82,20 @@ module.exports = function(RED) {
 
                 // Update if exist or create it
                 try {
+                  let device = data.device;
                   if ( exists ) {
-                      let device = data.device;
                       delete data.device;
                       delete data.type;
                       res = await server.request(node,`${url}/${device}`,'PUT',data);
                   } else {
                       res = await server.request(node, url, 'POST', data);
                   }
+
+                  // Associate to projects
+                  if (projects && projects.length !== 0) {
+                    res = await server.request(node,`${url}/${device}/projects`,'PUT',projects);
+                  }
+
                 } catch(err) {
                     delete err.stack;
                     msg.payload = data;

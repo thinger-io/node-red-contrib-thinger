@@ -371,7 +371,7 @@ module.exports = function(RED) {
 
     // API Endpoints
     RED.httpNode.get("/assets/:asset", async function(req,res) {
-        var filter = "";
+        let filter = "";
         if (req.query.name) {
             filter = `name=${req.query.name}`;
         }
@@ -397,11 +397,38 @@ module.exports = function(RED) {
         }
     });
 
+    RED.httpNode.get("/assets/:category/:asset", async function(req,res) {
+        let filter = "";
+        if (req.query.name) {
+            filter = `name=${req.query.name}`;
+        }
+
+        const node = RED.nodes.getNode(req.query.node_id);
+
+        if (!req.query.svr_id) { // If no server node has been selected return empty
+            node.error(`assets.failed: missing thinger server`);
+            return res.json({});
+        }
+
+        // User is adding new server option
+        if (req.query.svr_id === "_ADD_") return res.json({});
+
+        const server = RED.nodes.getNode(req.query.svr_id);
+
+        try {
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/${req.params.category}/${req.params.asset}?${filter}`;
+            res.json((await server.request(server, url, 'GET')).payload);
+        } catch(err) {
+            res.sendStatus(500);
+            server.error(`assets.failed ${err.toString()}`);
+        }
+    });
+
     RED.httpNode.get("/assets/:asset/:asset_id/:properties", async function(req,res) {
 
         const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
 
-        var filter = "";
+        let filter = "";
         if (req.query.name) {
             filter = "name="+req.query.name;
         }
@@ -431,7 +458,7 @@ module.exports = function(RED) {
 
         const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
 
-        var filter = "";
+        let filter = "";
         if (req.query.name) {
             filter = "name="+req.query.name;
         }
@@ -449,7 +476,7 @@ module.exports = function(RED) {
         const server = RED.nodes.getNode(req.query.svr_id);
 
         try {
-            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${req.params.asset}/${req.params.asset_id}/${req.params.properties}${req.params.property_id}?${filter}`;
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${req.params.asset}/${req.params.asset_id}/${req.params.properties}/${req.params.property_id}?${filter}`;
             res.json((await server.request(server, url, 'GET')).payload);
         } catch(err) {
             res.sendStatus(500);
@@ -468,6 +495,12 @@ module.exports = function(RED) {
         if (req.query.svr_id === "_ADD_") return res.json({});
 
         const server = RED.nodes.getNode(req.query.svr_id);
+
+        // if server is null
+        if ( !server ) {
+            console.error(`users.failed: server not found`);
+            return res.json({});
+        }
 
         try {
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}`;
@@ -491,7 +524,7 @@ module.exports = function(RED) {
             server = RED.nodes.getNode(req.query.svr_id);
         }
 
-        if (typeof server === undefined || !server) {
+        if (typeof server === "undefined" || !server) {
             host = 'backend.thinger.io'
         } else {
             host = server.config.host;
@@ -502,8 +535,9 @@ module.exports = function(RED) {
             const method = 'GET';
             const url = `${ssl ? "https://" : "http://"}${host}/v1/server/${req.params.resource}`;
             let data = {};
-            if (typeof server !== 'undefined')
+            if (typeof server !== 'undefined' && server !== null && !server) {
                 data = (await server.request(server, url, method)).payload;
+            }
             else {
                 let ThingerRequest = new Request();
                 data = (await  ThingerRequest.request(url, method)).payload;
@@ -520,7 +554,7 @@ module.exports = function(RED) {
     });
 
     RED.httpAdmin.get('/thinger/static/*', function(req, res){
-        var options = {
+        const options = {
             root: __dirname + '/../static/',
             dotfiles: 'deny'
         };

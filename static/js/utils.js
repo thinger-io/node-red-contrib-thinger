@@ -17,6 +17,12 @@ class ThingerUtils {
         }).join(" ");
     }
 
+    // Capitalize only the first letter of the string
+    static capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+
     /**
     * Generates a random password or credential of 16 characters of length. Used for device credentials
     */

@@ -35,7 +35,7 @@
             const node_id = this.id;
 
             // Event listeners
-            $("#node-input-device").click(function() {
+            $("#node-input-device").focus(function() {
                 const field = "device";
                 const device = $(this).val();
                 const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
@@ -98,6 +98,7 @@ Calls the callback endpoint of an HTTP device.
 : *prefix* (string) : the prefix for the id of the device and bucket on auto provisioning.
 : *asset_type* (string) : the type of thinger asset on autoprovisiong.
 : *asset_group* (string) : the type of thinger group on auto provisioning.
+: *product* (string) : the product id of the device and bucket on auto provisioning.
 
 ### Outputs
 
@@ -109,7 +110,7 @@ The values assigned through the dialog will have priority over the message.
 
 In case the device does not exist it will be autoprovisioned, as well as a data bucket with the same id as the device. After, the call to the callback will execute.
 
-The fields `msg.prefix`, `msg.asset_type` and `msg.asset_group` are only available through the input message and used only in the case of autoprivisioning.
+The fields `msg.prefix`, `msg.asset_type`, `msg.asset_group` and `msg.product` are only available through the input message and used only in the case of autoprivisioning.
 The default value for prefix on autoprovisoning if no value is passed is <samp>NR_</samp>.
 
 ### References

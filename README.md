@@ -1,6 +1,6 @@
 # node-red-contrib-thinger
 
-[![NPM Version](https://img.shields.io/static/v1?label=npm&message=v1.4.0&color=blue&style=flat)](https://www.npmjs.com/package/node-red-contrib-thinger)
+[![NPM Version](https://img.shields.io/static/v1?label=npm&message=v1.5.0&color=blue&style=flat)](https://www.npmjs.com/package/node-red-contrib-thinger)
 
 ![Node-RED and Thinger.io Integration](./images/laptop.png "Thinger.io web console with Node-RED plugin and ad-hoc nodes")
 
@@ -54,8 +54,8 @@ Below is a brief description of the actions allowed:
 - Reading properties of devices, types or groups (property read node).
 - Writing and modifying properties of devices, types or groups (property write node).
 - Detecting different events of devices, buckets, endpoints and others (server events node).
-- Read files (plain, csv, json, images, ...) from file storages (read storage node).
-- Store files (plain, csv, json, images, ...) to file storages (write storage node).
+- Reading files (plain, csv, json, images, ...) from file storages (read storage node).
+- Storing files (plain, csv, json, images, ...) to file storages (write storage node).
 
 ## License
 

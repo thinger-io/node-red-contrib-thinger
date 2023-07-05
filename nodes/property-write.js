@@ -6,17 +6,17 @@ module.exports = function(RED) {
         RED.nodes.createNode(this, config);
 
         // get node
-        var node = this;
+        const node = this;
 
         // get server configuration
-        var server = RED.nodes.getNode(config.server);
+        const server = RED.nodes.getNode(config.server);
 
         // call property read on input
         node.on("input",async function(msg, send, done) {
             let asset = (config.asset || msg.asset)+"s";
             let assetId = config.assetId || msg.asset_id;
             let property = config.property || msg.property;
-            var data = config.value || msg.payload || msg.value;
+            let data = config.value || msg.payload || msg.value;
 
             const apiVersion = (asset == "devices" ? "v3" : "v1");
             let url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${asset}/${assetId}/properties`;

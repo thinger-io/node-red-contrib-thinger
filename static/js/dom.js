@@ -3,6 +3,36 @@
 class ThingerDOM {
 
     // ----------------------- //
+    // Utility DOM functionality //
+    // ----------------------- //
+
+    // This functions registers the event handlers for the list of fields passed for the node
+    static registerFocusHandler(fields, node_id) {
+
+      fields.forEach(f => {
+
+        $(`#node-input-${f}`).focus(function() {
+
+          const val = $(this).val();
+          const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+
+          let assets = new (assetClass.get(`${f}s`))(val, node_id, svr_id);
+
+          assets.getAssets().then(function(data) {
+            ThingerDOM.showOptions(f,data,val,function(value) {
+              // asset filtering callback
+              assets = new (assetClass.get(`${f}s`))(value,node_id,svr_id);
+              assets.getAssets().then((data) => {ThingerDOM.showOptions(f, data)});
+            });
+          });
+
+        });
+
+      });
+
+    }
+
+    // ----------------------- //
     // Basic DOM functionality //
     // ----------------------- //
 
@@ -30,11 +60,11 @@ class ThingerDOM {
           <div class='node-row-additional-field'>
             <div class='form-row'>
               <label for="node-input-${name}"><i class="fa fa-${icon}"></i> ${capsName}</label>
-              <input type="text" id="node-input-${name}" placeholder="${capsName} ${placeholder}">
+              <input type="text" id="node-input-${name}" placeholder="${ThingerUtils.capitalizeFirstLetter(placeholder).replace('_',' ')}">
             </div>
           </div>
         `;
-        $(`.node-row-${field}`).append(html);
+        $(`.node-row-${field}`).before(html);
     }
 
     static renameInputField(id,value) {
@@ -52,14 +82,18 @@ class ThingerDOM {
         label.prop('placeholder', placeholder);
     }
 
-    static changeInputField(asset,field="assetId") {
+    static changeFieldAppearance(asset,field="assetId") {
         let fieldIcon = $(".node-row-"+field+" > div > label > i");
         let fieldLabel = $(".node-row-"+field+" > div > label");
         let fieldInput = $(".node-row-"+field+" > div > input");
-        let placeholder = field === "assetId" ? "Select a X or insert a new one" : "X Filter";
+        let placeholder = field === "assetId" ? "Select a X or insert a new one" : "X filter";
         fieldIcon.removeClassStartingWith("fa-").removeClass("fa fas");
 
         switch (asset) { // TODO: update icons once Node-RED updates from v4.7: https://nodered.org/docs/creating-nodes/appearance#font-awesome-icon
+            case 'alarm':
+            case 'alarm_rule':
+            case 'alarm_instance':
+                                  fieldIcon.addClass("fa fa-bell");             break;
             case 'brand':         fieldIcon.addClass("fa fa-paint-brush");      break;
             case 'bucket':        fieldIcon.addClass("fa fa-database");         break;
             case 'dashboard':     fieldIcon.addClass("fa fa-tachometer");       break;
@@ -70,20 +104,25 @@ class ThingerDOM {
             case 'host':          fieldIcon.addClass("fa fa-laptop");           break;
             case 'mqtt':          fieldIcon.addClass("fa fa-wifi");             break;
             case 'oauth':         fieldIcon.addClass("fa fa-window-maximize");  break;
-            case 'plugin':        fieldIcon.addClass("fa fa-cube");             break;
             case 'oauth_client':  fieldIcon.addClass("fa fa-key");              break;
+            case 'plugin':        fieldIcon.addClass("fa fa-cube");             break;
             case 'product':       fieldIcon.addClass("fa fa-shopping-bag");     break;
             case 'project':       fieldIcon.addClass("fa fa-folder");           break;
+            case 'proxy':         fieldIcon.addClass("fa fa-map-signs");        break;
+            case 'role':          fieldIcon.addClass("fa fa-shield");           break;
             case 'storage':       fieldIcon.addClass("fa fa-hdd-o");            break;
+            case 'sync':          fieldIcon.addClass("fa fa-refresh");          break;
+            case 'tag':           fieldIcon.addClass("fa fa-tag");              break;
             case 'token':         fieldIcon.addClass("fa fa-lock");             break;
             case 'type':          fieldIcon.addClass("fa fa-list-ul");          break;
             case 'user':          fieldIcon.addClass("fa fa-users");            break;
+            default:              fieldIcon.addClass("fa fa-filter");           break;
         }
 
         fieldLabel.empty();
         fieldLabel.append(fieldIcon);
-        fieldLabel.append(" ").append(ThingerUtils.capitalize(asset));
-        fieldInput.prop("placeholder",placeholder.replace('X',ThingerUtils.capitalize(asset)));
+        fieldLabel.append(" ").append(ThingerUtils.capitalize(asset).replace('_',' '));
+        fieldInput.prop("placeholder",placeholder.replace('X',ThingerUtils.capitalize(asset).replace('_',' ')));
     }
 
     // -------------------------------------- //
@@ -91,7 +130,6 @@ class ThingerDOM {
     // -------------------------------------- //
 
     static showOptions(field,options,selected,callback) {
-
         // if its created remove it before creating it again
         if ($('.red-form-options').length !== 0) {
             ThingerDOM.#destroyOptions();

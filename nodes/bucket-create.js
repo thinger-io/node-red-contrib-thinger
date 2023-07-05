@@ -13,10 +13,13 @@ module.exports = function(RED) {
                 break;
             case 'w':
                 seconds = seconds * 7;
+                // fall through
             case 'd':
                 seconds = seconds * 24;
+                // fall through
             case 'h':
                 seconds = seconds * 60;
+                // fall through
             case 'm':
                 seconds = seconds * 60;
                 break;
@@ -34,10 +37,10 @@ module.exports = function(RED) {
         RED.nodes.createNode(this, config);
 
         // get node
-        var node = this;
+        const node = this;
 
         // get server configuration
-        var server = RED.nodes.getNode(config.server);
+        const server = RED.nodes.getNode(config.server);
 
         // call bucket read on close
         node.on("input", async function(msg, send, done) {
@@ -68,6 +71,10 @@ module.exports = function(RED) {
             let jsonConfig = {}
             let source = config.source || msg.source;
             jsonConfig.source = source;
+            let tags = config.tags && config.tags !== "[]" ? RED.util.evaluateNodeProperty(config.tags, 'json', node) : msg.tags;
+            if (tags && tags.length !== 0) {
+              jsonConfig.tags = tags;
+            }
             if (source == "device") {
                 jsonConfig.device = config.extraSource || msg.extra_source || msg.device;
                 jsonConfig.resource = config.resource || msg.resource;
@@ -88,6 +95,10 @@ module.exports = function(RED) {
             }
             json.config = jsonConfig;
 
+            let projects = config.projects && config.projects !== "[]" ? RED.util.evaluateNodeProperty(config.projects, 'json', node) : msg.projects;
+            if ( typeof projects === 'object' && projects.length > 0 )
+              projects = projects.map(project => `${server.config.username}@${project}`); // body needs username
+
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/buckets`;
 
             if (typeof server.request === "function") {
@@ -100,13 +111,19 @@ module.exports = function(RED) {
 
                 // Update if exist or create it
                 try {
+                  let bucket = json.bucket;
                   if ( exists ) {
-                      let bucket = json.bucket;
                       delete json.bucket;
                       res = await server.request(node,`${url}/${bucket}`,'PUT',json);
                   } else {
                       res = await server.request(node, url, 'POST', json);
                   }
+
+                  // Associate to projects
+                  if (projects && projects.length !== 0) {
+                    res = await server.request(node,`${url}/${bucket}/projects`,'PUT',projects);
+                  }
+
                 } catch(err) {
                     delete err.stack;
                     msg.payload = json;
