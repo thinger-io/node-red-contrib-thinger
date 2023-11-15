@@ -65,7 +65,15 @@ module.exports = function(RED) {
               if (data === "content") {
                   for (let i in files) {
                       if (files[i].type === "file")
+                        try {
                           files[i].content = (await server.request(node, `${url}/${files[i].path}`, method)).payload;
+                        } catch ( e ) {
+                          delete e.stack;
+                          done(e);
+
+                          return;
+
+                        }
                   }
               }
 
