@@ -6,10 +6,10 @@ module.exports = function(RED) {
         RED.nodes.createNode(this, config);
 
         // get node
-        let node = this;
+        const node = this;
 
         // get server configuration
-        let server = RED.nodes.getNode(config.server);
+        const server = RED.nodes.getNode(config.server);
 
         // unregister listener on close
         node.on('input', async function(msg, send, done) {
@@ -65,7 +65,15 @@ module.exports = function(RED) {
               if (data === "content") {
                   for (let i in files) {
                       if (files[i].type === "file")
+                        try {
                           files[i].content = (await server.request(node, `${url}/${files[i].path}`, method)).payload;
+                        } catch ( e ) {
+                          delete e.stack;
+                          done(e);
+
+                          return;
+
+                        }
                   }
               }
 

@@ -5,7 +5,7 @@ class ThingerUser {
     #_url = "users/user";
 
     constructor(svr_id="") {
-        var self = this;
+        const self = this;
 
         $.ajax({
             url: `${this.#_url}?svr_id=${svr_id}`,

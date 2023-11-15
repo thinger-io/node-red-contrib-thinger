@@ -25,6 +25,7 @@
             assetType: {value: ""},
             assetGroup: {value: ""},
             product: {value: ""},
+            projects: {value: "[]"},
             server: {type:"thinger-server", required:true}
         },
         icon:"device.svg",
@@ -58,58 +59,19 @@
                 $("#node-input-deviceCredentials").val(ThingerUtils.generateCredentials());
             });
 
-            $("#node-input-assetType").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "assetType";
-                const type = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let types = new ThingerTypes(type,node_id,svr_id);
-                types.getTypes().then(function(data) {
-                    ThingerDOM.showOptions(field, data, type, function(value) {
-                        // types filtering callback
-                        types = new ThingerTypes(value,node_id,svr_id);
-                        types.getTypes().then((data) => {ThingerDOM.showOptions(field,data)});
-                    });
-                });
-            });
-
-            $("#node-input-assetGroup").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "assetGroup";
-                const group = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let groups = new ThingerGroups(group,node_id,svr_id);
-                groups.getGroups().then(function(data) {
-                    ThingerDOM.showOptions(field, data, group, function(value) {
-                        // groups filtering callback
-                        groups = new ThingerGroups(value,node_id,svr_id);
-                        groups.getGroups().then((data) => {ThingerDOM.showOptions(field,data)});
-                    });
-                });
-            });
-
-            $("#node-input-product").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "product";
-                const product = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let products = new ThingerProducts(product,node_id,svr_id);
-                products.getProducts().then(function(data) {
-                    ThingerDOM.showOptions(field, data, product, function(value) {
-                        // products filtering callback
-                        products = new ThingerProducts(value,node_id,svr_id);
-                        products.getProducts().then((data) => {ThingerDOM.showOptions(field,data)});
-                    });
-                });
-            });
+            $("#node-input-projects").typedInput({
+              type:"json",
+              types:["json"]
+            })
 
             // Load values into fields
             if (this.enabled === "") {
                 $("#node-input-enabled").prop("checked", true)
             }
+
+            // Register focus handlers (options select)
+            const optionsFields = ["assetType","assetGroup","product"];
+            ThingerDOM.registerFocusHandler(optionsFields, node_id);
 
         }
     });
@@ -127,7 +89,7 @@
             <label for="node-input-deviceType"><i class="fa fa-folder-open"></i> Device Type</label>
             <select id="node-input-deviceType" style="width:70%; !important">
                 <option value="" default>Select a device type</option>
-                <option value="Generic">Generic Thinger Device (WiFi, Ethernet, GSM)</option>
+                <option value="Generic">IOTMP Device (Thinger.io Protocol)</option>
                 <option value="HTTP">HTTP Device (Sigfox, Lora, cURL)</option>
                 <option value="MQTT">MQTT Device</option>
                 <!--option value="NB-IoT">NB-IoT</option-->
@@ -168,22 +130,27 @@
 
     <div class="form-row">
         <label for="node-input-assetType"><i class="fa fa-list-ul"></i> Asset Type</label>
-        <input type="text" id="node-input-assetType" placeholder="Select Type...">
+        <input type="text" id="node-input-assetType" placeholder="Select type...">
     </div>
 
     <div class="form-row">
         <label for="node-input-assetGroup"><i class="fa fa-th"></i> Asset Group</label>
-        <input type="text" id="node-input-assetGroup" placeholder="Select Group...">
+        <input type="text" id="node-input-assetGroup" placeholder="Select group...">
     </div>
 
     <div class="form-row">
         <label for="node-input-product"><i class="fa fa-shopping-bag"></i> Product</label>
-        <input type="text" id="node-input-product" placeholder="Select Product...">
+        <input type="text" id="node-input-product" placeholder="Select product...">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-projects"><i class="fa fa-folder"></i> Projects</label>
+        <input type="text" id="node-input-projects" placeholder="Type projects..." style="width:70%; !important">
     </div>
 
     <div class="form-row">
         <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
-        <input type="text" id="node-input-server" placeholder="Select Server">
+        <input type="text" id="node-input-server" placeholder="Select server">
     </div>
 </script>
 
@@ -200,6 +167,7 @@ Creates or updates a device given the configuration.
 : *asset_type* (string) : the type of thinger asset.
 : *asset_group* (string) : the type of thinger group.
 : *product* (string) : the type of thinger product.
+: *projects* (array) : the project to associate the device, as array of strings.
 
 ### Outputs
 
@@ -210,11 +178,11 @@ The node allows the configuration via the edit dialog or through an input messag
 The values assigned through the dialog will have priority over the message, with the exception the `msg.enabled`.
 
 The field `msg.type` allows different values depending on the desired device. Find and explanation of each one below:
-- **Generic device**: devices with Thinger.io software client in it (WiFi, Ethernet or GSM).
+- **Generic device**: devices with IOTMP Thinger.io protocol.
 - **HTTP device**: allows creating a virtual device to integrate data via REST API Callback (Sigfox, LoRa or cURL).
 - **MQTT devices**: for MQTT devices that will work with the Thinger.io embedded broker.
 
-The field `msg.credentials` is used if device type is Generic or HTTP. Has to be of 16 chars of length and can contain <samp>A-Z</samp>,<samp>a-z</samp>,<samp>0-9</samp> and <samp>!@#$%^&*()</samp>
+The field `msg.credentials` is used if device type is IOTMP/Generic or HTTP. Has to be of 16 chars of length and can contain <samp>A-Z</samp>,<samp>a-z</samp>,<samp>0-9</samp> and <samp>!@#$%^&*()</samp>
 
 ### References
 

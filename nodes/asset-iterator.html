@@ -6,14 +6,14 @@
         category: 'thinger',
         color: '#62b0fe', // #1F8EFE at 30% lightened
         defaults: {
-            server: {type:"thinger-server", required:true},
-            name: {value:""},
-            asset: {value: ""},
-            filter: {value: ""}, // regex
-            assetType: {value: ""},
-            assetGroup: {value: ""},
-            rate: {value: 0},
-            rateUnits: {value: "s"}
+          server: {type:"thinger-server", required:true},
+          name: {value:""},
+          asset: {value: ""},
+          filter: {value: ""}, // regex
+          assetType: {value: ""},
+          assetGroup: {value: ""},
+          rate: {value: 0},
+          rateUnits: {value: "s"}
         },
         icon:"asset.svg",
         inputs: 1,
@@ -32,7 +32,7 @@
             let _asset = this.asset ? this.asset : "";
 
             $("#node-input-server").change(function() {
-                let server_id = this.value ? this.value : "";;
+                const server_id = this.value ? this.value : "";;
 
                 const user = new ThingerUser(server_id);
                 const assets = typeof user.role !== 'undefined' ? new ThingerAssets(null,node_id,server_id,user.role) : new ThingerAssets(null,node_id,server_id);
@@ -49,7 +49,7 @@
 
                 if (asset) {
                     // Field appearance
-                    ThingerDOM.changeInputField(asset,"filter");
+                    ThingerDOM.changeFieldAppearance(asset,"filter");
 
                     if (["device", "bucket"].indexOf(asset) != -1) {
                         $(".node-row-assetType").show();
@@ -62,37 +62,9 @@
                 }
             });
 
-            $("#node-input-assetType").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "assetType";
-                const type = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let types = new ThingerTypes(type,node_id,svr_id);
-                types.getTypes().then(function(data) {
-                    ThingerDOM.showOptions(field, data, type, function(value) {
-                        // types filtering callback
-                        types = new ThingerTypes(value,node_id,svr_id);
-                        types.getTypes().then((data) => {ThingerDOM.showOptions(field,data)});
-                    });
-                });
-            });
-
-            $("#node-input-assetGroup").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "assetGroup";
-                const group = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let groups = new ThingerGroups(group,node_id,svr_id);
-                groups.getGroups().then(function(data) {
-                    ThingerDOM.showOptions(field, data, group, function(value) {
-                        // groups filtering callback
-                        groups = new ThingerGroups(value,node_id,svr_id);
-                        groups.getGroups().then((data) => {ThingerDOM.showOptions(field,data)});
-                    });
-                });
-            });
+            // Register focus handlers (options select)
+            const optionsFields = ["assetType","assetGroup"];
+            ThingerDOM.registerFocusHandler(optionsFields, node_id);
 
         },
         oneditsave: function() {

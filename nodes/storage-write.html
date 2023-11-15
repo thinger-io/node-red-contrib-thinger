@@ -25,21 +25,9 @@
 
             const node_id = this.id;
 
-            $("#node-input-storage").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "storage";
-                const storage = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let storages = new ThingerStorages(storage,node_id,svr_id);
-                storages.getStorages().then(function(data) {
-                    ThingerDOM.showOptions(field,data,storage,function(value) {
-                        // devices filtering callback
-                        storages = new ThingerStorages(value,node_id,svr_id);
-                        storages.getStorages().then((data) => {ThingerDOM.showOptions(field, data)});
-                    });
-                });
-            });
+            // Register focus handlers (options select)
+            const optionsFields = ["storage"];
+            ThingerDOM.registerFocusHandler(optionsFields, node_id);
 
             $("#node-input-file").focus(function() {
                 if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
@@ -152,6 +140,7 @@ Writes a file to a storage.
 : *action* (string) : sets the action to execute on the file (append, overwrite or delete).
 : *append_new_line* (boolean) : decides if a new line character should be added each time.
 : *create_dir* (boolean) : decides if the file and/or directory should be created if it does not already exist.
+: payload (object): content to write, it can be a Buffer object, a Base64, or a primitive data type.
 
 ### Outputs
 

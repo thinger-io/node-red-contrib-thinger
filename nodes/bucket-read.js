@@ -50,7 +50,13 @@ module.exports = function(RED) {
         let queryParametersString = "";
         queryParameters.forEach(function(value,key) {
             if (value) {
-                queryParametersString += key+"="+value+"&";
+                if ( Array.isArray(value) ) {
+                  for ( let i in value ) {
+                    queryParametersString += key+"="+value[i]+"&";
+                  }
+                } else {
+                  queryParametersString += key+"="+value+"&";
+                }
             }
         });
 
@@ -98,28 +104,37 @@ module.exports = function(RED) {
         RED.nodes.createNode(this, config);
 
         // get node
-        var node = this;
+        const node = this;
 
         // get server configuration
-        var server = RED.nodes.getNode(config.server);
+        const server = RED.nodes.getNode(config.server);
 
         // call bucket read on close
         node.on("input",function(msg, send, done) {
 
             let bucket = config.bucket || msg.bucket;
 
+            let tags = config.tags && Object.keys(config.tags).length !== 0 ? config.tags : msg.tags;
+
             const queryParameters = new Map();
             queryParameters.set('items',config.items || msg.items);
             queryParameters.set('agg',config.aggregation || msg.aggregation);
             queryParameters.set('agg_type',config.aggregationType || msg.aggregation_type);
             queryParameters.set('sort',config.sort || msg.sort);
+            for ( let key in tags ) {
+              let array = [];
+              for ( let i in tags[key] ) {
+                array.push(tags[key][i]);
+              }
+              queryParameters.set(key, array);
+            }
 
             // Timeframe filters
             let filter = config.filter || msg.filter;
-            var isFilterTime = true;
-            var isSimpleSorting = false;
-            var maxTs;
-            var minTs;
+            let isFilterTime = true;
+            let isSimpleSorting = false;
+            let maxTs;
+            let minTs;
 
             switch(filter) {
                 case "relative":
@@ -163,11 +178,11 @@ module.exports = function(RED) {
             }
 
             // limit < 0 will indicate all items matching the filter
-            var limit = queryParameters.get('items');
+            let limit = queryParameters.get('items');
             if (!limit) {
                 limit = -1;
             }
-            var result = [];
+            let result = [];
 
             readBucket(server, node, bucket, queryParameters, limit, result)
               .then(function(data) {

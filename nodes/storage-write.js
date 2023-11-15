@@ -20,7 +20,7 @@ module.exports = function(RED) {
             let file = config.file || msg.file || "";
             file = file.replace(/^\//, ''); // remove leading /
             let action = msg.action || config.action || "append";
-            let appendNewLine = msg.append_new_line || config.appendNewLine || true;
+            let appendNewLine = msg.append_new_line || config.appendNewLine || false;
             let createDir = msg.create_dir || config.createDir || false;
 
             const method = 'GET';
@@ -72,29 +72,36 @@ module.exports = function(RED) {
                   // Append, orverwrite or delete
                   let newContent = msg.payload;
                   if (appendNewLine) {
-                      if (Buffer.isBuffer(msg.payload)) newContent = Buffer.concat([msg.payload, Buffer.from('\n')]); 
+                      if (Buffer.isBuffer(msg.payload)) newContent = Buffer.concat([msg.payload, Buffer.from('\n')]);
                       else if (Utils.isBase64(msg.payload)) newContent = msg.payload+Buffer.from('\n','utf-8').toString('base64');
                       else newContent = msg.payload+'\n';
                   }
 
-                  if (action === "append") {
-                      let content = (await server.request(node, `${url}/${file}`, method)).payload;
-                      if (Buffer.isBuffer(content)) {
-                          if (Buffer.isBuffer(newContent)) msg.payload = Buffer.concat([content, newContent]);
-                          else msg.payload = `${content.toString('utf-8')}${newContent}`;
-                      } else if (Buffer.isBuffer(newContent)) {
-                          msg.payload = `${content}${newContent.toString('utf-8')}`;
-                      } else {
-                          msg.payload = `${content}${newContent}`;
-                      }
+                  try {
+                      if (action === "append") {
+                          let content = (await server.request(node, `${url}/${file}`, method)).payload;
+                          if (Buffer.isBuffer(content)) {
+                              if (Buffer.isBuffer(newContent)) msg.payload = Buffer.concat([content, newContent]);
+                              else msg.payload = `${content.toString('utf-8')}${newContent}`;
+                          } else if (Buffer.isBuffer(newContent)) {
+                              msg.payload = `${content}${newContent.toString('utf-8')}`;
+                          } else {
+                              msg.payload = `${content}${newContent}`;
+                          }
 
-                      msg.payload = await server.request(node, `${url}/${file}`, 'PUT', msg.payload).payload;
-                  } else  if (action === "overwrite") {
-                      msg.payload = await server.request(node, `${url}/${file}`, 'PUT', newContent).payload;
-                  } else if (action === "delete") {
-                      msg.payload = await server.request(node, `${url}/${file}`, 'DELETE').payload;
-                  } else {
-                      throw new Error("File action is not recognized");
+                          msg.payload = await server.request(node, `${url}/${file}`, 'PUT', msg.payload).payload;
+                      } else if (action === "overwrite") {
+                          msg.payload = await server.request(node, `${url}/${file}`, 'PUT', newContent).payload;
+                      } else if (action === "delete") {
+                          msg.payload = await server.request(node, `${url}/${file}`, 'DELETE').payload;
+                      } else {
+                          throw new Error("File action is not recognized");
+                      }
+                  } catch ( e ) {
+                      delete e.stack;
+                      done(e);
+
+                      return;
                   }
 
                   //send(msg);

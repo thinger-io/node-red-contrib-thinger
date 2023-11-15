@@ -6,10 +6,10 @@ module.exports = function(RED) {
         RED.nodes.createNode(this, config);
 
         // get node
-        var node = this;
+        const node = this;
 
         // get server configuration
-        var server = RED.nodes.getNode(config.server);
+        const server = RED.nodes.getNode(config.server);
 
         // register listener on creation
         let device = config.device || msg.device;
