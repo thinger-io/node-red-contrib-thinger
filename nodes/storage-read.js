@@ -44,7 +44,7 @@ module.exports = function(RED) {
               }
 
               // Clean file list only to what we need
-              let files = res.payload.filter(e => e.path.startsWith(file));
+              let files = res.payload.filter(e => e.path === file);
               const regex = /[/]/g;
               let fileDepth = (file.match(regex) || []).length;
 
