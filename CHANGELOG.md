@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Bucket Read node does not save time period setting when months is selected
+- Aggregation by month not implemented in bucket read node
 
 ## [1.5.1] - 2023-11-24
 
