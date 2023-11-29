@@ -61,7 +61,7 @@ module.exports = function(RED) {
             node.rate = (rateUnits === 's') ? parseInt(node.rate)*1000 : parseInt(node.rate);
 
             const queryParameters = new Map();
-            queryParameters.set('filter',config.filter || msg.asset_filter);
+            queryParameters.set('name',config.filter || msg.asset_filter || "");
             queryParameters.set('count',config.count || msg.count);
             queryParameters.set('asset_type',config.assetType || msg.asset_type);
             queryParameters.set('asset_group',config.assetGroup || msg.asset_group);
