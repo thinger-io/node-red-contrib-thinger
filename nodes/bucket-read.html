@@ -87,7 +87,9 @@
             let _tags = this.tags;
 
             // Fill timezone input
-            ThingerDOM.fillSelect("timezone", Intl.supportedValuesOf('timeZone'));
+            if ( typeof Intl.supportedValuesOf !== "undefined" )
+                ThingerDOM.fillSelect("timezone", Intl.supportedValuesOf('timeZone'));
+            else ThingerDOM.fillSelect("timezone", ["UTC"]);
             if ( typeof this.timezone !== "undefined" )
                 ThingerDOM.selectOption("timezone", this.timezone);
             else ThingerDOM.selectOption("timezone", "UTC");

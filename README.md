@@ -20,7 +20,7 @@ Have a valid [Thinger.io](https://thinger.io/) cloud [instance](https://pricing.
 
 #### Local
 Have a local instance of [Node-RED](https://nodered.org/) with the following characteristics:
-- [Node.js](https://nodejs.org) - v12.0 or newer
+- [Node.js](https://nodejs.org) - v16.0 or newer
 - [Node-RED](https://NodeRED.org) - v2.0.0 or newer
 
 ### Installation
