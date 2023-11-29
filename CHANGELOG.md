@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.2] - 2023-11-29
+
+### Fixed
+
+- Bucket Read node does not save time period setting when months is selected
+
 ## [1.5.1] - 2023-11-24
 
 ### Fixed
@@ -232,6 +238,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.5.2]: https://github.com/thinger-io/Node-RED/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/thinger-io/Node-RED/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/thinger-io/Node-RED/compare/1.4.3...1.5.0
 [1.4.3]: https://github.com/thinger-io/Node-RED/compare/1.4.2...1.4.3

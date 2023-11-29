@@ -23,6 +23,9 @@ module.exports = function(RED) {
             case 'w':
                 priorTs = new Date(ts.setDate(ts.getDate() - value*7));
                 break;
+            case 'mo':
+                priorTs = new Date(ts.setDate(ts.getMonth() - value));
+                break;
             case 'y':
                 priorTs = new Date(ts.setFullYear(ts.getFullYear() - value));
                 break;

@@ -259,7 +259,7 @@
                 <option value="h" default>hours</option>
                 <option value="d">days</option>
                 <option value="w">weeks</option>
-                <option value="m">months</option>
+                <option value="mo">months</option>
                 <option value="y">years</option>
             </select>
         </div>
@@ -346,7 +346,7 @@ Reads data from a data bucket.
 : filter (string) : the type of filter to apply the to the read operation (<samp>relative</samp>, <samp>absolute</samp> or <samp>simple</samp>).
 : *timespan_sequence* (string) : the sequence for <samp>relative</samp> filter (<samp>latest</samp> or <samp>previous</samp>).
 : *timespan_value* (int) : the value for <samp>relative</samp> filter.
-: *timespan_units* (char) : the time units for <samp>relative</samp> filter (s for seconds, m for minutes and so on; h, d, w, m, y).
+: *timespan_units* (char) : the time units for <samp>relative</samp> filter (s for seconds, m for minutes and so on; h, d, w, mo, y).
 : *min_ts* (Date) : the minimun data or timestamp of the time period for <samp>absolute</samp> time filter.
 : *max_ts* (Date) : the maximum date or timestamp of the time period for <samp>absolute</samp> time filter.
 : *limit* (int) : the number of items to retrieve when filter is <samp>relative</samp> or <samp>absolute</samp>.
