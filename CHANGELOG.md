@@ -7,11 +7,13 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - New timezone field in bucket read node to query the backend
+- New Project filter in asset iterator node
 
 ### Fixed
 
 - Bucket read node does not save time period setting when months is selected
 - Aggregation by month not implemented in bucket read node
+- Improved queries of devices and buckets with type or group filters in asset iterator node
 
 ## [1.5.1] - 2023-11-24
 
