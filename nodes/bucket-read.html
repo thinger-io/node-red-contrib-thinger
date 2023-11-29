@@ -67,6 +67,7 @@
             aggregation: {value: ""}, //1m, 5h, 1w
             aggregationType: {value: ""}, // mean, median, 
             sort: {value: ""},
+            timezone: {value: "UTC"},
             server: {type:"thinger-server", required:true}
         },
         icon:"bucket.svg",
@@ -84,6 +85,12 @@
 
             const node_id = this.id;
             let _tags = this.tags;
+
+            // Fill timezone input
+            ThingerDOM.fillSelect("timezone", Intl.supportedValuesOf('timeZone'));
+            if ( typeof this.timezone !== "undefined" )
+                ThingerDOM.selectOption("timezone", this.timezone);
+            else ThingerDOM.selectOption("timezone", "UTC");
 
             // Defaults set on prepare instead of properties to allow for configuration on input message
             $("#node-input-sort").val(this.sort || "asc");
@@ -335,6 +342,12 @@
     </div>
 
     <div class="form-row">
+        <label for="node-input-timezone"><i class="fa fa-globe"></i> Timezone</label>
+        <select id="node-input-timezone" style="width: 70%; !important">
+        </select>
+    </div>
+
+    <div class="form-row">
         <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
         <input type="text" id="node-input-server" placeholder="Select Server">
     </div>
@@ -358,6 +371,7 @@ Reads data from a data bucket.
 : sort (string) : the sorting order for the retrieved items (<samp>asc</samp> or <samp>desc</samp>).
 : *aggregation* (string) : the value for aggregating the retrieved data (<samp>1d</samp> for 1 day and so on).
 : *aggregation_type* (string) : the type of aggregation to apply over the data (<samp>median</samp>, <samp>mean</samp>, <samp>max</samp>, <samp>min</samp>, <samp>count</samp> or <samp>sum</samp>).
+: *timezone* (string) : the timezone string to query the backend, default is UTC.
 
 ### Outputs
 
@@ -366,7 +380,7 @@ Reads data from a data bucket.
 ### Details
 
 The node allows the configuration via the edit dialog or through an input message.
-The values assigned through the dialog will have priority over the message.
+The values assigned through the dialog will have priority over the message with the exception of the timezone field.
 
 Each `msg.filter` will retrieve the data one way or another:
 - **Relative**: based on relative time with lastest or previous to a date value. Ex.: previous 3 days.

@@ -2,11 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.5.2] - 2023-11-29
+## [1.6.0] - 2023-11-29
+
+### Added
+
+- New timezone field in bucket read node to query the backend
 
 ### Fixed
 
-- Bucket Read node does not save time period setting when months is selected
+- Bucket read node does not save time period setting when months is selected
 - Aggregation by month not implemented in bucket read node
 
 ## [1.5.1] - 2023-11-24
@@ -239,7 +243,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
-[1.5.2]: https://github.com/thinger-io/Node-RED/compare/1.5.1...1.5.2
+[1.6.0]: https://github.com/thinger-io/Node-RED/compare/1.5.1...1.6.0
 [1.5.1]: https://github.com/thinger-io/Node-RED/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/thinger-io/Node-RED/compare/1.4.3...1.5.0
 [1.4.3]: https://github.com/thinger-io/Node-RED/compare/1.4.2...1.4.3
