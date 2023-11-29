@@ -1,6 +1,6 @@
 # node-red-contrib-thinger
 
-[![NPM Version](https://img.shields.io/static/v1?label=npm&message=v1.5.1&color=blue&style=flat)](https://www.npmjs.com/package/node-red-contrib-thinger)
+[![NPM Version](https://img.shields.io/static/v1?label=npm&message=v1.6.0&color=blue&style=flat)](https://www.npmjs.com/package/node-red-contrib-thinger)
 
 ![Node-RED and Thinger.io Integration](./images/laptop.png "Thinger.io web console with Node-RED plugin and ad-hoc nodes")
 
@@ -20,7 +20,7 @@ Have a valid [Thinger.io](https://thinger.io/) cloud [instance](https://pricing.
 
 #### Local
 Have a local instance of [Node-RED](https://nodered.org/) with the following characteristics:
-- [Node.js](https://nodejs.org) - v12.0 or newer
+- [Node.js](https://nodejs.org) - v16.0 or newer
 - [Node-RED](https://NodeRED.org) - v2.0.0 or newer
 
 ### Installation
