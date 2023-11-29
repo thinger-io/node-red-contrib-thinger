@@ -12,6 +12,7 @@
           filter: {value: ""}, // regex
           assetType: {value: ""},
           assetGroup: {value: ""},
+          project: {value: ""},
           rate: {value: 0},
           rateUnits: {value: "s"}
         },
@@ -54,16 +55,18 @@
                     if (["device", "bucket"].indexOf(asset) != -1) {
                         $(".node-row-assetType").show();
                         $(".node-row-assetGroup").show();
+                        $(".node-row-project").show();
                     } else {
                         $(".node-row-assetType").hide();
                         $(".node-row-assetGroup").hide();
+                        $(".node-row-project").hide();
                     }
 
                 }
             });
 
             // Register focus handlers (options select)
-            const optionsFields = ["assetType","assetGroup"];
+            const optionsFields = ["assetType","assetGroup","project"];
             ThingerDOM.registerFocusHandler(optionsFields, node_id);
 
         },
@@ -72,6 +75,7 @@
             if ( asset !== "device" && asset !== "bucket") {
                 $("#node-input-assetType").val("");
                 $("#node-input-assetGroup").val("");
+                $("#node-input-project").val("");
             }
         }
     });
@@ -111,6 +115,13 @@
         <div class="form-row">
             <label for="node-input-assetGroup"><i class="fa fa-th"></i> Asset Group</label>
             <input type="text" id="node-input-assetGroup" placeholder="Select Group...">
+        </div>
+    </div>
+
+    <div class="node-row-project" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-project"><i class="fa fa-folder"></i> Project</label>
+            <input type="text" id="node-input-project" placeholder="Select Project...">
         </div>
     </div>
 
