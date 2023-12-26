@@ -112,7 +112,7 @@ module.exports = function(RED) {
                     delete e.stack;
                     msg.payload = {};
                     msg.payload.asset = asset;
-                    msg.payload.asset_filter = queryParameters.get("filter");
+                    msg.payload.asset_filter = queryParameters.get("name");
                     msg.payload.asset_type = queryParameters.get("asset_type");
                     msg.payload.asset_group = queryParameters.get("asset_group");
                     done(e);
