@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Return of non existent field in asset iterator node
+- Storage-write node not returning recursive details of files
 
 ## [1.6.1] - 2023-11-30
 
