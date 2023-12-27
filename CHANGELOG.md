@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - Return of non existent field in asset iterator node
 - Storage-write node not returning recursive details of files
+- Can't write value 0 to property when using msg.payload
 
 ## [1.6.1] - 2023-11-30
 

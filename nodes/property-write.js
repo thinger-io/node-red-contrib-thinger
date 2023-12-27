@@ -2,6 +2,8 @@ module.exports = function(RED) {
 
     "use strict";
 
+    const Utils = require('../lib/utils/utils.js');
+
     function PropertyWriteNode(config) {
         RED.nodes.createNode(this, config);
 
@@ -16,7 +18,7 @@ module.exports = function(RED) {
             let asset = (config.asset || msg.asset)+"s";
             let assetId = config.assetId || msg.asset_id;
             let property = config.property || msg.property;
-            let data = config.value || msg.payload || msg.value;
+            let data = config.value || Utils.transformValue(msg.payload) || Utils.transformValue(msg.value);
 
             const apiVersion = (asset == "devices" ? "v3" : "v1");
             let url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${asset}/${assetId}/properties`;
