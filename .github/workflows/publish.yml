@@ -13,19 +13,18 @@ jobs:
 
     - name: Extract branch name
       shell: bash
-      run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
-      id: extract_branch
+      run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
     - name: checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        ref: ${{ steps.extract_branch.outputs.branch }}
+        ref: ${{ env.branch }}
 
     - name: node
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: 16
+        node-version: 18
         registry-url: https://registry.npmjs.org
 
     - name: Get tag version
@@ -35,7 +34,7 @@ jobs:
     - name: Check if tag is for develop and if it already exists
       run: |
         git fetch --prune --tags
-        if [ ${{ steps.extract_branch.outputs.branch }} == 'develop' ]; then
+        if [ ${{ env.branch }} == 'develop' ]; then
             for i in {1..100}; do
                 if [ `git tag --list | grep ${{ env.tag_version }}"-alpha.${i}" | wc -l` -eq 0 ]; then
                     tag_version=${{ env.tag_version }}"-alpha.${i}"
@@ -44,7 +43,7 @@ jobs:
                     break;
                 fi
             done
-        elif [ ${{steps.extract_branch.outputs.branch }} == 'master' ]; then
+        elif [ ${{ env.branch }} == 'master' ]; then
             echo "npm_tag_version=latest" >> $GITHUB_ENV
         elif [ `git tag --list | grep -q ${{ env.tag_version }}` -ne 0 ]; then exit 1; fi
 
@@ -67,32 +66,23 @@ jobs:
         NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
     - name: Get changelog body
-      id: get_changelog
       run: |
-        release_body=$(cat << EOF
-        $(awk '/^## \[[0-9]+/,EOF' CHANGELOG.md | awk '(NR>1)' | awk '1;/^## \[[0-9]+/{exit}' | sed '$d')
-        EOF
-        )
-        release_body="${release_body//'%'/'%25'}"
-        release_body="${release_body//$'\n'/'%0A'}"
-        release_body="${release_body//$'\r'/'%0D'}"
-        echo "release_body=$release_body" >> $GITHUB_OUTPUT
+        awk '/^## \[[0-9]+/,EOF' CHANGELOG.md | awk '(NR>1)' | awk '1;/^## \[[0-9]+/{exit}' | sed '$d' > release_body.md
 
     - name: Set pre-release boolean
-      id: is_prerelease
       run: |
         prerelease=false
-        if [ ${{ steps.extract_branch.outputs.branch }} == 'develop' ]; then
+        if [ ${{ env.branch }} == 'develop' ]; then
             prerelease=true
         fi
-        echo "prerelease=$prerelease" >> $GITHUB_OUTPUT
+        echo "prerelease=$prerelease" >> $GITHUB_ENV
 
     - name: Create GitHub release
       uses: ncipollo/release-action@v1
       with:
-        prerelease: ${{ steps.is_prerelease.outputs.prerelease }}
+        prerelease: ${{ env.prerelease }}
+        commit: ${{ env.branch }}
         tag: ${{ env.tag_version }}
         name: ${{ env.tag_version }}
         token: ${{ secrets.GITHUB_TOKEN }}
-        body: |
-          ${{ steps.get_changelog.outputs.release_body }}
+        bodyFile: "release_body.md"
