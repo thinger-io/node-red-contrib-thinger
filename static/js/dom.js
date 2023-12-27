@@ -38,6 +38,9 @@ class ThingerDOM {
 
     static fillSelect(field,options) {
 
+      // Empty select before filling
+      $(`#node-input-${field} option:gt(0)`).remove();
+
         options.forEach((value) => {
             $(`#node-input-${field}`).
               append($('<option>', {

@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.2] - 2023-12-27
+
+### Fixed
+
+- Return of non existent field in asset iterator node
+- Storage-write node not returning recursive details of files
+- Can't write value 0 to property when using msg.payload
+- Asset list duplicated in server events node
+
 ## [1.6.1] - 2023-11-30
 
 ### Fixed
@@ -251,6 +260,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.6.2]: https://github.com/thinger-io/Node-RED/compare/1.6.1...1.6.2
 [1.6.1]: https://github.com/thinger-io/Node-RED/compare/1.6.0...1.6.1
 [1.6.0]: https://github.com/thinger-io/Node-RED/compare/1.5.1...1.6.0
 [1.5.1]: https://github.com/thinger-io/Node-RED/compare/1.5.0...1.5.1
