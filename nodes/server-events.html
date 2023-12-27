@@ -51,7 +51,7 @@
             let events;
             // Fill asset options
             $("#node-input-server").change(function() {
-                const server_id = this.value ? this.value : "";;
+                const server_id = this.value ? this.value : "";
 
                 const user = new ThingerUser(server_id);
                 const assets = typeof user.role !== 'undefined' ? new ThingerAssets(null,node_id,server_id,user.role) : new ThingerAssets(null,node_id,server_id);
