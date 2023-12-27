@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.2] - 2023-12-27
+
+### Fixed
+
+- Return of non existent field in asset iterator node
+- Storage-write node not returning recursive details of files
+- Can't write value 0 to property when using msg.payload
+- Asset list duplicated in server events node
+
+## [1.6.1] - 2023-11-30
+
+### Fixed
+
+- Asset iterator node ignoring asset id
+
+## [1.6.0] - 2023-11-29
+
+### Added
+
+- New timezone field in bucket read node to query the backend
+- New Project filter in asset iterator node
+
+### Fixed
+
+- Bucket read node does not save time period setting when months is selected
+- Aggregation by month not implemented in bucket read node
+- Improved queries of devices and buckets with type or group filters in asset iterator node
+
 ## [1.5.1] - 2023-11-24
 
 ### Fixed
@@ -232,6 +260,9 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.6.2]: https://github.com/thinger-io/Node-RED/compare/1.6.1...1.6.2
+[1.6.1]: https://github.com/thinger-io/Node-RED/compare/1.6.0...1.6.1
+[1.6.0]: https://github.com/thinger-io/Node-RED/compare/1.5.1...1.6.0
 [1.5.1]: https://github.com/thinger-io/Node-RED/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/thinger-io/Node-RED/compare/1.4.3...1.5.0
 [1.4.3]: https://github.com/thinger-io/Node-RED/compare/1.4.2...1.4.3

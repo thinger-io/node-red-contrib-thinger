@@ -23,6 +23,9 @@ module.exports = function(RED) {
             case 'w':
                 priorTs = new Date(ts.setDate(ts.getDate() - value*7));
                 break;
+            case 'mo':
+                priorTs = new Date(ts.setDate(ts.getMonth() - value));
+                break;
             case 'y':
                 priorTs = new Date(ts.setFullYear(ts.getFullYear() - value));
                 break;
@@ -121,6 +124,7 @@ module.exports = function(RED) {
             queryParameters.set('agg',config.aggregation || msg.aggregation);
             queryParameters.set('agg_type',config.aggregationType || msg.aggregation_type);
             queryParameters.set('sort',config.sort || msg.sort);
+            queryParameters.set('tz', msg.timezone || config.timezone);
             for ( let key in tags ) {
               let array = [];
               for ( let i in tags[key] ) {

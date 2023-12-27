@@ -6,27 +6,15 @@ module.exports = function(RED) {
 
         RED.nodes.createNode(this, config);
 
-        function handleResponse(msg, res, assetType, assetGroup) {
+        function handleResponse(msg, res) {
             for (const i in res) {
-                let type = res[i].asset_type;
-                let group = res[i].asset_group;
 
                 let newMsg = RED.util.cloneMessage(msg.msg);
                 if (res.length > 1) { // if more than one asset create new message with its own id
                     delete newMsg._msgid;
                 }
 
-                if (
-                  (assetType === undefined && assetGroup === undefined) ||
-                  (assetType === type && assetGroup === group) ||
-                  (assetType === type && assetGroup === undefined) ||
-                  (assetType === undefined && assetGroup == group)
-                ) {
-                    newMsg.payload = res[i];
-                } else {
-                    continue;
-                }
-
+                newMsg.payload = res[i];
                 node.buffer.push({msg: newMsg, send: msg.send, done: msg.done});
 
                 if (node.intervalId === -1) {
@@ -67,14 +55,25 @@ module.exports = function(RED) {
             node.status({fill:"blue", shape:"ring", text:"running"});
 
             let asset = (config.asset || msg.asset);
-            let filter = config.filter || msg.asset_filter || "";
 
             let rateUnits = config.rateUnits || msg.rate_units || "s";
             node.rate = config.rate || msg.rate || 0;
             node.rate = (rateUnits === 's') ? parseInt(node.rate)*1000 : parseInt(node.rate);
 
-            let assetType = config.assetType || msg.asset_type;
-            let assetGroup = config.assetGroup || msg.asset_group;
+            const queryParameters = new Map();
+            queryParameters.set('name',config.filter || msg.asset_filter || "");
+            queryParameters.set('count',config.count || msg.count);
+            queryParameters.set('asset_type',config.assetType || msg.asset_type);
+            queryParameters.set('asset_group',config.assetGroup || msg.asset_group);
+            queryParameters.set('project',config.project || msg.project);
+
+            // Query parameters to string
+            let queryParametersString = "";
+            queryParameters.forEach(function(value,key) {
+                if (value) {
+                    queryParametersString += key+"="+value+"&";
+                }
+            });
 
             if (typeof server.request === "function") {
 
@@ -88,16 +87,16 @@ module.exports = function(RED) {
                 path = path.replace(userRegex, server.config.username);
 
                 const count = 50;
-                const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${path}?name=${filter}&count=${count}`;
+                const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${path}?count=${count}&${queryParametersString}`;
 
                 let index = 0;
                 let res_length = 0;
 
                 try {
                     do {
-                      const res = await server.request(node,`${url}&index=${index}`,'GET');
+                      const res = await server.request(node,`${url}index=${index}`,'GET');
                       res_length = res.payload.length;
-                      handleResponse({msg: msg, send: send, done: done}, res.payload, assetType, assetGroup);
+                      handleResponse({msg: msg, send: send, done: done}, res.payload);
                       index += res_length;
                     } while (res_length == count);
 
@@ -113,9 +112,9 @@ module.exports = function(RED) {
                     delete e.stack;
                     msg.payload = {};
                     msg.payload.asset = asset;
-                    msg.payload.asset_filter = filter;
-                    msg.payload.asset_type = assetType;
-                    msg.payload.asset_group = assetGroup;
+                    msg.payload.asset_filter = queryParameters.get("name");
+                    msg.payload.asset_type = queryParameters.get("asset_type");
+                    msg.payload.asset_group = queryParameters.get("asset_group");
                     done(e);
                 }
 
