@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.3] - 2024-01-03
+
+### Fixed
+
+- Could not send JSON value through msg.payload in propery write node
+
 ## [1.6.2] - 2023-12-27
 
 ### Fixed
@@ -260,6 +266,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.6.3]: https://github.com/thinger-io/Node-RED/compare/1.6.2...1.6.3
 [1.6.2]: https://github.com/thinger-io/Node-RED/compare/1.6.1...1.6.2
 [1.6.1]: https://github.com/thinger-io/Node-RED/compare/1.6.0...1.6.1
 [1.6.0]: https://github.com/thinger-io/Node-RED/compare/1.5.1...1.6.0
