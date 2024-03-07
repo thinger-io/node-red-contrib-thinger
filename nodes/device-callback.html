@@ -105,6 +105,7 @@ Calls the callback endpoint of an HTTP device.
 : payload (object) : the standard output of the command.
 
 ### Details
+
 The node allows the configuration via the edit dialog or through an input message.
 The values assigned through the dialog will have priority over the message.
 
@@ -112,6 +113,10 @@ In case the device does not exist it will be autoprovisioned, as well as a data 
 
 The fields `msg.prefix`, `msg.asset_type`, `msg.asset_group` and `msg.product` are only available through the input message and used only in the case of autoprivisioning.
 The default value for prefix on autoprovisoning if no value is passed is <samp>NR_</samp>.
+
+When configured within the node, the Device and Value properties can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+For example if Device is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
+For the Value property, templates can only be place in a JSON property value and not a key, as well as handling only templates on the first level.
 
 ### References
 

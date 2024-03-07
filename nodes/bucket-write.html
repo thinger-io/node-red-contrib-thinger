@@ -92,6 +92,10 @@ Writes the input payload to a data bucket.
 The node allows the configuration via the edit dialog or through an input message.
 The values assigned through the dialog will have priority over the message.
 
+When configured within the node, the Bucket and Value properties can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+For example if Bucket is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
+For the Value property, templates can only be place in a JSON property value and not a key, as well as handling only templates on the first level.
+
 ### References
 
 - [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin

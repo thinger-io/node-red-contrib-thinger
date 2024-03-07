@@ -2,6 +2,8 @@ module.exports = function(RED) {
 
     "use strict";
 
+    const Utils = require('../lib/utils/utils');
+
     function StorageReadNode(config) {
         RED.nodes.createNode(this, config);
 
@@ -15,8 +17,12 @@ module.exports = function(RED) {
         node.on('input', async function(msg, send, done) {
 
             let storage = config.storage || msg.storage;
+            storage = Utils.mustacheRender(storage, msg);
+
             let file = config.file || msg.file || "";
             file = file.replace(/^\//, ''); // remove leading /
+            file = Utils.mustacheRender(file, msg);
+
             let data = config.data || msg.data || "content";
             let recursive = config.recursive || msg.recursive || false;
             let minDepth = config.minDepth || msg.min_depth || 0;

@@ -5,6 +5,7 @@ module.exports = function(RED) {
     const Utils = require('../lib/utils/utils.js');
 
     function PropertyWriteNode(config) {
+
         RED.nodes.createNode(this, config);
 
         // get node
@@ -16,9 +17,15 @@ module.exports = function(RED) {
         // call property read on input
         node.on("input",async function(msg, send, done) {
             let asset = (config.asset || msg.asset)+"s";
+
             let assetId = config.assetId || msg.asset_id;
+            assetId = Utils.mustacheRender(assetId, msg);
+
             let property = config.property || msg.property;
+            property = Utils.mustacheRender(property, msg);
+
             let data = config.value || Utils.transformValue(msg.payload) || Utils.transformValue(msg.value);
+            data = Utils.mustacheRender(data, msg);
 
             const apiVersion = (asset == "devices" ? "v3" : "v1");
             let url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${asset}/${assetId}/properties`;

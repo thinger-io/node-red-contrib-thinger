@@ -58,10 +58,14 @@ Calls a server endpoint with the supplied input payload.
 : payload (object) : the standard output of the command.
 
 ### Details
+
 The node allows the configuration of the endpoint via the edit dialog or through an input message.
 The values assigned through the dialog will have priority over the message.
 
 The input `msg.payload` is not available through the edit dialog and can only be passed through the input.
+
+When configured within the node, the Endpoint property can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+For example if Endpoint is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
 
 ### References
 

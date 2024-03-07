@@ -122,10 +122,15 @@ Writes the input payload to a connected device resource.
 : payload (object) : the standard output of the command.
 
 ### Details
+
 The node allows the configuration via the edit dialog or through an input message.
 The values assigned through the dialog will have priority over the message.
 
 There will only be output present when the device resource is both input and output simultaneously.
+
+When configured within the node, the Device, Resource and Value properties can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+For example if Device is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
+For the Value property, templates can only be place in a JSON property value and not a key, as well as handling only templates on the first level.
 
 ### References
 

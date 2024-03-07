@@ -78,8 +78,12 @@ Reads a resource value from a connected device.
 : payload (object) : the standard output of the command.
 
 ### Details
+
 The node allows the configuration via the edit dialog or through an input message.
 The values assigned through the dialog will have priority over the message.
+
+When configured within the node, the Device and Resource property can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+For example if Bucket is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
 
 ### References
 

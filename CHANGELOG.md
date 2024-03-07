@@ -2,11 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.7.0] - 2024-03-07
+## [1.7.0] - 2024-03-08
 
 ### Added
 
 - New configuration for setting the timeout for Thinger.io requests
+- Allow msg placeholders in thinger nodes input forms
 
 ## [1.6.3] - 2024-01-03
 

@@ -2,6 +2,8 @@ module.exports = function(RED) {
 
     "use strict";
 
+    const Utils = require('../lib/utils/utils');
+
     function DeviceCreateNode(config) {
         RED.nodes.createNode(this, config);
 
@@ -60,14 +62,14 @@ module.exports = function(RED) {
                 data.product = product;
             }
 
-            let project = config.project || msg.project;
-            if (project) {
-                data.project = project;
-            }
+            // Render all required templates
+            data = Utils.mustacheRender(data, msg);
 
             let projects = config.projects && config.projects !== "[]" ? RED.util.evaluateNodeProperty(config.projects, 'json', node) : msg.projects;
-            if ( typeof projects === 'object' && projects.length > 0 )
-              projects = projects.map(project => `${server.config.username}@${project}`); // body needs username
+            if ( typeof projects === 'object' && projects.length > 0 ) {
+                projects = projects.map(project => `${server.config.username}@${project}`); // body needs username
+                if ( Utils.isTemplated(projects) ) projects = Utils.mustacheRender(projects, msg);
+            }
 
             // It fails when no credentials are passed as expected by the backend
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/devices`;

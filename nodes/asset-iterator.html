@@ -160,8 +160,12 @@ Reads and iterates over the assets that match the filters, returning one message
 : payload (object) : the standard output of the command.
 
 ### Details
+
 The values of the field `msg.asset_filter` allows basic regular expressions.
 If the response contains more than one asset new message will be created for each, altering the property `msg._msgid` inserted by Node-RED.
+
+When configured within the node, the Asset Filter, Asset Type, Asset Group and Project properties can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+For example if Asset Filter is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
 
 ### References
 

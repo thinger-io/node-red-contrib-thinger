@@ -2,6 +2,8 @@ module.exports = function(RED) {
 
     "use strict";
 
+    const Utils = require('../lib/utils/utils');
+
     async function provisionDevice(server,node,prefix,device,assetType,assetGroup,product) {
         // create auto provisioned device
         let data = {};
@@ -81,6 +83,7 @@ module.exports = function(RED) {
         node.on("input",async function(msg, send, done) {
 
             let device = config.device || msg.device;
+            device = Utils.mustacheRender(device, msg);
 
             let assetType = msg.asset_type || "";
 
@@ -97,6 +100,9 @@ module.exports = function(RED) {
             if (typeof(data) === 'string') {
                 data = JSON.parse(data);
             }
+
+            // Render all required templates
+            data = Utils.mustacheRender(data, msg);
 
             if (typeof server.request === "function") {
 

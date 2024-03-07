@@ -1,7 +1,8 @@
-
 module.exports = function(RED) {
 
     "use strict";
+
+    const Utils = require('../lib/utils/utils');
 
     function BucketWriteNode(config) {
         RED.nodes.createNode(this, config);
@@ -16,10 +17,15 @@ module.exports = function(RED) {
         node.on("input", function(msg, _send, done) {
 
             let bucket = config.bucket || msg.bucket;
+            bucket = Utils.mustacheRender(bucket, msg);
+
             let value = config.value || msg.payload || msg.value;
             if (typeof(value) === 'string') {
                 value = JSON.parse(value);
             }
+
+            // Render all required templates
+            value = Utils.mustacheRender(value, msg);
 
             const method = 'POST';
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/buckets/${bucket}/data`;
