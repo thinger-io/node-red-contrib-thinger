@@ -12,6 +12,7 @@
           filter: {value: ""}, // regex
           assetType: {value: ""},
           assetGroup: {value: ""},
+          product: {value: ""},
           project: {value: ""},
           rate: {value: 0},
           rateUnits: {value: "s"}
@@ -55,10 +56,12 @@
                     if (["device", "bucket"].indexOf(asset) != -1) {
                         $(".node-row-assetType").show();
                         $(".node-row-assetGroup").show();
+                        $(".node-row-product").show();
                         $(".node-row-project").show();
                     } else {
                         $(".node-row-assetType").hide();
                         $(".node-row-assetGroup").hide();
+                        $(".node-row-product").hide();
                         $(".node-row-project").hide();
                     }
 
@@ -66,7 +69,7 @@
             });
 
             // Register focus handlers (options select)
-            const optionsFields = ["assetType","assetGroup","project"];
+            const optionsFields = ["assetType","assetGroup","project","product"];
             ThingerDOM.registerFocusHandler(optionsFields, node_id);
 
         },
@@ -75,6 +78,7 @@
             if ( asset !== "device" && asset !== "bucket") {
                 $("#node-input-assetType").val("");
                 $("#node-input-assetGroup").val("");
+                $("#node-input-product").val("");
                 $("#node-input-project").val("");
             }
         }
@@ -118,6 +122,13 @@
         </div>
     </div>
 
+    <div class="node-row-product" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-product"><i class="fa fa-shopping-bag"></i> Product</label>
+            <input type="text" id="node-input-product" placeholder="Select product...">
+        </div>
+    </div>
+
     <div class="node-row-project" style="display: none;">
         <div class="form-row">
             <label for="node-input-project"><i class="fa fa-folder"></i> Project</label>
@@ -151,6 +162,7 @@ Reads and iterates over the assets that match the filters, returning one message
 : asset_filter (string) : the filter of the assets to match.
 : *asset_type* (string) : the type of thinger asset.
 : *asset_group* (string) : the group of thinger asset.
+: *product* (string) : the product of thinger asset.
 : *project* (string) : the project of thinger asset.
 : *rate* (int) : the number of seconds between each message.
 : *rate_units* (string) : the units to interpret the rate value (s or ms).

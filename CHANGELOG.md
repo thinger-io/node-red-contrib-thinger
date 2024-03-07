@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - New configuration for setting the timeout for Thinger.io requests
 - Allow msg placeholders in thinger nodes input forms
+- Iteration over assets associated to a Product
 
 ## [1.6.3] - 2024-01-03
 

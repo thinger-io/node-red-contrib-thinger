@@ -70,6 +70,8 @@ module.exports = function(RED) {
 
             queryParameters.asset_group = config.assetGroup || msg.asset_group;
 
+            queryParameters.product = config.product || msg.product;
+
             queryParameters.project = config.project || msg.project;
 
             queryParameters.count = config.count || msg.count;
