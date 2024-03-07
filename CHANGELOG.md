@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2024-03-07
+
+### Added
+
+- New configuration for setting the timeout for Thinger.io requests
+
 ## [1.6.3] - 2024-01-03
 
 ### Fixed
@@ -266,6 +272,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.7.0]: https://github.com/thinger-io/Node-RED/compare/1.6.3...1.7.0
 [1.6.3]: https://github.com/thinger-io/Node-RED/compare/1.6.2...1.6.3
 [1.6.2]: https://github.com/thinger-io/Node-RED/compare/1.6.1...1.6.2
 [1.6.1]: https://github.com/thinger-io/Node-RED/compare/1.6.0...1.6.1
