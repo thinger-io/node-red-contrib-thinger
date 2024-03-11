@@ -2,6 +2,8 @@ module.exports = function(RED) {
 
     "use strict";
 
+    const Utils = require('../lib/utils/utils');
+
     /**
      * Will return the date of the timestamp based on prior value and units
      */
@@ -116,6 +118,7 @@ module.exports = function(RED) {
         node.on("input",function(msg, send, done) {
 
             let bucket = config.bucket || msg.bucket;
+            bucket = Utils.mustacheRender(bucket, msg);
 
             let tags = config.tags && Object.keys(config.tags).length !== 0 ? config.tags : msg.tags;
 

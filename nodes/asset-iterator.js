@@ -2,6 +2,8 @@ module.exports = function(RED) {
 
     "use strict";
 
+    const Utils = require('../lib/utils/utils');
+
     function AssetIteratorNode(config) {
 
         RED.nodes.createNode(this, config);
@@ -60,20 +62,27 @@ module.exports = function(RED) {
             node.rate = config.rate || msg.rate || 0;
             node.rate = (rateUnits === 's') ? parseInt(node.rate)*1000 : parseInt(node.rate);
 
-            const queryParameters = new Map();
-            queryParameters.set('name',config.filter || msg.asset_filter || "");
-            queryParameters.set('count',config.count || msg.count);
-            queryParameters.set('asset_type',config.assetType || msg.asset_type);
-            queryParameters.set('asset_group',config.assetGroup || msg.asset_group);
-            queryParameters.set('project',config.project || msg.project);
+            let queryParameters = {};
+
+            queryParameters.name = config.filter || msg.asset_filter || "";
+
+            queryParameters.asset_type = config.assetType || msg.asset_type;
+
+            queryParameters.asset_group = config.assetGroup || msg.asset_group;
+
+            queryParameters.product = config.product || msg.product;
+
+            queryParameters.project = config.project || msg.project;
+
+            queryParameters.count = config.count || msg.count;
+
+            queryParameters = Utils.mustacheRender(queryParameters, msg);
 
             // Query parameters to string
             let queryParametersString = "";
-            queryParameters.forEach(function(value,key) {
-                if (value) {
-                    queryParametersString += key+"="+value+"&";
-                }
-            });
+            for (const [key, value] of Object.entries(queryParameters)) {
+                if ( value ) queryParametersString += key+"="+value+"&";
+            }
 
             if (typeof server.request === "function") {
 
@@ -98,7 +107,7 @@ module.exports = function(RED) {
                       res_length = res.payload.length;
                       handleResponse({msg: msg, send: send, done: done}, res.payload);
                       index += res_length;
-                    } while (res_length == count);
+                    } while (res_length === count);
 
                     if (index === 0) {
                         clearInterval(node.intervalId);

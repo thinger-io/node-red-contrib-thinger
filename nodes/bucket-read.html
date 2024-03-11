@@ -391,6 +391,9 @@ Each `msg.filter` will retrieve the data one way or another:
 
 The fields `msg.max_ts` and `msg.min_ts` allow any string which javascript Date objects can interpret, find more info [here]("https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#several_ways_to_create_a_date_object"). It is recommended to use Epoch timestamp or UTC date for clarity.
 
+When configured within the node, the Bucket property can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+For example if Bucket is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
+
 ### References
 
 - [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin

@@ -2,7 +2,10 @@ module.exports = function(RED) {
 
     "use strict";
 
+    const Utils = require('../lib/utils/utils');
+
     function PropertyReadNode(config) {
+
         RED.nodes.createNode(this, config);
 
         // get node
@@ -14,8 +17,11 @@ module.exports = function(RED) {
         // call property read on input
         node.on("input",function(msg, send, done) {
             let asset = (config.asset || msg.asset)+"s";
+
             let assetId = config.assetId || msg.asset_id;
+            assetId = Utils.mustacheRender(assetId, msg);
             let property = config.property || msg.property;
+            property = Utils.mustacheRender(property, msg);
 
             const method = 'GET';
             const apiVersion = (asset == "devices" ? "v3" : "v1");

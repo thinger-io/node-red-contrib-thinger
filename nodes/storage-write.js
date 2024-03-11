@@ -17,8 +17,12 @@ module.exports = function(RED) {
         node.on('input', async function(msg, _send, done) {
 
             let storage = config.storage || msg.storage;
+            storage = Utils.mustacheRender(storage, msg);
+
             let file = config.file || msg.file || "";
             file = file.replace(/^\//, ''); // remove leading /
+            file = Utils.mustacheRender(file, msg);
+
             let action = msg.action || config.action || "append";
             let appendNewLine = msg.append_new_line || config.appendNewLine || false;
             let createDir = msg.create_dir || config.createDir || false;
