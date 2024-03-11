@@ -64,7 +64,8 @@
                     storages.getStorages().then(function() {
                       storages.getStorageFiles(storage).then((data) => {
                           const fileDetails = data.find(e=>e.id === file);
-                          $("#node-input-file").trigger("change",{"textContent":fileDetails.name});
+                          if ( typeof fileDetails !== 'undefined' )
+                            $("#node-input-file").trigger("change",{"textContent":fileDetails.name});
                       });
                     });
                 }
