@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - New configuration for setting the timeout for Thinger.io requests
 - Allow msg placeholders in thinger nodes input forms
 - Iteration over assets associated to a Product
+- Add configuration payload to endpoint call node
 
 ### Fixed
 

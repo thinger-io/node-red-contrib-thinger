@@ -5,6 +5,7 @@
         defaults: {
             name: {value:""},
             endpoint: {value: ""},
+            value: {value: ""},
             server: {type:"thinger-server", required:true}
         },
         icon:"server.svg",
@@ -18,6 +19,18 @@
             return "endpoint call";
         },
         oneditprepare: function() {
+            // Prepare editor
+            this.editor = RED.editor.createEditor({
+              id: 'node-input-value-editor',
+              mode: 'ace/mode/json',
+              value: this.value
+            });
+
+            var editor = this.editor;
+            if (editor.getValue()) {
+              var editor_value = JSON.parse(editor.getValue());
+              editor.setValue(JSON.stringify(editor_value,null,'\t'));
+            }
 
             const node_id = this.id;
 
@@ -25,6 +38,21 @@
             const optionsFields = ["endpoint"];
             ThingerDOM.registerFocusHandler(optionsFields, node_id);
 
+        },
+        oneditsave: function() {
+          // remove pretty characters and save
+          if (this.editor.getValue()) {
+            var editor_value = JSON.parse(this.editor.getValue());
+            this.value = JSON.stringify(editor_value);
+          } else {
+            this.value = this.editor.getValue();
+          }
+          this.editor.destroy();
+          delete this.editor;
+        },
+        oneditcancel: function() {
+          this.editor.destroy();
+          delete this.editor;
         }
     });
 </script>
@@ -35,14 +63,22 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+
     <div class="form-row">
         <label for="node-input-endpoint"><i class="fa fa-server"></i> Endpoint</label>
         <input type="text" id="node-input-endpoint" placeholder="Endpoint Identifier">
     </div>
+
+    <div class="form-row">
+        <label for="node-input-value" style="vertical-align: top;"><i class="fa fa-pencil-square"></i> Value</label>
+        <div id="node-input-value-editor" class="node-text-editor" style="height:125px; width:70%; display:inline-block;"></div>
+    </div>
+
     <div class="form-row">
         <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
         <input type="text" id="node-input-server" placeholder="Select Server">
     </div>
+
 </script>
 
 <script type="text/markdown" data-help-name="endpoint-call">
@@ -62,9 +98,7 @@ Calls a server endpoint with the supplied input payload.
 The node allows the configuration of the endpoint via the edit dialog or through an input message.
 The values assigned through the dialog will have priority over the message.
 
-The input `msg.payload` is not available through the edit dialog and can only be passed through the input.
-
-When configured within the node, the Endpoint property can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+When configured within the node, the Endpoint and Value properties can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
 For example if Endpoint is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
 
 ### References
