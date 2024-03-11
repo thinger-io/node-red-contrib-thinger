@@ -95,7 +95,8 @@
                                 ThingerDOM.showOptions("property",data,property);
                                 $("#node-input-property").change(function() {
                                     let propertyValue = JSON.stringify(asset.getPropertyValue($(this).val()),null,'\t');
-                                    editor.setValue(propertyValue);
+                                    if ( typeof propertyValue !== 'undefined' )
+                                        editor.setValue(propertyValue);
                                 });
                             });
                         }

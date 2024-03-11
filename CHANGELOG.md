@@ -2,13 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.7.0] - 2024-03-08
+## [1.7.0] - 2024-03-11
 
 ### Added
 
 - New configuration for setting the timeout for Thinger.io requests
 - Allow msg placeholders in thinger nodes input forms
 - Iteration over assets associated to a Product
+
+### Fixed
+
+- Property write node has default value of {}
 
 ## [1.6.3] - 2024-01-03
 
