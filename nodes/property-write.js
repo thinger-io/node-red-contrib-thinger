@@ -1,3 +1,4 @@
+const Utils = require("../lib/utils/utils");
 module.exports = function(RED) {
 
     "use strict";
@@ -24,7 +25,15 @@ module.exports = function(RED) {
             let property = config.property || msg.property;
             property = Utils.mustacheRender(property, msg);
 
-            let data = config.value || Utils.transformValue(msg.payload) || Utils.transformValue(msg.value);
+            let data = Utils.transformValue(config.value);
+            if ( data === null ) {
+                if ( typeof msg.payload !== 'undefined' ) {
+                    data = Utils.transformValue(msg.payload);
+                }
+                else if ( typeof msg.value !== 'undefined' ) {
+                    data = Utils.transformValue(msg.payload);
+                }
+            }
             data = Utils.mustacheRender(data, msg);
 
             const apiVersion = (asset == "devices" ? "v3" : "v1");

@@ -13,7 +13,8 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Property write node has default value of {}
-
+- Don't send empty value in property write node
+ 
 ## [1.6.3] - 2024-01-03
 
 ### Fixed

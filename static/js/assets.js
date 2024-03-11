@@ -74,7 +74,7 @@ class ThingerAsset {
         if (property !== undefined) {
             return property.value;
         }
-        return undefined;
+        return null;
     }
 
 }
