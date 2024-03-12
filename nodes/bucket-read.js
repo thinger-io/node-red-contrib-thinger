@@ -121,6 +121,7 @@ module.exports = function(RED) {
             bucket = Utils.mustacheRender(bucket, msg);
 
             let tags = config.tags && Object.keys(config.tags).length !== 0 ? config.tags : msg.tags;
+            tags = Utils.mustacheRender(tags, msg);
 
             const queryParameters = new Map();
             queryParameters.set('items',config.items || msg.items);

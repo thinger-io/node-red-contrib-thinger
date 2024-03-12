@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.1] - 2024-03-12
+
+### Fixed
+
+- Message template placeholders not working for bucket tags in bucket read node
+
 ## [1.7.0] - 2024-03-11
 
 ### Added
@@ -280,6 +286,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.7.1]: https://github.com/thinger-io/Node-RED/compare/1.7.0...1.7.1
 [1.7.0]: https://github.com/thinger-io/Node-RED/compare/1.6.3...1.7.0
 [1.6.3]: https://github.com/thinger-io/Node-RED/compare/1.6.2...1.6.3
 [1.6.2]: https://github.com/thinger-io/Node-RED/compare/1.6.1...1.6.2
