@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-thinger",
-  "version": "1.7.2-alpha.1",
+  "version": "1.7.2",
   "description": "Node-Red library for Thinger.io Platform",
   "keywords": [
     "node-red",
