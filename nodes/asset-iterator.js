@@ -124,6 +124,10 @@ module.exports = function(RED) {
                     msg.payload.asset_filter = queryParameters.get("name");
                     msg.payload.asset_type = queryParameters.get("asset_type");
                     msg.payload.asset_group = queryParameters.get("asset_group");
+
+                    if ( e.hasOwnProperty("status") )
+                      msg.payload.status = e.status;
+
                     done(e);
                 }
 

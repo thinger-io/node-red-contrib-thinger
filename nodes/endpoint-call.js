@@ -37,10 +37,6 @@ module.exports = function(RED) {
               server.request(node, url, method, data)
               .then(res => {
 
-                  // Throw if response fails
-                  if (!res.status.toString().startsWith('20'))
-                    throw res.error;
-
                   msg.payload = res.payload;
                   send(msg);
                   done();
@@ -51,6 +47,10 @@ module.exports = function(RED) {
                   msg.payload = {};
                   msg.payload.endpoint = endpoint;
                   msg.payload.data = payload;
+
+                  if ( e.hasOwnProperty("status") )
+                    msg.payload.status = e.status;
+
                   done(e);
               });
             }
