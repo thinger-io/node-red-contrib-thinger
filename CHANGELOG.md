@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Return code when failed API request is no longer in msg.payload
+- Device read node fails when sending timestamp through msg.payload
 
 ## [1.7.1] - 2024-03-12
 
