@@ -87,6 +87,7 @@ module.exports = function(RED) {
 
               } catch (err) {
 
+                  delete err.stack;
                   msg.payload = {};
                   msg.payload.storage = storage;
                   msg.payload.file = file;
