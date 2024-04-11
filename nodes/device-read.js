@@ -23,17 +23,12 @@ module.exports = function(RED) {
             let resource = config.resource || msg.resource;
             resource = Utils.mustacheRender(resource, msg);
 
-            const method = 'POST';
+            const method = 'GET';
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${device}/resources/${resource}`;
 
             if (typeof server.request === "function") {
-              server.request(node, url, method, msg.payload)
+              server.request(node, url, method)
               .then(res => {
-                // Throw if response fails
-                if (!res.status.toString().startsWith('20')) {
-                    throw res.error;
-                }
-
                 msg.payload = res.payload;
                 send(msg);
                 done();
@@ -43,6 +38,10 @@ module.exports = function(RED) {
                   msg.payload = {};
                   msg.payload.device = device;
                   msg.payload.resource = resource;
+
+                  if ( e.hasOwnProperty("status") )
+                    msg.payload.status = e.status;
+
                   done(e);
               });
             }
