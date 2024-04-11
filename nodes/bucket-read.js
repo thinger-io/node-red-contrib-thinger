@@ -73,10 +73,6 @@ module.exports = function(RED) {
             return server.request(node, url, method)
             .then(function(res) {
 
-                // Throw if response fails
-                if (!res.status.toString().startsWith('20'))
-                    throw res.error;
-
                 if (!result) {
                     result = [];
                 }
@@ -207,6 +203,10 @@ module.exports = function(RED) {
                 delete e.stack;
                 msg.payload = Object.fromEntries(queryParameters);
                 msg.payload.bucket = bucket;
+
+                if ( e.hasOwnProperty("status") )
+                  msg.payload.status = e.status;
+
                 done(e)}
               );
 

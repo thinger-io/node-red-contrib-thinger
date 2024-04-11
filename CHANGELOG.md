@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.2] - 2024-04-11
+
+### Fixed
+
+- Return code when failed API request is no longer in msg.payload
+
 ## [1.7.1] - 2024-03-12
 
 ### Fixed
@@ -286,6 +292,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.7.2]: https://github.com/thinger-io/Node-RED/compare/1.7.1...1.7.2
 [1.7.1]: https://github.com/thinger-io/Node-RED/compare/1.7.0...1.7.1
 [1.7.0]: https://github.com/thinger-io/Node-RED/compare/1.6.3...1.7.0
 [1.6.3]: https://github.com/thinger-io/Node-RED/compare/1.6.2...1.6.3

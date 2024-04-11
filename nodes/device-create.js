@@ -101,6 +101,10 @@ module.exports = function(RED) {
                 } catch(err) {
                     delete err.stack;
                     msg.payload = data;
+
+                    if ( err.hasOwnProperty("status") )
+                      msg.payload.status = err.status;
+
                     done(err);
                     return;
                 }

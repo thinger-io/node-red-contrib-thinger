@@ -132,6 +132,10 @@ module.exports = function(RED) {
                     msg.payload.product = product;
                     msg.payload.prefix = prefix;
                     msg.payload.data = data;
+
+                    if ( err.hasOwnProperty("status") )
+                      msg.payload.status = err.status;
+
                     done(err);
                 }
             } else

@@ -77,6 +77,10 @@ module.exports = function(RED) {
                     msg.payload.asset_id = assetId;
                     msg.payload.property = property;
                     msg.payload.data = data;
+
+                    if ( err.hasOwnProperty("status") )
+                      msg.payload.status = err.status;
+
                     done(err);
                     return;
                 }
