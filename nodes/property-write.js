@@ -55,7 +55,7 @@ module.exports = function(RED) {
                         }
                     }
 
-                    if (typeof data === 'undefined' || (typeof data !== 'object' && data.length === 0))
+                    if (typeof data === 'undefined' || data === null || (typeof data !== 'object' && data.length === 0))
                         throw new Error("Property value cannot be empty");
 
                     data = {property: property, value: (typeof data === 'object') ? data : JSON.parse(data)};
