@@ -94,9 +94,11 @@
                             asset.getProperties().then(function(data) {
                                 ThingerDOM.showOptions("property",data,property);
                                 $("#node-input-property").change(function() {
-                                    let propertyValue = JSON.stringify(asset.getPropertyValue($(this).val()),null,'\t');
-                                    if ( propertyValue !== null )
+                                    let propertyValue = asset.getPropertyValue($(this).val());
+                                    if ( propertyValue !== null ) {
+                                        propertyValue = JSON.stringify(propertyValue,null,'\t');
                                         editor.setValue(propertyValue);
+                                    }
                                 });
                             });
                         }

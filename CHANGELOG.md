@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.3] - 2024-04-12
+
+### Fixed
+
+- msg placeholders rendering failed when value is null or undefined
+- property write node still sending emtpy payload
+
 ## [1.7.2] - 2024-04-11
 
 ### Fixed
@@ -293,6 +300,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.7.3]: https://github.com/thinger-io/Node-RED/compare/1.7.2...1.7.3
 [1.7.2]: https://github.com/thinger-io/Node-RED/compare/1.7.1...1.7.2
 [1.7.1]: https://github.com/thinger-io/Node-RED/compare/1.7.0...1.7.1
 [1.7.0]: https://github.com/thinger-io/Node-RED/compare/1.6.3...1.7.0
