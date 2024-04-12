@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.3] - 2024-04-12
+
+### Fixed
+
+- msg placeholders rendering failed when value is null or undefined
+
 ## [1.7.2] - 2024-04-11
 
 ### Fixed
