@@ -94,8 +94,11 @@
                             asset.getProperties().then(function(data) {
                                 ThingerDOM.showOptions("property",data,property);
                                 $("#node-input-property").change(function() {
-                                    let propertyValue = JSON.stringify(asset.getPropertyValue($(this).val()),null,'\t');
-                                    editor.setValue(propertyValue);
+                                    let propertyValue = asset.getPropertyValue($(this).val());
+                                    if ( propertyValue !== null ) {
+                                        propertyValue = JSON.stringify(propertyValue,null,'\t');
+                                        editor.setValue(propertyValue);
+                                    }
                                 });
                             });
                         }
@@ -184,12 +187,17 @@ Writes or modifies a property to either a device, type or group.
 : payload (object) : the standard output of the command.
 
 ### Details
+
 The node allows the configuration via the edit dialog or through an input message.
 The values assigned through the dialog will have priority over the message.
 
 The values of the field `msg.asset_id` must exist in the Thinger platform, otherwise the flow will fail.
 
 The values of the fields `msg.property` and `msg.payload` may not exist in the Thinger platform, as they will be created on write.
+
+When configured within the node, the Asset Id, Property and Value properties can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+For example if Asset Id is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
+For the Value property, templates can only be place in a JSON property value and not a key, as well as handling only templates on the first level.
 
 ### References
 

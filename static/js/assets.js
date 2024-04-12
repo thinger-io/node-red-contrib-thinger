@@ -32,6 +32,8 @@ class ThingerAssets {
     }
 
     request() {
+        if ( this._url.includes('{') ) return Promise.resolve(); // When using entry message placholders
+
         if (this._url.includes('?'))
             return $.getJSON(`${this._url}&node_id=${this.node_id}&svr_id=${this.svr_id}`);
         else
@@ -55,8 +57,11 @@ class ThingerAsset {
 
         this._properties = [];
         const self = this;
-        return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/properties?node_id=${this.node_id}&svr_id=${this.svr_id ? this.svr_id : ""}`).
-        then(function(data) {
+        if ( this.id.includes('{') )
+            return Promise.resolve([]); // When using entry message placholders
+        else
+          return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/properties?node_id=${this.node_id}&svr_id=${this.svr_id ? this.svr_id : ""}`).
+          then(function(data) {
             for (let i in data) {
                 self._properties.push(
                   new ThingerProperty(
@@ -66,7 +71,7 @@ class ThingerAsset {
                 );
             }
             return self._properties;
-        });
+          });
     }
 
     getPropertyValue(id) {
@@ -74,7 +79,7 @@ class ThingerAsset {
         if (property !== undefined) {
             return property.value;
         }
-        return {};
+        return null;
     }
 
 }
@@ -175,8 +180,11 @@ class ThingerDevice extends ThingerAsset {
 
         this._resources = [];
         const self = this;
-        return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/resources?node_id=${this.node_id}&svr_id=${this.svr_id ? this.svr_id : ""}`).
-        then(function(data) {
+        if ( this.id.includes('{') )
+            return Promise.resolve([]); // When using entry message placholders
+        else
+          return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/resources?node_id=${this.node_id}&svr_id=${this.svr_id ? this.svr_id : ""}`).
+          then(function(data) {
             for (let i in data) {
                 self._resources.push(
                   new ThingerResource(
@@ -186,7 +194,7 @@ class ThingerDevice extends ThingerAsset {
                 );
             }
             return self._resources;
-        });
+          });
     }
 
     async getInputResources() {
@@ -347,7 +355,8 @@ class ThingerBucket extends ThingerAsset {
         return Promise.resolve([]);
 
       if ( this.tags[id].length === 0 ) {
-        this.tags[id] = $.getJSON(`${this.#_url}/${this.type}s/${this.id}/tags/${id}?node_id=${this.node_id}&svr_id=${this.svr_id ? this.svr_id : ""}`);
+          if ( ! this.id.includes('{') )
+            this.tags[id] = $.getJSON(`${this.#_url}/${this.type}s/${this.id}/tags/${id}?node_id=${this.node_id}&svr_id=${this.svr_id ? this.svr_id : ""}`);
       }
 
       return this.tags[id];
@@ -608,8 +617,11 @@ class ThingerStorage extends ThingerAsset {
 
         this._files = [];
         const self = this;
-        return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/files?node_id=${this.node_id}&svr_id=${this.svr_id ? this.svr_id : ""}`).
-        then(function(data) {
+        if ( this.id.includes('{') )
+            return Promise.resolve([]); // When using entry message placholders
+        else
+          return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/files?node_id=${this.node_id}&svr_id=${this.svr_id ? this.svr_id : ""}`).
+          then(function(data) {
             for (let i in data) {
                 self._files.push(
                   new ThingerFile(
@@ -621,7 +633,7 @@ class ThingerStorage extends ThingerAsset {
                 );
             }
             return self._files;
-        });
+          });
     }
 
 }
@@ -749,7 +761,6 @@ class ThingerProjects extends ThingerAssets {
         return super.request()
         .then(function(data) {
             for (let i in data) {
-console.log(data);
                 self._projects.push(
                   new ThingerProject(
                     data[i].project,

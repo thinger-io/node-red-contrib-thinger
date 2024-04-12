@@ -65,7 +65,8 @@
                     storages.getStorages().then(function() {
                       storages.getStorageFiles(storage).then((data) => {
                           const fileDetails = data.find(e=>e.id === file);
-                          $("#node-input-file").trigger("change",{"textContent":fileDetails.name});
+                          if ( typeof fileDetails !== 'undefined' )
+                            $("#node-input-file").trigger("change",{"textContent":fileDetails.name});
                       });
                     });
                 }
@@ -147,6 +148,7 @@
 Reads a file from a storage.
 
 ### Inputs
+
 : storage (string) : the id of the storage to read from.
 : *file* (string) : the file path or directory path of the storage to read.
 : *data* (string) : sets the data to retrieve, file content or file data.
@@ -159,6 +161,7 @@ Reads a file from a storage.
 : payload (object) : the standard output of the command.
 
 ### Details
+
 This node is able to retrieve any text file (plain, csv, json, ...). Any other file will be returned as a Buffer.
 
 The node presents different functionalities depending on the configuration:
@@ -170,6 +173,9 @@ The node presents different functionalities depending on the configuration:
 
 The node allows the configuration via the edit dialog or through an input message.
 The values assigned through the dialog will have priority over the message.
+
+When configured within the node, the Storage and File properties can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+For example if Storage is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
 
 ### References
 

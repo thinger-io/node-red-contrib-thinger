@@ -17,8 +17,12 @@ module.exports = function(RED) {
         node.on('input', async function(msg, _send, done) {
 
             let storage = config.storage || msg.storage;
+            storage = Utils.mustacheRender(storage, msg);
+
             let file = config.file || msg.file || "";
             file = file.replace(/^\//, ''); // remove leading /
+            file = Utils.mustacheRender(file, msg);
+
             let action = msg.action || config.action || "append";
             let appendNewLine = msg.append_new_line || config.appendNewLine || false;
             let createDir = msg.create_dir || config.createDir || false;
@@ -32,9 +36,6 @@ module.exports = function(RED) {
 
                   // Get all files of storage
                   let res = await server.request(node, url, method);
-                  if (!res.status.toString().startsWith('20')) {
-                      throw res.error;
-                  }
 
                   // Check if file and directory exist
                   // Clean file list only to what we need
@@ -107,13 +108,18 @@ module.exports = function(RED) {
                   //send(msg);
                   done();
 
-              } catch(e) {
+             } catch(e) {
+                  delete e.stack;
                   msg.payload = {};
                   msg.payload.storage = storage;
                   msg.payload.file = file;
                   msg.payload.action = action;
                   msg.payload.append_new_line = appendNewLine;
                   msg.payload.create_dir = createDir;
+
+                  if ( e.hasOwnProperty("status") )
+                    msg.payload.status = e.status;
+
                   done(e);
                   return;
               }

@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.3] - 2024-04-12
+
+### Fixed
+
+- msg placeholders rendering failed when value is null or undefined
+- property write node still sending emtpy payload
+
+## [1.7.2] - 2024-04-11
+
+### Fixed
+
+- Return code when failed API request is no longer in msg.payload
+- Device read node fails when sending timestamp through msg.payload
+
+## [1.7.1] - 2024-03-12
+
+### Fixed
+
+- Message template placeholders not working for bucket tags in bucket read node
+
+## [1.7.0] - 2024-03-11
+
+### Added
+
+- New configuration for setting the timeout for Thinger.io requests
+- Allow msg placeholders in thinger nodes input forms
+- Iteration over assets associated to a Product
+- Add configuration payload to endpoint call node
+
+### Fixed
+
+- Property write node has default value of {}
+- Don't send empty value in property write node
+ 
+## [1.6.3] - 2024-01-03
+
+### Fixed
+
+- Could not send JSON value through msg.payload in propery write node
+
 ## [1.6.2] - 2023-12-27
 
 ### Fixed
@@ -260,6 +300,11 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.7.3]: https://github.com/thinger-io/Node-RED/compare/1.7.2...1.7.3
+[1.7.2]: https://github.com/thinger-io/Node-RED/compare/1.7.1...1.7.2
+[1.7.1]: https://github.com/thinger-io/Node-RED/compare/1.7.0...1.7.1
+[1.7.0]: https://github.com/thinger-io/Node-RED/compare/1.6.3...1.7.0
+[1.6.3]: https://github.com/thinger-io/Node-RED/compare/1.6.2...1.6.3
 [1.6.2]: https://github.com/thinger-io/Node-RED/compare/1.6.1...1.6.2
 [1.6.1]: https://github.com/thinger-io/Node-RED/compare/1.6.0...1.6.1
 [1.6.0]: https://github.com/thinger-io/Node-RED/compare/1.5.1...1.6.0

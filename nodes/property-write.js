@@ -1,3 +1,4 @@
+const Utils = require("../lib/utils/utils");
 module.exports = function(RED) {
 
     "use strict";
@@ -5,6 +6,7 @@ module.exports = function(RED) {
     const Utils = require('../lib/utils/utils.js');
 
     function PropertyWriteNode(config) {
+
         RED.nodes.createNode(this, config);
 
         // get node
@@ -16,9 +18,23 @@ module.exports = function(RED) {
         // call property read on input
         node.on("input",async function(msg, send, done) {
             let asset = (config.asset || msg.asset)+"s";
+
             let assetId = config.assetId || msg.asset_id;
+            assetId = Utils.mustacheRender(assetId, msg);
+
             let property = config.property || msg.property;
-            let data = config.value || Utils.transformValue(msg.payload) || Utils.transformValue(msg.value);
+            property = Utils.mustacheRender(property, msg);
+
+            let data = Utils.transformValue(config.value);
+            if ( data === null ) {
+                if ( typeof msg.payload !== 'undefined' ) {
+                    data = Utils.transformValue(msg.payload);
+                }
+                else if ( typeof msg.value !== 'undefined' ) {
+                    data = Utils.transformValue(msg.payload);
+                }
+            }
+            data = Utils.mustacheRender(data, msg);
 
             const apiVersion = (asset == "devices" ? "v3" : "v1");
             let url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${asset}/${assetId}/properties`;
@@ -39,7 +55,7 @@ module.exports = function(RED) {
                         }
                     }
 
-                    if (typeof data === 'undefined' || (typeof data !== 'object' && data.length === 0))
+                    if (typeof data === 'undefined' || data === null || (typeof data !== 'object' && data.length === 0))
                         throw new Error("Property value cannot be empty");
 
                     data = {property: property, value: (typeof data === 'object') ? data : JSON.parse(data)};
@@ -61,6 +77,10 @@ module.exports = function(RED) {
                     msg.payload.asset_id = assetId;
                     msg.payload.property = property;
                     msg.payload.data = data;
+
+                    if ( err.hasOwnProperty("status") )
+                      msg.payload.status = err.status;
+
                     done(err);
                     return;
                 }

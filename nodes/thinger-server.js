@@ -59,7 +59,8 @@ module.exports = function(RED) {
         }
 
         let maxSockets = config.maxSockets;
-        const ThingerRequest = new Request(token,maxSockets);
+        let requestTimeout = config.requestTimeout;
+        const ThingerRequest = new Request(token, maxSockets, requestTimeout);
 
         // As precaution, but should not be the desired handler: will handle all rejections from requests
         //process.on('unhandledRejection', e => {

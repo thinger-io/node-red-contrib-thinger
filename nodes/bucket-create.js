@@ -2,6 +2,8 @@ module.exports = function(RED) {
 
     "use strict";
 
+    const Utils = require('../lib/utils/utils');
+
     /**
      * Will return the interval passed as (1s, 1m) in seconds
      */
@@ -46,6 +48,7 @@ module.exports = function(RED) {
         node.on("input", async function(msg, send, done) {
 
             let json = {};
+
             json.bucket = config.bucketId || msg.id;
             json.name = config.bucket || msg.bucket;
             json.description = config.description || msg.description;
@@ -95,6 +98,9 @@ module.exports = function(RED) {
             }
             json.config = jsonConfig;
 
+            // Render all required templates
+            json = Utils.mustacheRender(json, msg);
+
             let projects = config.projects && config.projects !== "[]" ? RED.util.evaluateNodeProperty(config.projects, 'json', node) : msg.projects;
             if ( typeof projects === 'object' && projects.length > 0 )
               projects = projects.map(project => `${server.config.username}@${project}`); // body needs username
@@ -127,6 +133,10 @@ module.exports = function(RED) {
                 } catch(err) {
                     delete err.stack;
                     msg.payload = json;
+
+                    if ( err.hasOwnProperty("status") )
+                      msg.payload.status = err.status;
+
                     done(err);
                     return;
                 }

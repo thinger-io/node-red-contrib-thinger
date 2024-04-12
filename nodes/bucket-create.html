@@ -302,6 +302,9 @@ The field `msg.update` represents the Refresh mode when `msg.source` is <samp>de
 - **Stream by Device**: allows the device to stream the information when required.
 - **None**: to not set a refresh mode.
 
+When configured within the node, the Bucket Id, Bucket Name, Description, Data rags, Asset Type, Asset Group, Product and Projects properties can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+For example if Bucket Id is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
+
 ### References
 
 - [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin

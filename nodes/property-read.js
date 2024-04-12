@@ -2,7 +2,10 @@ module.exports = function(RED) {
 
     "use strict";
 
+    const Utils = require('../lib/utils/utils');
+
     function PropertyReadNode(config) {
+
         RED.nodes.createNode(this, config);
 
         // get node
@@ -14,8 +17,11 @@ module.exports = function(RED) {
         // call property read on input
         node.on("input",function(msg, send, done) {
             let asset = (config.asset || msg.asset)+"s";
+
             let assetId = config.assetId || msg.asset_id;
+            assetId = Utils.mustacheRender(assetId, msg);
             let property = config.property || msg.property;
+            property = Utils.mustacheRender(property, msg);
 
             const method = 'GET';
             const apiVersion = (asset == "devices" ? "v3" : "v1");
@@ -25,10 +31,6 @@ module.exports = function(RED) {
 
               server.request(node, url, method)
               .then(res => {
-
-                  // Throw if response fails
-                  if (!res.status.toString().startsWith('20'))
-                    throw res.error;
 
                   msg.payload = res.payload;
                   send(msg);
@@ -40,6 +42,10 @@ module.exports = function(RED) {
                   msg.payload.asset = asset;
                   msg.payload.asset_id = assetId;
                   msg.payload.property = property;
+
+                  if ( e.hasOwnProperty("status") )
+                    msg.payload.status = e.status;
+
                   done(e);
               });
             }

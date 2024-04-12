@@ -5,7 +5,8 @@
             host: {value: "api.thinger.io", required:true},
             name: {value: "", required:false},
             ssl: {value: true},
-            maxSockets: {value: ""}
+            maxSockets: {value: ""},
+            requestTimeout: {value: ""}
         },
         credentials: {
             token: {type:"password", required: true}
@@ -58,7 +59,11 @@
     </div>
     <div class="form-row">
         <label for="node-config-input-maxSockets"><i class="fa fa-plug"></i> Max Sockets</label>
-        <input type="number" id="node-config-input-maxSockets" placeholder=1 style="width:15%; !important" min=0> <!-- 0 will be Infinity -->
+        <input type="number" id="node-config-input-maxSockets" placeholder=0 style="width:15%; !important" min=0> <!-- 0 will be Infinity -->
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-requestTimeout"><i class="fa fa-clock-o"></i> Timeout (s)</label>
+        <input type="number" id="node-config-input-requestTimeout" placeholder=30 style="width:15%; !important" min=0> <!-- 0 will be Infinity -->
     </div>
 </script>
 
@@ -70,8 +75,8 @@ Configuration settings of the Thinger.io Host and Access Tokens.
 : host (string) : the host of the Thinger.io platform to connect to.
 : ssl (boolean) : the status of the SSL verification.
 : access_token (string) : the access token for the Thinger.io platform to connect to.
-: max_sockets (string) : the maximum concurrent sockets that can be opened against the configured server.
-
+: max_sockets (number) : the maximum concurrent sockets that can be opened against the configured server. Default and 0 is Infinity.
+: timeout (number) : the maximum timeout sockets that can be opened against the configured server. Default is 30 seconds.
 
 ### Outputs
 
@@ -82,6 +87,7 @@ Configuration settings of the Thinger.io Host and Access Tokens.
 : payload (string) : the standard error of the command.
 
 ### Details
+
 The node only allows the configuration via the edit dialog.
 
 If working with the same Thinger.io server that is hosting the plugin, it is only necessary to include ${THINGER_HOST} into "Host" box and ${THINGER_TOKEN_NODE_RED_PLUGIN} in the "Token" box, then you can disable SSL communication, as all messages are going to run into the same computer.

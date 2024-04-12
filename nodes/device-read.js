@@ -2,7 +2,10 @@ module.exports = function(RED) {
 
     "use strict";
 
+    const Utils = require('../lib/utils/utils');
+
     function DeviceReadNode(config) {
+
         RED.nodes.createNode(this, config);
 
         // get node
@@ -15,19 +18,17 @@ module.exports = function(RED) {
         node.on('input', function(msg, send, done) {
 
             let device = config.device || msg.device;
-            let resource = config.resource || msg.resource;
+            device = Utils.mustacheRender(device, msg);
 
-            const method = 'POST';
+            let resource = config.resource || msg.resource;
+            resource = Utils.mustacheRender(resource, msg);
+
+            const method = 'GET';
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${device}/resources/${resource}`;
 
             if (typeof server.request === "function") {
-              server.request(node, url, method, msg.payload)
+              server.request(node, url, method)
               .then(res => {
-                // Throw if response fails
-                if (!res.status.toString().startsWith('20')) {
-                    throw res.error;
-                }
-
                 msg.payload = res.payload;
                 send(msg);
                 done();
@@ -37,6 +38,10 @@ module.exports = function(RED) {
                   msg.payload = {};
                   msg.payload.device = device;
                   msg.payload.resource = resource;
+
+                  if ( e.hasOwnProperty("status") )
+                    msg.payload.status = e.status;
+
                   done(e);
               });
             }

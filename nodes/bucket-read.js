@@ -2,6 +2,8 @@ module.exports = function(RED) {
 
     "use strict";
 
+    const Utils = require('../lib/utils/utils');
+
     /**
      * Will return the date of the timestamp based on prior value and units
      */
@@ -71,10 +73,6 @@ module.exports = function(RED) {
             return server.request(node, url, method)
             .then(function(res) {
 
-                // Throw if response fails
-                if (!res.status.toString().startsWith('20'))
-                    throw res.error;
-
                 if (!result) {
                     result = [];
                 }
@@ -116,8 +114,10 @@ module.exports = function(RED) {
         node.on("input",function(msg, send, done) {
 
             let bucket = config.bucket || msg.bucket;
+            bucket = Utils.mustacheRender(bucket, msg);
 
             let tags = config.tags && Object.keys(config.tags).length !== 0 ? config.tags : msg.tags;
+            tags = Utils.mustacheRender(tags, msg);
 
             const queryParameters = new Map();
             queryParameters.set('items',config.items || msg.items);
@@ -203,6 +203,10 @@ module.exports = function(RED) {
                 delete e.stack;
                 msg.payload = Object.fromEntries(queryParameters);
                 msg.payload.bucket = bucket;
+
+                if ( e.hasOwnProperty("status") )
+                  msg.payload.status = e.status;
+
                 done(e)}
               );
 

@@ -158,6 +158,7 @@
 Creates or updates a device given the configuration.
 
 ### Inputs
+
 : *type* (string) : the type of the device to create (<samp>Generic</samp>, <samp>HTTP</samp> or <samp>MQTT</samp>).
 : device (string) : the id of the device to create.
 : *credentials* (string) : the credentials to authenticate the device.
@@ -174,6 +175,7 @@ Creates or updates a device given the configuration.
 : payload (object) : the standard output of the command.
 
 ### Details
+
 The node allows the configuration via the edit dialog or through an input message.
 The values assigned through the dialog will have priority over the message, with the exception the `msg.enabled`.
 
@@ -183,6 +185,9 @@ The field `msg.type` allows different values depending on the desired device. Fi
 - **MQTT devices**: for MQTT devices that will work with the Thinger.io embedded broker.
 
 The field `msg.credentials` is used if device type is IOTMP/Generic or HTTP. Has to be of 16 chars of length and can contain <samp>A-Z</samp>,<samp>a-z</samp>,<samp>0-9</samp> and <samp>!@#$%^&*()</samp>
+
+When configured within the node, the Device Id, Device Name, Device Description, Asset Type, Asset Group, Product and Projects properties can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+For example if Asset Filter is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
 
 ### References
 

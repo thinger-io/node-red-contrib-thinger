@@ -136,6 +136,7 @@ Reads a property from either a device, type of group.
 
 
 ### Inputs
+
 : asset (string) : the type of asset (<samp>device</samp>, <samp>type</samp> or <samp>group</samp>).
 : asset_id (string) : the id of the asset to read the property from.
 : property (string) : the name of the property to read its value.
@@ -147,6 +148,9 @@ Reads a property from either a device, type of group.
 ### Details
 
 The values of the fields `msg.asset_id` and `msg.property` must exist in the Thinger platform, otherwise the flow will fail
+
+When configured within the node, the Asset Id and Property properties can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+For example if Asset Id is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
 
 ### References
 
