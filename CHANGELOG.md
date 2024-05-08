@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.4] - 2024-04-12
+
+### Fixed
+
+- Added try catch block in mustache render block
+
 ## [1.7.3] - 2024-04-12
 
 ### Fixed
@@ -300,6 +306,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.7.4]: https://github.com/thinger-io/Node-RED/compare/1.7.3...1.7.4
 [1.7.3]: https://github.com/thinger-io/Node-RED/compare/1.7.2...1.7.3
 [1.7.2]: https://github.com/thinger-io/Node-RED/compare/1.7.1...1.7.2
 [1.7.1]: https://github.com/thinger-io/Node-RED/compare/1.7.0...1.7.1
