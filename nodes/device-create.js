@@ -78,12 +78,14 @@ module.exports = function(RED) {
                 // Check if device exists
                 let exists = true;
                 let res;
-                res = await server.request(node,`${url}/${data.device}`, 'GET');
-                if (res.status !== 200)
-                    exists = false;
 
                 // Update if exist or create it
                 try {
+
+                  res = await server.request(node,`${url}/${data.device}`, 'GET');
+                  if (res.status !== 200)
+                    exists = false;
+
                   let device = data.device;
                   if ( exists ) {
                       delete data.device;
