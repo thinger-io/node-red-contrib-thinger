@@ -88,20 +88,20 @@ module.exports = function(RED) {
 
                 const assetsUrl = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/server/assets`;
 
-                let data = (await server.request(node, assetsUrl, 'GET')).payload;
-
-                // Set path for asset
-                let path = data.find(e=>e.asset === asset).paths.list;
-                const userRegex = new RegExp(`\\(\\?<user>[^)]+\\)`);
-                path = path.replace(userRegex, server.config.username);
-
-                const count = 50;
-                const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${path}?count=${count}&${queryParametersString}`;
-
-                let index = 0;
-                let res_length = 0;
-
                 try {
+                    let data = (await server.request(node, assetsUrl, 'GET')).payload;
+
+                    // Set path for asset
+                    let path = data.find(e=>e.asset === asset).paths.list;
+                    const userRegex = new RegExp(`\\(\\?<user>[^)]+\\)`);
+                    path = path.replace(userRegex, server.config.username);
+
+                    const count = 50;
+                    const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${path}?count=${count}&${queryParametersString}`;
+
+                    let index = 0;
+                    let res_length = 0;
+
                     do {
                       const res = await server.request(node,`${url}index=${index}`,'GET');
                       res_length = res.payload.length;

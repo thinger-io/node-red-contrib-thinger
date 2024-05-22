@@ -2,11 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.7.5] - 2024-05-08
+## [1.7.5] - 2024-05-22
 
 ### Fixed
 
 - Catch exceptions when thinger server node websocket receives message
+- Exception uncaught when device create node had no device id value
 
 ## [1.7.4] - 2024-04-12
 
