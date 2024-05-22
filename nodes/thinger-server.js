@@ -321,15 +321,17 @@ module.exports = function(RED) {
                 if(device === undefined) return;
 
                 // parse incoming data
-                let payload = JSON.parse(data);
+                try {
 
-                // get resource
-                let resource = device.resources[payload.resource];
+                  let payload = JSON.parse(data);
 
-                // no listeners for this resource?
-                if(resource === undefined) return;
+                  // get resource
+                  let resource = device.resources[payload.resource];
 
-                for(let id in resource.listeners) {
+                  // no listeners for this resource?
+                  if(resource === undefined) return;
+
+                  for(let id in resource.listeners) {
                     let listener = resource.listeners[id];
                     if(listener.skipMeasures){
                         node.log("Listener " + id + ": SkipMeasures(" + listener.skipMeasures + ") SkipCurrent (" + listener.skipCurrent + ")");
@@ -342,7 +344,16 @@ module.exports = function(RED) {
                     }
                     listener.node.status({fill:"blue",shape:"dot",text:"connected"});
                     listener.node.send({payload: payload});
-                    listener.node.status({fill:"green",shape:"dot",text:"connected"}); }
+                    listener.node.status({fill:"green",shape:"dot",text:"connected"});
+                  }
+
+                } catch (e) {
+
+                  node.error(e.message);
+                  console.debug(e.stack);
+
+                }
+
             });
 
             wss.on('close', function close() {

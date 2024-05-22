@@ -111,12 +111,13 @@ module.exports = function(RED) {
                 // Check if bucket exists
                 let exists = true;
                 let res;
-                res = await server.request(node,`${url}/${json.bucket}`, 'GET');
-                if (res.status !== 200)
+
+                try {
+                  res = await server.request(node,`${url}/${json.bucket}`, 'GET');
+                  if (res.status !== 200)
                     exists = false;
 
-                // Update if exist or create it
-                try {
+                  // Update if exist or create it
                   let bucket = json.bucket;
                   if ( exists ) {
                       delete json.bucket;
