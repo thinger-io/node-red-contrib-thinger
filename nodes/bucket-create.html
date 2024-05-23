@@ -1,6 +1,6 @@
 <script type="text/javascript">
 
-    function hideSources() {
+    function hideBucketSources() {
         $(".node-row-device").hide();
         $(".node-row-resource").hide();
         $(".node-row-update").hide();
@@ -52,7 +52,7 @@
             // Event listeners
             $("#node-input-source").change(function() {
                 if (!firstTime) {
-                    hideSources();
+                    hideBucketSources();
                 }
                 firstTime = false;
 
