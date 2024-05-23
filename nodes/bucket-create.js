@@ -108,28 +108,34 @@ module.exports = function(RED) {
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/buckets`;
 
             if (typeof server.request === "function") {
+
                 // Check if bucket exists
                 let exists = true;
                 let res;
 
                 try {
-                  res = await server.request(node,`${url}/${json.bucket}`, 'GET');
-                  if (res.status !== 200)
-                    exists = false;
+                    res = await server.request(node,`${url}/${json.bucket}`, 'GET');
+                } catch (err) {
+                } finally {
+                    if ( !res || res.status !== 200 )
+                        exists = false;
+                }
 
-                  // Update if exist or create it
-                  let bucket = json.bucket;
-                  if ( exists ) {
-                      delete json.bucket;
-                      res = await server.request(node,`${url}/${bucket}`,'PUT',json);
-                  } else {
-                      res = await server.request(node, url, 'POST', json);
-                  }
+                try {
 
-                  // Associate to projects
-                  if (projects && projects.length !== 0) {
-                    res = await server.request(node,`${url}/${bucket}/projects`,'PUT',projects);
-                  }
+                    // Update if exist or create it
+                    let bucket = json.bucket;
+                    if ( exists ) {
+                        delete json.bucket;
+                        res = await server.request(node,`${url}/${bucket}`,'PUT',json);
+                    } else {
+                        res = await server.request(node, url, 'POST', json);
+                    }
+
+                    // Associate to projects
+                    if (projects && projects.length !== 0) {
+                        res = await server.request(node,`${url}/${bucket}/projects`,'PUT',projects);
+                    }
 
                 } catch(err) {
                     delete err.stack;

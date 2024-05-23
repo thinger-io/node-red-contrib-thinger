@@ -82,23 +82,28 @@ module.exports = function(RED) {
                 // Update if exist or create it
                 try {
 
-                  res = await server.request(node,`${url}/${data.device}`, 'GET');
-                  if (res.status !== 200)
-                    exists = false;
+                    try {
+                        res = await server.request(node,`${url}/${data.device}`, 'GET');
+                    } catch (err) {
+                    } finally {
+                        if ( !res || res.status !== 200 )
+                            exists = false;
 
-                  let device = data.device;
-                  if ( exists ) {
-                      delete data.device;
-                      delete data.type;
-                      res = await server.request(node,`${url}/${device}`,'PUT',data);
-                  } else {
-                      res = await server.request(node, url, 'POST', data);
-                  }
+                    }
 
-                  // Associate to projects
-                  if (projects && projects.length !== 0) {
-                    res = await server.request(node,`${url}/${device}/projects`,'PUT',projects);
-                  }
+                    let device = data.device;
+                    if ( exists ) {
+                        delete data.device;
+                        delete data.type;
+                        res = await server.request(node,`${url}/${device}`,'PUT',data);
+                    } else {
+                        res = await server.request(node, url, 'POST', data);
+                    }
+
+                    // Associate to projects
+                    if (projects && projects.length !== 0) {
+                      res = await server.request(node,`${url}/${device}/projects`,'PUT',projects);
+                    }
 
                 } catch(err) {
                     delete err.stack;

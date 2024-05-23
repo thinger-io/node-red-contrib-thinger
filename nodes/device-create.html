@@ -1,14 +1,5 @@
 <script type="text/javascript">
 
-    function hideSources() {
-        $(".node-row-device").hide();
-        $(".node-row-update").hide();
-        $(".node-row-topic").hide();
-        $("#node-input-device").val("");
-        $("#node-input-update").val("");
-        $("#node-input-topic").val("");
-    }
-
     RED.nodes.registerType('device-create', {
         category: 'thinger',
         color: '#62b0fe', // #1F8EFE at 30% lightened

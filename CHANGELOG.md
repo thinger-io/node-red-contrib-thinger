@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.6] - 2024-05-23
+
+### Fixed
+
+- Device create and Bucket create nodes failing on creation
+- Bucket create node not hiding auxiliary sources fields when source changed
+
+
 ## [1.7.5] - 2024-05-22
 
 ### Fixed
@@ -313,6 +321,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.7.6]: https://github.com/thinger-io/Node-RED/compare/1.7.5...1.7.6
 [1.7.5]: https://github.com/thinger-io/Node-RED/compare/1.7.4...1.7.5
 [1.7.4]: https://github.com/thinger-io/Node-RED/compare/1.7.3...1.7.4
 [1.7.3]: https://github.com/thinger-io/Node-RED/compare/1.7.2...1.7.3

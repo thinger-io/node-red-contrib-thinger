@@ -1,6 +1,6 @@
 # node-red-contrib-thinger
 
-[![NPM Version](https://img.shields.io/static/v1?label=npm&message=v1.7.5&color=blue&style=flat)](https://www.npmjs.com/package/node-red-contrib-thinger)
+[![NPM Version](https://img.shields.io/static/v1?label=npm&message=v1.7.6&color=blue&style=flat)](https://www.npmjs.com/package/node-red-contrib-thinger)
 
 ![Node-RED and Thinger.io Integration](./images/laptop.png "Thinger.io web console with Node-RED plugin and ad-hoc nodes")
 
