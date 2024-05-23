@@ -106,17 +106,21 @@ module.exports = function(RED) {
 
             if (typeof server.request === "function") {
 
+                const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${prefix}${device}/callback`;
+
                 try {
-                    const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v3/users/${server.config.username}/devices/${prefix}${device}/callback`;
 
                     // Check if device exists if not autoprovision resources
-                    let res = await server.request(node,`${url}/data`,'POST',data);
-                    if ( res.status !== 200 ) {
-
-                        await provisionBucket(server,node,prefix,device,assetType,assetGroup,product);
-                        await provisionDevice(server,node,prefix,device,assetType,assetGroup,product);
+                    let res;
+                    try {
                         res = await server.request(node,`${url}/data`,'POST',data);
-
+                    } catch (err) {
+                    } finally {
+                        if ( !res || res.status !== 200 ) {
+                            await provisionBucket(server,node,prefix,device,assetType,assetGroup,product);
+                            await provisionDevice(server,node,prefix,device,assetType,assetGroup,product);
+                            res = await server.request(node,`${url}/data`,'POST',data);
+                        }
                     }
 
                     msg.payload = res.payload;
