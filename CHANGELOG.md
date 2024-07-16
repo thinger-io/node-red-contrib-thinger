@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [1.8.0] - 2024-07-23
 
+### Security
+
+- Updated dependencies to fix security vulnerabilities
+
 ## [1.7.6] - 2024-05-23
 
 ### Fixed
