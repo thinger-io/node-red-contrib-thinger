@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0] - 2024-07-23
+
 ## [1.7.6] - 2024-05-23
 
 ### Fixed
@@ -321,6 +323,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.8.0]: https://github.com/thinger-io/Node-RED/compare/1.7.6...1.8.0
 [1.7.6]: https://github.com/thinger-io/Node-RED/compare/1.7.5...1.7.6
 [1.7.5]: https://github.com/thinger-io/Node-RED/compare/1.7.4...1.7.5
 [1.7.4]: https://github.com/thinger-io/Node-RED/compare/1.7.3...1.7.4
