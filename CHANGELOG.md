@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Set default sockets against backend server to 5
+- Updated generated node names to be more descriptive
 
 ### Security
 

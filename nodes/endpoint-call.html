@@ -13,7 +13,7 @@
         outputs: 1,
         align: 'left',
         label: function() {
-            return this.name || (this.endpoint ? this.endpoint : "endpoint call");
+            return this.name || (this.endpoint ? `${this.endpoint} call` : "endpoint call");
         },
         paletteLabel: function() {
             return "endpoint call";

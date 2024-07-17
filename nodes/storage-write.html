@@ -16,7 +16,7 @@
         outputs:0,
         inputLabels: "event",
         label: function() {
-            return this.name || ((this.storage && this.file) ? (this.storage + "/" + this.file) : "storage write");
+            return this.name || ((this.storage && this.file) ? (`${this.storage}/${this.file} write`) : "storage write");
         },
         paletteLabel: function() {
             return "storage write";

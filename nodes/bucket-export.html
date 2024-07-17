@@ -63,7 +63,7 @@
         inputLabels: "event",
         align: 'left',
         label: function() {
-            return this.name || (this.bucket ? `export ${this.bucket}` : "bucket export");
+            return this.name || (this.bucket ? `${this.bucket} export` : "bucket export");
         },
         paletteLabel: function() {
             return "bucket export";

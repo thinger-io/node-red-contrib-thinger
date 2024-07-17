@@ -76,7 +76,7 @@
         inputLabels: "event",
         align: 'left',
         label: function() {
-            return this.name || (this.bucket ? this.bucket + "("+this.sort+")" : "bucket read");
+            return this.name || (this.bucket ? `${this.bucket} (${this.sort}) read` : "bucket read");
         },
         paletteLabel: function() {
             return "bucket read";

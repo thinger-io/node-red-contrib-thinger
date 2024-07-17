@@ -13,7 +13,7 @@
         outputs: 0,
         align: 'right',
         label: function() {
-            return this.name || (this.bucket ? this.bucket : "bucket write");
+            return this.name || (this.bucket ? `${this.bucket} write` : "bucket write");
         },
         paletteLabel: function() {
             return "bucket write";

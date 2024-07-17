@@ -13,7 +13,7 @@
         outputs:1,
         inputLabels: "event",
         label: function() {
-            return this.name || ((this.device && this.resource) ? (this.device + "/" + this.resource) : "device read");
+            return this.name || ((this.device && this.resource) ? (this.device + "/" + this.resource + " read") : "device read");
         },
         paletteLabel: function() {
             return "device read";

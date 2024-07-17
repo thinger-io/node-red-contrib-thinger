@@ -25,7 +25,7 @@
         inputLabels: "event",
         align: 'left',
         label: function() {
-            return this.name || (this.device ? this.device : "device create");
+            return this.name || (this.device ? `${this.device} create` : "device create");
         },
         paletteLabel: function() {
             return "device create";

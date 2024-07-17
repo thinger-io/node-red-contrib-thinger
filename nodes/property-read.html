@@ -16,7 +16,7 @@
         outputs: 1,
         align: 'left',
         label: function() {
-            return this.name || (this.assetId && this.property ? this.assetId +"/"+ this.property : "property read");
+            return this.name || (this.assetId && this.property ? `${this.assetId}/${this.property} read` : "property read");
         },
         paletteLabel: function() {
             return "property read";

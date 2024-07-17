@@ -16,7 +16,7 @@
         outputs: 1,
         align: 'left',
         label: function() {
-            return this.name || (this.assetId && this.property ? this.assetId +"/"+ this.property : "property write");
+            return this.name || (this.assetId && this.property ? `${this.assetId}/${this.property} write` : "property write");
         },
         paletteLabel: function() {
             return "property write";

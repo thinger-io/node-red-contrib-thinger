@@ -13,7 +13,7 @@
         outputs: 1,
         align: 'left',
         label: function() {
-            return this.name || (this.device ? this.device : "device callback");
+            return this.name || (this.device ? `${this.device} callback` : "device callback");
         },
         paletteLabel: function() {
             return "device callback";

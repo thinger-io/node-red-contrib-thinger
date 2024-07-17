@@ -22,7 +22,7 @@
         outputs: 1,
         align: 'left',
         label: function() {
-            return this.name || (this.asset ? this.asset +"/"+ this.filter : "asset iterator");
+            return this.name || (this.asset ? `${this.asset}${this.filter ? "/"+this.filter : ""} iterator` : "asset iterator");
         },
         paletteLabel: function() {
             return "asset iterator";

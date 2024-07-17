@@ -17,7 +17,7 @@
         outputs:1,
         inputLabels: "event",
         label: function() {
-            return this.name || ((this.storage && this.file) ? (this.storage + "/" + this.file) : "storage read");
+            return this.name || ((this.storage && this.file) ? (`${this.storage}/${this.file} read`) : "storage read");
         },
         paletteLabel: function() {
             return "storage read";
@@ -151,7 +151,7 @@ Reads a file from a storage.
 
 : storage (string) : the id of the storage to read from.
 : *file* (string) : the file path or directory path of the storage to read.
-: *data* (string) : sets the data to retrieve, file content or file data.
+: *data* (string) : sets the data to retrieve, file content (content) or file data (details).
 : *recursive* (string) : allows the configuration of depth for recursiveness.
 : *min_depth* (string) : do not apply any tests or actions at levels less than.
 : *max_depth* (string) : descend at most levels of directories below the starting points.
