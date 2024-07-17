@@ -12,6 +12,10 @@ All notable changes to this project will be documented in this file.
 
 - Can't read/write api resources when created from product
 
+### Changed
+
+- Set default sockets against backend server to 5
+
 ### Security
 
 - Updated dependencies to fix security vulnerabilities
