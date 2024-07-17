@@ -67,7 +67,7 @@
             aggregation: {value: ""}, //1m, 5h, 1w
             aggregationType: {value: ""}, // mean, median, 
             sort: {value: ""},
-            timezone: {value: "UTC"},
+            timezone: {value: Intl.DateTimeFormat().resolvedOptions().timeZone},
             server: {type:"thinger-server", required:true}
         },
         icon:"bucket.svg",

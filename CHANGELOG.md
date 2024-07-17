@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 
 - Set default sockets against backend server to 5
 - Updated generated node names to be more descriptive
+- Set default dialog timezone in bucket read node to the browser timezone
 
 ### Security
 

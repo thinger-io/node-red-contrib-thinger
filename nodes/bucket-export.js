@@ -212,7 +212,6 @@ module.exports = function(RED) {
 
                     break;
                 case "absolute":
-                    let timezone = config.timezone || msg.timezone;
                     maxTs = new Date(config.maxTs || msg.max_ts).getTime();
                     minTs = new Date(config.minTs || msg.min_ts).getTime();
                     break;
