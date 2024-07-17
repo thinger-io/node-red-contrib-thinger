@@ -7,28 +7,36 @@ class ThingerDOM {
     // ----------------------- //
 
     // This functions registers the event handlers for the list of fields passed for the node
+    // as long as the fields match with the asset types
     static registerFocusHandler(fields, node_id) {
 
       fields.forEach(f => {
 
-        $(`#node-input-${f}`).focus(function() {
-
-          const val = $(this).val();
-          const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-
-          let assets = new (assetClass.get(`${f}s`))(val, node_id, svr_id);
-
-          assets.getAssets().then(function(data) {
-            ThingerDOM.showOptions(f,data,val,function(value) {
-              // asset filtering callback
-              assets = new (assetClass.get(`${f}s`))(value,node_id,svr_id);
-              assets.getAssets().then((data) => {ThingerDOM.showOptions(f, data)});
-            });
-          });
-
-        });
+          ThingerDOM.registerGenericFocusHandler(f, f, node_id);
 
       });
+
+    }
+
+    // This function registers the event handler for the field and asset passed for the node
+    static registerGenericFocusHandler(field, asset, node_id) {
+
+        $(`#node-input-${field}`).focus(function() {
+
+            const val = $(this).val();
+            const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+
+            let assets = new (assetClass.get(`${asset}s`))(val, node_id, svr_id);
+
+            assets.getAssets().then(function(data) {
+                ThingerDOM.showOptions(field,data,val,function(value) {
+                    // asset filtering callback
+                    assets = new (assetClass.get(`${asset}s`))(value,node_id,svr_id);
+                    assets.getAssets().then((data) => {ThingerDOM.showOptions(field, data)});
+                });
+            });
+
+        });
 
     }
 

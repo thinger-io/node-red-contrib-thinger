@@ -1,0 +1,361 @@
+<script type="text/javascript">
+
+    function loadDateField(ts,field) {
+        if (ts) {
+          var date = new Date(ts);
+          $("#node-input-"+field+"date").val(
+            date.getFullYear()+"-"+
+            (date.getMonth()+1).toString().padStart(2,'0')+"-"+
+            date.getDate().toString().padStart(2,'0'));
+          $("#node-input-"+field+"time").val(
+            date.getHours().toString().padStart(2,'0')+":"+
+            date.getMinutes().toString().padStart(2,'0'));
+      }
+    }
+
+    function showRelative() {
+        $(".node-row-relative").show();
+        if (!$("#node-input-timespanSequence").val()) { // assuming that if one is set all three are set
+            $("#node-input-timespanSequence").val("latest");
+            $("#node-input-timespanValue").val("6");
+            $("#node-input-timespanUnits").val("h");
+        }
+    }
+
+    function hideRelative() {
+        $(".node-row-relative").hide();
+        $("#node-input-timespanSequence").val("");
+        $("#node-input-timespanValue").val("");
+        $("#node-input-timespanUnits").val("");
+    }
+
+    function hideAbsolute() {
+        $(".node-row-absolute").hide();
+        $("#node-input-startdate").val("");
+        $("#node-input-starttime").val("");
+        $("#node-input-enddate").val("");
+        $("#node-input-endtime").val("");
+    }
+
+    RED.nodes.registerType('bucket-export', {
+        category: 'thinger',
+        color: '#62b0fe', // #1F8EFE at 30% lightened
+        defaults: {
+            name: {value: ""},
+            bucket: {value: ""},
+            dataType: {value: ""},
+            //TODO: uncomment when bucket export allows tags tags: {value: ""},
+            range: {value: ""},
+            timespanSequence: {value: ""},
+            timespanValue: {value: ""},
+            timespanUnits: {value: ""},
+            maxTs: {value: ""},
+            minTs: {value: ""},
+            timestampFormat: {value: ""},
+            callback:  {value: ""},
+            callbackId: {value: ""},
+            data: {value: ""},
+            server: {type:"thinger-server", required:true}
+        },
+        icon:"bucket.svg",
+        inputs: 1,
+        outputs: 1,
+        inputLabels: "event",
+        align: 'left',
+        label: function() {
+            return this.name || (this.bucket ? `export ${this.bucket}` : "bucket export");
+        },
+        paletteLabel: function() {
+            return "bucket export";
+        },
+        oneditprepare: function() {
+
+            const node_id = this.id;
+            // TODO: uncomment when implemented: let _tags = this.tags;
+
+            // Defaults set on prepare instead of properties to allow for configuration on input message
+            loadDateField(this.minTs,"start");
+            loadDateField(this.maxTs,"end");
+
+            /* TODO: uncomment when bucket export allows tags
+            $("#node-input-bucket").change(function() {
+
+                $(".node-row-additional-field").remove();
+
+                const bucket = $(this).val();
+                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+
+                let buckets = new ThingerBuckets(bucket,node_id,svr_id);
+                buckets.getBuckets().then(function() {
+                    let tags = buckets.getBucketTagsName(bucket);
+                    tags.forEach(tag => {
+                        // Create fields
+                        ThingerDOM.addInputField(`tag_${tag}`, `Select or search a ${tag}...`, "dataType", "tag");
+                        // Set values from config
+                        if ( _tags && _tags !== "" ) {
+                            for (let key in _tags) {
+                                $(`#node-input-${key}`).val(_tags[key]);
+                            }
+                            _tags = {};
+                        }
+                        // Show options
+                        $(`#node-input-tag_${tag}`).focus(function() {
+                            if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
+
+                            let value = $(this).val();
+
+                            // Get values of tags
+                            buckets.getBucketTagsValue(bucket,tag).then(function(data) {
+                                ThingerDOM.showOptions(`tag_${tag}`, data,value);
+                            });
+
+                        });
+                    });
+
+                });
+
+            });
+            */
+
+            $("#node-input-range").change(function() {
+                if ($(this).val() == "relative") {
+                    showRelative();
+                    hideAbsolute();
+                } else if ($(this).val() == "absolute") {
+                    $(".node-row-absolute").show();
+                    hideRelative();
+                } else if ($(this).val() == "all") {
+                    hideRelative();
+                    hideAbsolute();
+                } else {
+                    hideRelative();
+                    hideAbsolute();
+                }
+
+            });
+
+            $("#node-input-startdate").change(function() {
+                if ($(this).val() && !$("#node-input-starttime").val()) {
+                    $("#node-input-starttime").val("00:00");
+                }
+            });
+
+            $("#node-input-enddate").change(function() {
+                if ($(this).val() && !$("#node-input-endtime").val()) {
+                    $("#node-input-endtime").val("00:00");
+                }
+            });
+
+            $("#node-input-callback").change(function () {
+                //  Remove previously set handlers or the will acumulate
+                $('#node-input-callbackId').off('focus');
+
+                if ( $(this).val() ) {
+                    $(".node-row-callbackId").show();
+                    ThingerDOM.changeFieldAppearance($(this).val(),"callbackId");
+                    ThingerDOM.registerGenericFocusHandler("callbackId", $(this).val(), node_id);
+                } else {
+                    $(".node-row-callbackId").hide();
+                    $("#node-input-callbackId").val("");
+                }
+
+            });
+
+            $("#node-input-data").val(this.data || "url");
+
+            // Register focus handlers (options select)
+            const optionsFields = ["bucket"];
+            ThingerDOM.registerFocusHandler(optionsFields, node_id);
+
+        },
+        oneditsave: function() {
+          /* TODO: Uncomment when bucket export allows tags
+          // save tags
+          this.tags = {};
+          $(".node-row-additional-field").each((index,element) => {
+                let input = element.children[0].children[1];
+                let id = input.id.split('-').pop();
+                let value = input.value;
+                if ( value && value !== "" ) // only add if it has value
+                  this.tags[id] = [value];
+          });
+          */
+
+          // Save max ts and min ts in case of absolute
+          if ($("#node-input-range").val() == "absolute") {
+              this.minTs = new Date($("#node-input-startdate").val()+"T"+$("#node-input-starttime").val()).toISOString();
+              this.maxTs = new Date($("#node-input-enddate").val()+"T"+$("#node-input-endtime").val()).toISOString();
+          } else {
+              this.minTs = "";
+              this.maxTs = "";
+          }
+
+
+          // Remove timespan
+          if (!$("#node-input-timespanValue").val()) {
+              this.timespanSequence = "";
+              this.timespanUnits = "";
+          }
+
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="bucket-export">
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="node-row-bucket">
+        <div class="form-row">
+            <label for="node-input-bucket"><i class="fa fa-database"></i> Bucket</label>
+            <input type="text" id="node-input-bucket" placeholder="Bucket Identifier">
+        </div>
+    </div>
+
+    <div class="node-row-dataType">
+        <div class="form-row">
+            <label for="node-input-dataType"><i class="fa fa-file"></i> Format</label>
+            <select id="node-input-dataType" style="width:70% !important;">
+                <option value="" selected>Select Data Export Format</option>
+                <option value="csv">CSV (Comma Separated Values)</option>
+                <option value="json">JSON (JavasScript Object Notation)</option>
+                <option value="arff">ARFF (Attribute-Relation File Format)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-range">
+        <div class="form-row">
+            <label for="node-input-range"><i class="fa fa-filter"></i> Range</label>
+            <select id="node-input-range" style="width:70% !important;">
+                <option value="" default>Select Range</option>
+                <option value="all">all data</option>
+                <option value="relative">relative timeframe</option>
+                <option value="absolute">absolute timeframe</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-relative" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-timespan"><i class="fa fa-clock-o"></i> Time Period</label>
+            <select id="node-input-timespanSequence" style="width:20% !important;">
+                <option value="latest" selected>latest</option>
+                <option value="previous">previous</option>
+            </select>
+            <input type="number" id="node-input-timespanValue" placeholder="Specify the timespan of the data to display" style="width:28% !important;" value=6>
+            <select id="node-input-timespanUnits" style="width:20% !important;">
+                <option value="s">seconds</option>
+                <option value="m">minutes</option>
+                <option value="h" selected>hours</option>
+                <option value="d">days</option>
+                <option value="w">weeks</option>
+                <option value="mo">months</option>
+                <option value="y">years</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="node-row-absolute" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-startdate"><i class="fa fa-calendar"></i> Start Date</label>
+            <input type="date" id="node-input-startdate" placeholder="" style="width: 35% !important;">
+            <input type="time" id="node-input-starttime" placeholder="" style="width: 34% !important;">
+        </div>
+
+        <div class="form-row">
+            <label for="node-input-enddate"><i class="fa fa-calendar"></i> End Date</label>
+            <input type="date" id="node-input-enddate" placeholder="" style="width: 35% !important;">
+            <input type="time" id="node-input-endtime" placeholder="" style="width: 34% !important;">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-timestampFormat"><i class="fa fa-globe"></i> Timestamp</label>
+        <select id="node-input-timestampFormat" style="width:70% !important;">
+            <option value="" selected>Select Timestamp Export Format</option>
+            <option value="iso">ISO Date</option>
+            <option value="seconds">Unix Timestamp (seconds)</option>
+            <option value="milliseconds">Unix Timestamp (milliseconds)</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-callback"><i class="fa fa-phone"></i> Callback</label>
+        <select id="node-input-callback" style="width:70% !important;">
+            <option value="" selected>Select Callback</option>
+            <option value="endpoint">Endpoint</option>
+        </select>
+    </div>
+
+    <div class="node-row-callbackId" style="display: none;">
+        <div class="form-row">
+            <label for="node-input-callbackId"><i class="fa fa-server"></i> Callback Id</label>
+            <input type="text" id="node-input-callbackId" placeholder="Callback Identifier">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-data"><i class="fa fa-file-text"></i> Data</label>
+        <select id="node-input-data" style="width:30% !important;">
+            <option value="url" selected>file url</option>
+            <option value="content">file content</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-server"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="Select Server">
+    </div>
+</script>
+
+<script type="text/markdown" data-help-name="bucket-export">
+Exports data from a bucket synchronously.
+
+### Inputs
+
+: bucket (string) : the id of the bucket to export from.
+: *dataType* (string) : the format of the data to export (<samp>csv</samp>, <samp>json</samp> or <samp>arff</samp>). Default is <samp>csv</samp>.
+: *range* (string) : the type of range to apply the to the read operation (<samp>relative</samp>, <samp>absolute</samp> or <samp>all</samp>). Default is <samp>all</samp>.
+: *timespan_sequence* (string) : the sequence for <samp>relative</samp> filter (<samp>latest</samp> or <samp>previous</samp>).
+: *timespan_value* (int) : the value for <samp>relative</samp> filter.
+: *timespan_units* (char) : the time units for <samp>relative</samp> filter (s for seconds, m for minutes and so on; h, d, w, mo, y).
+: *min_ts* (Date) : the minimun data or timestamp of the time period for <samp>absolute</samp> time filter.
+: *max_ts* (Date) : the maximum date or timestamp of the time period for <samp>absolute</samp> time filter.
+: *timestamp_format* (string) : the format of the timestamp to export (<samp>iso</samp>, <samp>seconds</samp> or <samp>milliseconds</samp>). Default is <samp>milliseconds</samp>.
+: *callback* (string) : the type of callback to use (<samp>endpoint</samp>).
+: *callback_id* (string) : the id of the callback to use.
+: *data* (string) : the type of data to return (<samp>url</samp> or <samp>content</samp>). Default is <samp>url</samp>.
+
+### Outputs
+
+: payload (object) : the standard output of the command.
+
+### Details
+
+The export is done synchronously, meaning that the node will wait for the data to be exported before continuing the flow. For asynchronous export, use the callback option.
+
+The node allows the configuration via the edit dialog or through an input message.
+The values assigned through the dialog will have priority over the message.
+
+Each `msg.filter` will retrieve the data one way or another:
+- **Relative**: based on relative time with lastest or previous to a date value. Ex.: previous 3 days.
+- **Absolute**: based of abolute times. Ex.: from 2021/01/01 to 2021/12/31.
+- **Simple**: last N items.
+
+The fields `msg.max_ts` and `msg.min_ts` allow any string which javascript Date objects can interpret, find more info [here]("https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#several_ways_to_create_a_date_object"). It is recommended to use Epoch timestamp or UTC date for clarity.
+
+When configured within the node, the Bucket property can contain [mustache-style](http://mustache.github.io/mustache.5.html) tags.
+For example if Bucket is set to `gw_{{eui}}`, it will have the value of `msg.eui` automatically inserted. Using {{{...}}} prevents mustache from escaping characters like / & etc.
+
+### References
+
+- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
+- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
+- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
+- [Thinger.io]("https://thinger.io/") - the company behind the development
+</script>
+

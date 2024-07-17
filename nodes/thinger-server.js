@@ -84,26 +84,21 @@ module.exports = function(RED) {
             let wss = new WebSocket(url);
 
             wss.on('error', function(e){
-                caller.status({fill:"red", shape:"dot", text: 'websocket error'});
                 caller.error(e && e.message ? e.message : "websocket error");
                 if(on_error) on_error(e);
             });
 
             wss.on('open', function open() {
-                caller.status({fill:"green", shape:"dot", text: 'connected'});
                 if(on_open) on_open();
             });
 
             wss.on('message', function incoming(data) {
                 // parse incoming data
                 let payload = JSON.parse(data);
-                caller.status({fill:"blue",shape:"dot",text:"connected"});
                 if(on_message) on_message(payload);
-                caller.status({fill:"green",shape:"dot",text:"connected"});
             });
 
             wss.on('close', function close() {
-                caller.status({fill:"red", shape:"dot", text: 'disconnected'});
                 if(on_close) on_close();
             });
 
@@ -111,9 +106,9 @@ module.exports = function(RED) {
         };
 
         // function used by all nodes
-        node.request = function(caller, url, method, data) {
+        node.request = function(caller, url, method, data, external = false) {
             if (typeof caller === 'undefined') caller = node;
-            return ThingerRequest.request(url, method, data)
+            return ThingerRequest.request(url, method, data, external)
               .then(res => {
                   let body = data;
                   if (typeof data !== 'undefined') {
@@ -405,7 +400,8 @@ module.exports = function(RED) {
             res.json((await server.request(server, url, 'GET')).payload);
         } catch(err) {
             res.sendStatus(500);
-            server.error(`assets.failed ${err.toString()}`);
+            if ( server )
+                server.error(`assets.failed ${err.toString()}`);
         }
     });
 

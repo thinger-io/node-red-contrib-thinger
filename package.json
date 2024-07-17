@@ -28,6 +28,7 @@
     "nodes": {
       "asset-iterator": "nodes/asset-iterator.js",
       "bucket-create": "nodes/bucket-create.js",
+      "bucket-export": "nodes/bucket-export.js",
       "bucket-read": "nodes/bucket-read.js",
       "bucket-write": "nodes/bucket-write.js",
       "device-callback": "nodes/device-callback.js",

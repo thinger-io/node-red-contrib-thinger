@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [1.8.0] - 2024-07-23
 
+### Added
+
+- New node to export data from a bucket
+
 ### Security
 
 - Updated dependencies to fix security vulnerabilities
