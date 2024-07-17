@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 
 - New node to export data from a bucket
 
+### Fixed
+
+- Can't read/write api resources when created from product
+
 ### Security
 
 - Updated dependencies to fix security vulnerabilities

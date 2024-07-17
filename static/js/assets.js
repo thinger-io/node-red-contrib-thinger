@@ -183,7 +183,7 @@ class ThingerDevice extends ThingerAsset {
         if ( this.id.includes('{') )
             return Promise.resolve([]); // When using entry message placholders
         else
-          return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/resources?node_id=${this.node_id}&svr_id=${this.svr_id ? this.svr_id : ""}`).
+          return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/resources/api?node_id=${this.node_id}&svr_id=${this.svr_id ? this.svr_id : ""}`).
           then(function(data) {
             for (let i in data) {
                 self._resources.push(
