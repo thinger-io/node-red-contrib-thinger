@@ -246,7 +246,7 @@
         <div class="form-row">
             <label for="node-input-filter"><i class="fa fa-filter"></i> Filter</label>
             <select id="node-input-filter" style="width:70% !important;">
-                <option value="" default>Select Filter</option>
+                <option value="" selected>Select Filter</option>
                 <option value="relative">relative timeframe</option>
                 <option value="absolute">absolute timeframe</option>
                 <option value="simple">last N items</option>
@@ -258,14 +258,14 @@
         <div class="form-row">
             <label for="node-input-timespan"><i class="fa fa-clock-o"></i> Time Period</label>
             <select id="node-input-timespanSequence" style="width:20% !important;">
-                <option value="latest" default>latest</option>
+                <option value="latest" selected>latest</option>
                 <option value="previous">previous</option>
             </select>
             <input type="number" id="node-input-timespanValue" placeholder="Specify the timespan of the data to display" style="width:28% !important;" value=6>
             <select id="node-input-timespanUnits" style="width:20% !important;">
                 <option value="s">seconds</option>
                 <option value="m">minutes</option>
-                <option value="h" default>hours</option>
+                <option value="h" selected>hours</option>
                 <option value="d">days</option>
                 <option value="w">weeks</option>
                 <option value="mo">months</option>
@@ -306,7 +306,7 @@
         <div class="form-row">
             <label for="node-input-aggregation"><i class="fa fa-bar-chart"></i> Aggregation</label>
             <select id="node-input-aggregation" style="width:35% !important;">
-                <option value="" default>None</option>
+                <option value="" selected>None</option>
                 <option value="5m">5 min</option>
                 <option value="15m">15 min</option>
                 <option value="30m">30 min</option>
@@ -323,7 +323,7 @@
             </select>
             <select id="node-input-aggregationType" style="display: none; width:34% !important;">
                 <option value="count">count</option>
-                <option value="mean" default>mean</option>
+                <option value="mean" selected>mean</option>
                 <option value="median">median</option>
                 <option value="mode">mode</option>
                 <option value="spread">spread</option>
@@ -338,7 +338,7 @@
     <div class="form-row">
         <label for="node-input-sort"><i class="fa fa-sort"></i> Sort</label>
         <select id="node-input-sort" style="width: 70% !important;">
-            <option value="asc" default>ascending</option>
+            <option value="asc" selected>ascending</option>
             <option value="desc">descending</option>
         </select>
     </div>
