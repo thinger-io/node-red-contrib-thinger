@@ -87,9 +87,7 @@
             $('#node-input-event').focus(function() {
                 if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
 
-                const field = "event";
                 const asset = $("#node-input-asset").val();
-                const event = $(this).val();
 
                 // Show existing events
                 let filteredEvents = events.getAssetEvents(asset);
@@ -137,9 +135,8 @@
             $(".node-row-additional-field").each((index,element) => {
                 let input = element.children[0].children[1];
                 let id = input.id.split('-').pop();
-                let value = input.value;
 
-                this.filters[id] = value;
+                this.filters[id] = input.value;
             });
 
             // slowly remove old version properties

@@ -210,7 +210,7 @@ class ThingerDOM {
             ThingerDOM.#destroyOptions();
         }
 
-        let addEvents = typeof selected === 'undefined' ? false : true; // when showOptions is already a callback of a previous showOptions, event listeners should not be added
+        let addEvents = typeof selected !== 'undefined'; // when showOptions is already a callback of a previous showOptions, event listeners should not be added
         ThingerDOM.#createOptionsDiv(field,callback,addEvents);
         let elements = $();
 
@@ -219,7 +219,7 @@ class ThingerDOM {
             if ((typeof option === 'string' && option === selected) ||
                 (typeof option === 'object' &&
                   ((option.id === selected) ||
-                   (option.hasOwnProperty("name") && typeof option.name !== 'undefined' && option.name.length != 0 &&
+                   (option.hasOwnProperty("name") && typeof option.name !== 'undefined' && option.name.length !== 0 &&
                     option.name === selected))))
             {
                 element.addClass("red-form-option-active");
@@ -363,12 +363,12 @@ class ThingerDOM {
 
         let activeOption = false;
 
-        $("span[class^='red-form-option'").each((index,element) => {
+        $("span[class^='red-form-option']").each((index,element) => {
             let id = element.getElementsByTagName('strong')[0].innerHTML.toLowerCase();
             let name = "";
             if (element.children.length >= 3)
                 name = element.children[2].innerHTML.toLowerCase();
-            else if (element.children.length == 2)
+            else if (element.children.length === 2)
                 name = element.children[1].innerHTML.toLowerCase();
 
             if (id.match(re) || name.match(re)) {

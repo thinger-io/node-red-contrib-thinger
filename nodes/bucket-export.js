@@ -131,7 +131,7 @@ module.exports = function(RED) {
     /**
      * Auxiliary function that calls the server function export bucket
      */
-    function exportBucket(server, node, bucket, body, done) {
+    function exportBucket(server, node, bucket, body) {
 
         const method = 'POST';
         const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/buckets/${bucket}/exports`;

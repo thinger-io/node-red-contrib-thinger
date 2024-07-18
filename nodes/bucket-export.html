@@ -110,13 +110,13 @@
             */
 
             $("#node-input-range").change(function() {
-                if ($(this).val() == "relative") {
+                if ($(this).val() === "relative") {
                     showRelative();
                     hideAbsolute();
-                } else if ($(this).val() == "absolute") {
+                } else if ($(this).val() === "absolute") {
                     $(".node-row-absolute").show();
                     hideRelative();
-                } else if ($(this).val() == "all") {
+                } else if ($(this).val() === "all") {
                     hideRelative();
                     hideAbsolute();
                 } else {
@@ -174,7 +174,7 @@
           */
 
           // Save max ts and min ts in case of absolute
-          if ($("#node-input-range").val() == "absolute") {
+          if ($("#node-input-range").val() === "absolute") {
               this.minTs = new Date($("#node-input-startdate").val()+"T"+$("#node-input-starttime").val()).toISOString();
               this.maxTs = new Date($("#node-input-enddate").val()+"T"+$("#node-input-endtime").val()).toISOString();
           } else {

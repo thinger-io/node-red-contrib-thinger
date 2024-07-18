@@ -34,11 +34,9 @@
 
             const node_id = this.id;
 
-            var firstTime = true;
-
             // Event listeners
             $("#node-input-deviceType").change(function() {
-                if ($(this).val() == "HTTP") {
+                if ($(this).val() === "HTTP") {
                     $(".node-row-deviceCredentials").hide();
                 } else {
                     $(".node-row-deviceCredentials").show();
