@@ -82,15 +82,16 @@
 
                 $(".node-row-additional-field").remove();
 
-                const bucket = $(this).val();
+                const bucket_id = $(this).val();
                 const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
 
-                let buckets = new ThingerBuckets(bucket,node_id,svr_id);
-                buckets.getBuckets().then(function() {
-                    let tags = buckets.getBucketTagsName(bucket);
+                let buckets = new ThingerBuckets(bucket_id,node_id,svr_id);
+                buckets.getBuckets().then(function(data) {
+                    let bucket = data.find(e=>e.id === bucket_id);
+                    let tags = bucket.getTagsName();
                     tags.forEach(tag => {
                         // Create fields
-                        ThingerDOM.addInputField(`tag_${tag}`, `Select or search a ${tag}...`, "dataType", "tag");
+                        ThingerDOM.addInputField(`tag_${tag}`, `Select or search a ${tag}...`, "filter", "tag");
                         // Set values from config
                         if ( _tags && _tags !== "" ) {
                             for (let key in _tags) {
@@ -98,19 +99,10 @@
                             }
                             _tags = {};
                         }
-                        // Show options
-                        $(`#node-input-tag_${tag}`).focus(function() {
-                            if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
 
-                            let value = $(this).val();
-
-                            // Get values of tags
-                            buckets.getBucketTagsValue(bucket,tag).then(function(data) {
-                                ThingerDOM.showOptions(`tag_${tag}`, data,value);
-                            });
-
-                        });
-                    });
+                        // Show tag options
+                        ThingerDOM.registerGenericFocusHandler(node_id, `tag_${tag}`, "bucket", bucket);
+                  });
 
                 });
 
@@ -153,7 +145,7 @@
                 if ( $(this).val() ) {
                     $(".node-row-callbackId").show();
                     ThingerDOM.changeFieldAppearance($(this).val(),"callbackId");
-                    ThingerDOM.registerGenericFocusHandler("callbackId", $(this).val(), node_id);
+                    ThingerDOM.registerGenericFocusHandler(node_id, "callbackId", $(this).val());
                 } else {
                     $(".node-row-callbackId").hide();
                     $("#node-input-callbackId").val("");
@@ -165,7 +157,7 @@
 
             // Register focus handlers (options select)
             const optionsFields = ["bucket"];
-            ThingerDOM.registerFocusHandler(optionsFields, node_id);
+            ThingerDOM.registerFocusHandler(node_id, optionsFields);
 
         },
         oneditsave: function() {

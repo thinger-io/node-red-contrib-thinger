@@ -34,20 +34,8 @@
 
             const node_id = this.id;
 
-            // Event listeners
-            $("#node-input-device").focus(function() {
-                const field = "device";
-                const device = $(this).val();
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let devices = new ThingerDevices(device,node_id,svr_id);
-                devices.getHTTPDevices().then(function(data) {
-                    ThingerDOM.showOptions(field,data,device,function(value) {
-                        // devices filtering callback
-                        devices = new ThingerDevices(value,node_id,svr_id);
-                        devices.getHTTPDevices().then((data) => {ThingerDOM.showOptions(field, data)});
-                    });
-                });
-            });
+            const optionsFields = ["device"];
+            ThingerDOM.registerFocusHandler(node_id, optionsFields, "http");
 
         },
         oneditsave: function() {

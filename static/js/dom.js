@@ -8,35 +8,98 @@ class ThingerDOM {
 
     // This functions registers the event handlers for the list of fields passed for the node
     // as long as the fields match with the asset types
-    static registerFocusHandler(fields, node_id) {
+    static registerFocusHandler(node_id, fields, option = "") {
 
       fields.forEach(f => {
 
-          ThingerDOM.registerGenericFocusHandler(f, f, node_id);
+          ThingerDOM.registerGenericFocusHandler(node_id, f, f, undefined, undefined, option);
 
       });
 
     }
 
-    // This function registers the event handler for the field and asset passed for the node
-    static registerGenericFocusHandler(field, asset, node_id) {
+    /*
+     * @param {string} node_id - node id
+     * @param {string} field - field to register the handler
+     * @param {string} assetType - asset type to filter the options. For example, device, bucket, etc.
+     * @param {string|object} assetId - asset id to filter the options or object of the asset
+     * @param {object} editor - editor to fill with the selected option
+     * @param {string} option - additional option for assets. For example for resources it would mark if, input or output.
+     */
+    static registerGenericFocusHandler(node_id, field, assetType, assetId, editor, option = "") {
+
+        //  Remove previously set handlers or the will acumulate
+        $(`#node-input-${field}`).off('focus');
 
         $(`#node-input-${field}`).focus(function() {
 
             const val = $(this).val();
             const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
 
-            let assets = new (assetClass.get(`${asset}s`))(val, node_id, svr_id);
+            if ( assetId !== undefined ) {
 
-            assets.getAssets().then(function(data) {
-                ThingerDOM.showOptions(field,data,val,function(value) {
-                    // asset filtering callback
-                    assets = new (assetClass.get(`${asset}s`))(value,node_id,svr_id);
-                    assets.getAssets().then((data) => {ThingerDOM.showOptions(field, data)});
+                // specific asset
+                let asset;
+                if ( typeof assetId === 'object' ) {
+                    asset = assetId;
+                } else {
+                    asset = new (assetClass.get(`${assetType}`))(assetId, "", node_id, svr_id);
+                }
+
+                let promise;
+                switch (field) {
+                    case "property":
+                        promise = asset.getProperties();
+                        break;
+                    case "resource":
+                        if ( option === "input" ) promise = asset.getInputResources();
+                        else if ( option === "output" ) promise = asset.getOutputResources();
+                        else promise = asset.getInputOutputResources();
+                        break;
+                    case field.match(/^tag/)?.input: // bucket tags
+                        promise = asset.getTagValues( field.split('_')[1] );
+                        break;
+                    case "file":
+                        promise = asset.getFiles();
+                        break;
+                }
+
+                if (promise !== undefined) {
+                    promise.then(function(data) {
+                        ThingerDOM.showOptions(field, data, val);
+                        if ( editor !== undefined ) {
+                            $(`#node-input-${field}`).off('change');
+                            $(`#node-input-${field}`).change(function() {
+                                ThingerDOM.#fillEditor(editor, asset, $(this).val());
+                            });
+                        }
+                    });
+                }
+
+            } else {
+
+                console.log("option", option);
+                // asset family
+                let assets = new (assetClass.get(`${option}${assetType}s`))(val, node_id, svr_id);
+                assets.getAssets().then(function(data) {
+                    ThingerDOM.showOptions(field,data,val,function(value) {
+                        // asset filtering callback
+                        assets = new (assetClass.get(`${option}${assetType}s`))(value,node_id,svr_id);
+                        assets.getAssets().then((data) => {ThingerDOM.showOptions(field, data)});
+                    });
                 });
-            });
+
+            }
 
         });
+    }
+
+    static #fillEditor(editor, asset, assetId) {
+        let propertyValue = asset.getPropertyValue( assetId );
+        if ( propertyValue !== null ) {
+            propertyValue = JSON.stringify(propertyValue,null,'\t');
+            editor.setValue(propertyValue);
+        }
 
     }
 

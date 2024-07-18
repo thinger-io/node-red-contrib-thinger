@@ -118,49 +118,31 @@ class ThingerDevices extends ThingerAssets {
         return this.getDevices();
     }
 
-    async getDeviceResources(id) {
-        const device = this._devices.find(e=>e.id === id);
-        if (device !== undefined) {
-            return device.getResources();
-        }
-        return Promise.resolve([]);
+}
+
+class ThingerHTTPDevices extends ThingerDevices {
+
+    constructor(name,node_id,svr_id="") {
+        super(name,node_id,svr_id);
     }
 
-    async getDeviceInputResources(id) {
-        const device = this._devices.find(e=>e.id === id);
-        if (device !== undefined) {
-            return device.getInputResources();
-        }
-        return Promise.resolve([]);
-    }
-
-    async getDeviceOutputResources(id) {
-        const device = this._devices.find(e=>e.id === id);
-        if (device !== undefined) {
-            return device.getOutputResources();
-        }
-        return Promise.resolve([]);
-    }
-
-    async getDeviceInputOutputResources(id) {
-        const device = this._devices.find(e=>e.id === id);
-        if (device !== undefined) {
-            return device.getInputOutputResources();
-        }
-        return Promise.resolve([]);
-    }
-
-    async getHTTPDevices() {
-        let httpDevices = [];
-        return this.getDevices().then(function(data) {
+    async getDevices() {
+        this._httpDevices = [];
+        const self = this;
+        return super.getDevices().then(function(data) {
             for (let i in data) {
                 if (data[i].isHTTP()) {
-                    httpDevices.push(data[i]);
+                    self._httpDevices.push(data[i]);
                 }
             }
-            return httpDevices;
+            return self._httpDevices;
         });
     }
+
+    async getAssets() {
+        return this.getDevices();
+    }
+
 }
 
 class ThingerDevice extends ThingerAsset {
@@ -309,22 +291,6 @@ class ThingerBuckets extends ThingerAssets {
 
     async getAssets() {
         return this.getBuckets();
-    }
-
-    getBucketTagsName(id) {
-      const bucket = this._buckets.find(e=>e.id === id);
-      if (bucket !== undefined) {
-        return bucket.getTagsName();
-      }
-      return [];
-    }
-
-    async getBucketTagsValue(id, tag) {
-      const bucket = this._buckets.find(e=>e.id === id);
-      if (bucket !== undefined) {
-        return bucket.getTagValues(tag);
-      }
-      return Promise.resolve([]);
     }
 
 }
@@ -646,10 +612,6 @@ class ThingerFile {
         this.name = type; // using type for show options in DOM
     }
 
-    isDirectory() {
-        return this.name === "directory" ? true : false;
-    }
-
 }
 
 class ThingerAlarmRules extends ThingerAssets {
@@ -799,6 +761,7 @@ const assetClass = new Map([
     ['rules', ThingerAlarmRules], ['rule', ThingerAlarmRule],
     ['buckets', ThingerBuckets], ['bucket', ThingerBucket],
     ['devices', ThingerDevices], ['device', ThingerDevice],
+    ['httpdevices', ThingerHTTPDevices],
     ['types', ThingerTypes], ['type', ThingerType],
     ['assetTypes', ThingerTypes], ['assetType', ThingerType],
     ['groups', ThingerGroups], ['group', ThingerGroup],
