@@ -170,6 +170,7 @@ class ThingerDOM {
                                   fieldIcon.addClass("fa fa-bell");             break;
             case 'brand':         fieldIcon.addClass("fa fa-paint-brush");      break;
             case 'bucket':        fieldIcon.addClass("fa fa-database");         break;
+            case 'claim':         fieldIcon.addClass("fa fa-clipboard");         break;
             case 'dashboard':     fieldIcon.addClass("fa fa-tachometer");       break;
             case 'device':        fieldIcon.addClass("fa fa-rocket");           break;
             case 'domain':        fieldIcon.addClass("fa fa-at");               break;
