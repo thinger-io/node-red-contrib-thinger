@@ -32,12 +32,19 @@ class ThingerAssets {
     }
 
     request() {
+
+        // Set the project v
+        let filter = "";
+        const node = RED.nodes.node(this.node_id);
+        let project = ThingerUtils.getNodeRedThingerEnvVar(node, "THINGER_PROJECT");
+        if ( project !== undefined ) filter = `&project=${project}`;
+
         if ( this._url.includes('{') ) return Promise.resolve(); // When using entry message placholders
 
         if (this._url.includes('?'))
-            return $.getJSON(`${this._url}&node_id=${this.node_id}&svr_id=${this.svr_id}`);
+            return $.getJSON(`${this._url}&node_id=${this.node_id}&svr_id=${this.svr_id}${filter}`);
         else
-            return $.getJSON(`${this._url}?node_id=${this.node_id}&svr_id=${this.svr_id}`);
+            return $.getJSON(`${this._url}?node_id=${this.node_id}&svr_id=${this.svr_id}${filter}`);
     }
 
 }

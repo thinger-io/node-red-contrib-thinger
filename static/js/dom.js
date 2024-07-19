@@ -78,7 +78,6 @@ class ThingerDOM {
 
             } else {
 
-                console.log("option", option);
                 // asset family
                 let assets = new (assetClass.get(`${option}${assetType}s`))(val, node_id, svr_id);
                 assets.getAssets().then(function(data) {
