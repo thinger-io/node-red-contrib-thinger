@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Can't read/write api resources when created from product
+- Internal server error when configuring any thinger node right after creating a new thinger server node not yet deployed
 
 ### Changed
 

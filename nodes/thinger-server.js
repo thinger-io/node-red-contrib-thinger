@@ -390,6 +390,7 @@ module.exports = function(RED) {
         if (req.query.svr_id === "_ADD_") return res.json({});
 
         const server = RED.nodes.getNode(req.query.svr_id);
+        if ( !server ) return res.json({});
 
         let filter = "";
         if (req.query.name) {
@@ -399,13 +400,6 @@ module.exports = function(RED) {
         if ( req.query.project ) {
             filter = `project=${req.query.project}&${filter}`;
         }
-
-        //console.log("workspace", RED.nodes.workspace("2007d72d7893220f"));
-        //console.log("workspace", RED.nodes.getWorkspace("2007d72d7893220f"));
-        //console.log("node", node);
-        //console.log("server", server);
-        //console.log("project", RED.util.getSetting(node, 'THINGER_PROJECT'));
-        //console.log("project", RED.util.getSetting(server, 'THINGER_PROJECT'));
 
         try {
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/${req.params.asset}?${filter}`;
@@ -430,6 +424,7 @@ module.exports = function(RED) {
         if (req.query.svr_id === "_ADD_") return res.json({});
 
         const server = RED.nodes.getNode(req.query.svr_id);
+        if ( !server ) return res.json({});
 
         let filter = "";
         if (req.query.name) {
@@ -451,7 +446,7 @@ module.exports = function(RED) {
 
     RED.httpNode.get("/assets/:asset/:asset_id/:properties", async function(req,res) {
 
-        const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
+        const apiVersion = (req.params.asset === "devices" ? "v3" : "v1");
 
         const node = RED.nodes.getNode(req.query.node_id);
 
@@ -464,6 +459,7 @@ module.exports = function(RED) {
         if (req.query.svr_id === "_ADD_") return res.json({});
 
         const server = RED.nodes.getNode(req.query.svr_id);
+        if ( !server ) return res.json({});
 
         let filter = "";
         if (req.query.name) {
@@ -485,7 +481,7 @@ module.exports = function(RED) {
 
     RED.httpNode.get("/assets/:asset/:asset_id/:properties/:property_id", async function(req,res) {
 
-        const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
+        const apiVersion = (req.params.asset === "devices" ? "v3" : "v1");
 
         const node = RED.nodes.getNode(req.query.node_id);
 
@@ -498,6 +494,7 @@ module.exports = function(RED) {
         if (req.query.svr_id === "_ADD_") return res.json({});
 
         const server = RED.nodes.getNode(req.query.svr_id);
+        if ( !server ) return res.json({});
 
         let filter = "";
         if (req.query.name) {
@@ -529,6 +526,7 @@ module.exports = function(RED) {
         if (req.query.svr_id === "_ADD_") return res.json({});
 
         const server = RED.nodes.getNode(req.query.svr_id);
+        if ( !server ) return res.json({});
 
         // if server is null
         if ( !server ) {
