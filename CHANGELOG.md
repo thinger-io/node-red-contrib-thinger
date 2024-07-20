@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - New node to export data from a bucket
 - Added claim asset icon
 - UI assets filtering through THINGER_PROJECT environment variable in flow, subflow and group context
+- Thinger server node sets default values for the server connection on initialization
 
 ### Fixed
 
