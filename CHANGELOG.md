@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.8.0] - 2024-07-23
+## [1.8.0] - 2024-07-31
 
 ### Added
 
@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 
 - Can't read/write api resources when created from product
 - Internal server error when configuring any thinger node right after creating a new thinger server node not yet deployed
+- Unhandled exception when asset type not found in asset iterator node
 
 ### Changed
 
