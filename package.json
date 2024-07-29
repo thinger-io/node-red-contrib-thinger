@@ -16,19 +16,20 @@
     "url": "https://marketplace.thinger.io/plugins/node-red/"
   },
   "scripts": {
+    "start": "cd ~/.node-red && npm install ~/Documents/repos/thinger/node-red/node-red-contrib-thinger && node-red",
     "test": "mocha \"test/**/*_spec.js\""
   },
   "dependencies": {
-    "ws": "8.18.0",
     "jsonwebtoken": "9.0.2",
-    "mustache": "4.2.0"
+    "mustache": "4.2.0",
+    "ws": "8.18.0"
   },
   "devDependencies": {
-    "node-red": "^4.0.2",
-    "sinon": "^18.0.0",
     "mocha": "^10.7.0",
     "nock": "^13.5.4",
-    "node-red-node-test-helper": "^0.3.4"
+    "node-red": "^4.0.2",
+    "node-red-node-test-helper": "^0.3.4",
+    "sinon": "^18.0.0"
   },
   "engines": {
     "node": ">=16.0.0"
