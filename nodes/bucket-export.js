@@ -63,6 +63,7 @@ module.exports = function(RED) {
             node.log("sending event subscription: " + JSON.stringify(subscription));
             wss.send(JSON.stringify(subscription));
 
+            // once the ws is open, execute the export bucket request
             exportBucket(server, node, bucket, body)
                 .then(function (data) {
                     export_file = data.payload.file;

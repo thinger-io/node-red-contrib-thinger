@@ -25,7 +25,7 @@ module.exports = function(RED) {
                     data = Utils.transformValue(msg.payload);
                 }
                 else if ( typeof msg.value !== 'undefined' ) {
-                    data = Utils.transformValue(msg.payload);
+                    data = Utils.transformValue(msg.value);
                 }
             }
             data = Utils.mustacheRender(data, msg);

@@ -93,8 +93,10 @@ module.exports = function(RED) {
 
                     // Set path for asset
                     let assetObj = data.find(e=>e.asset === asset)
-                    if ( typeof assetObj === "undefined" )
-                        throw new Error("Asset type not found");
+                    if ( typeof assetObj === "undefined" ) {
+                        node.error("Asset not found");
+                        return;
+                    }
                     let path = assetObj.paths.list;
                     const userRegex = new RegExp(`\\(\\?<user>[^)]+\\)`);
                     path = path.replace(userRegex, server.config.username);

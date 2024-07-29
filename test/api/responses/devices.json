@@ -1,0 +1,75 @@
+[
+  {
+    "connection": {
+      "active": true,
+      "security": "Private Network",
+      "ts": 1721832488377
+    },
+    "created": 1706012122524,
+    "description": "",
+    "device": "http0",
+    "enabled": true,
+    "modified": 1721832488377,
+    "name": "HTTP0",
+    "project": [
+      "thinger@project1"
+    ],
+    "type": "HTTP",
+    "user": "thinger"
+  },
+  {
+    "connection": {
+      "active": true,
+      "security": "Private Network",
+      "ts": 1721832488377
+    },
+    "created": 1706012122524,
+    "description": "",
+    "device": "http1",
+    "enabled": true,
+    "modified": 1721832488377,
+    "name": "HTTP1",
+    "project": [
+      "thinger@project2"
+    ],
+    "type": "HTTP",
+    "user": "thinger"
+  },
+  {
+    "connection": {
+      "active": true,
+      "security": "",
+      "ts": 1721819832793
+    },
+    "created": 1680540761634,
+    "description": "for thinger's use",
+    "device": "mqtt0",
+    "enabled": true,
+    "modified": 1721819832793,
+    "name": "MQTT0",
+    "product": "mqtt",
+    "project": [
+      "thinger@project2"
+    ],
+    "type": "MQTT",
+    "user": "thinger"
+  },
+  {
+    "asset_group": "",
+    "asset_type": "",
+    "connection": {
+      "active": false,
+      "security": "TLSv1.3",
+      "ts": 1700748637189
+    },
+    "created": 1678380989732,
+    "description": "",
+    "device": "generic0",
+    "enabled": true,
+    "modified": 1700748637189,
+    "name": "Generic0",
+    "product": "",
+    "type": "Generic",
+    "user": "thinger"
+  }
+]

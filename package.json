@@ -15,10 +15,20 @@
     "type": "git",
     "url": "https://marketplace.thinger.io/plugins/node-red/"
   },
+  "scripts": {
+    "test": "mocha \"test/**/*_spec.js\""
+  },
   "dependencies": {
     "ws": "8.18.0",
     "jsonwebtoken": "9.0.2",
     "mustache": "4.2.0"
+  },
+  "devDependencies": {
+    "node-red": "^4.0.2",
+    "sinon": "^18.0.0",
+    "mocha": "^10.7.0",
+    "nock": "^13.5.4",
+    "node-red-node-test-helper": "^0.3.4"
   },
   "engines": {
     "node": ">=16.0.0"
