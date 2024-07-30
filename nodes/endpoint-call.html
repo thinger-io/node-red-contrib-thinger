@@ -13,7 +13,7 @@
         outputs: 1,
         align: 'left',
         label: function() {
-            return this.name || (this.endpoint ? this.endpoint : "endpoint call");
+            return this.name || (this.endpoint ? `${this.endpoint} call` : "endpoint call");
         },
         paletteLabel: function() {
             return "endpoint call";
@@ -36,7 +36,7 @@
 
             // Register focus handlers (options select)
             const optionsFields = ["endpoint"];
-            ThingerDOM.registerFocusHandler(optionsFields, node_id);
+            ThingerDOM.registerFocusHandler(node_id, optionsFields);
 
         },
         oneditsave: function() {
@@ -103,8 +103,8 @@ For example if Endpoint is set to `gw_{{eui}}`, it will have the value of `msg.e
 
 ### References
 
-- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
-- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
-- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
-- [Thinger.io]("https://thinger.io/") - the company behind the development
+- [Thinger Node-RED Plugin](https://marketplace.thinger.io/plugins/node-red) - full description of the plugin
+- [GitHub](https://github.com/thinger-io/Node-RED) - the nodes github repository
+- [npm](https://www.npmjs.com/package/node-red-contrib-thinger) - the nodes npm repository
+- [Thinger.io](https://thinger.io/) - the company behind the development
 </script>

@@ -92,7 +92,12 @@ module.exports = function(RED) {
                     let data = (await server.request(node, assetsUrl, 'GET')).payload;
 
                     // Set path for asset
-                    let path = data.find(e=>e.asset === asset).paths.list;
+                    let assetObj = data.find(e=>e.asset === asset)
+                    if ( typeof assetObj === "undefined" ) {
+                        node.error("Asset not found");
+                        return;
+                    }
+                    let path = assetObj.paths.list;
                     const userRegex = new RegExp(`\\(\\?<user>[^)]+\\)`);
                     path = path.replace(userRegex, server.config.username);
 
@@ -121,9 +126,9 @@ module.exports = function(RED) {
                     delete e.stack;
                     msg.payload = {};
                     msg.payload.asset = asset;
-                    msg.payload.asset_filter = queryParameters.get("name");
-                    msg.payload.asset_type = queryParameters.get("asset_type");
-                    msg.payload.asset_group = queryParameters.get("asset_group");
+                    msg.payload.asset_filter = queryParameters.name;
+                    msg.payload.asset_type = queryParameters.asset_type;
+                    msg.payload.asset_group = queryParameters.asset_group;
 
                     if ( e.hasOwnProperty("status") )
                       msg.payload.status = e.status;

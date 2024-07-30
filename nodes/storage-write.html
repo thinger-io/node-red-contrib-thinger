@@ -13,10 +13,10 @@
         },
         icon:"storage.svg",
         inputs: 1,
-        outputs:0,
+        outputs: 0,
         inputLabels: "event",
         label: function() {
-            return this.name || ((this.storage && this.file) ? (this.storage + "/" + this.file) : "storage write");
+            return this.name || ((this.storage && this.file) ? (`${this.storage}/${this.file} write`) : "storage write");
         },
         paletteLabel: function() {
             return "storage write";
@@ -27,21 +27,11 @@
 
             // Register focus handlers (options select)
             const optionsFields = ["storage"];
-            ThingerDOM.registerFocusHandler(optionsFields, node_id);
+            ThingerDOM.registerFocusHandler(node_id, optionsFields);
 
-            $("#node-input-file").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "file";
-                const file = $(this).val();
-                const storage = $("#node-input-storage").val()
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let storages = new ThingerStorages(storage,node_id,svr_id);
-                storages.getStorages().then(function() {
-                    storages.getStorageFiles(storage).then((data) => {
-                        ThingerDOM.showOptions(field, data, file)
-                    });
-                });
+            $("#node-input-storage").change(function() {
+                $("#node-input-file").val("");
+                ThingerDOM.registerGenericFocusHandler(node_id, "file", "storage", $(this).val());
             });
 
             $("#node-input-file").change(function(e,obj) {
@@ -106,7 +96,7 @@
 
     <div class="form-row">
         <label for="node-input-action"><i class="fa fa-random"></i> Action</label>
-        <select id="node-input-action" style="width:30%; !important">
+        <select id="node-input-action" style="width:30% !important;">
             <option value="append" selected>append to file</option>
             <option value="overwrite">overwrite file</option>
             <option value="delete">delete file</option>
@@ -166,8 +156,8 @@ For example if Storage is set to `gw_{{eui}}`, it will have the value of `msg.eu
 
 ### References
 
-- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
-- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
-- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
-- [Thinger.io]("https://thinger.io/") - the company behind the development
+- [Thinger Node-RED Plugin](https://marketplace.thinger.io/plugins/node-red) - full description of the plugin
+- [GitHub](https://github.com/thinger-io/Node-RED) - the nodes github repository
+- [npm](https://www.npmjs.com/package/node-red-contrib-thinger) - the nodes npm repository
+- [Thinger.io](https://thinger.io/) - the company behind the development
 </script>

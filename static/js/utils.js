@@ -39,5 +39,32 @@ class ThingerUtils {
 
     }
 
+    /**
+     * This function returns the env var of a given node by hierarchy (group < subflow || flow)
+     * @param node
+     * @param envVar the env var to search for (ex: "THINGER_PROJECT")
+     */
+    static getNodeRedThingerEnvVar(node, envVar) {
+
+        let parent;
+        if (node.g) {
+            parent = RED.nodes.group(node.g)
+        } else if (node.z) {
+            parent = RED.nodes.workspace(node.z) || RED.nodes.subflow(node.z)
+        }
+
+        if ( parent ) {
+
+            if (parent.env && parent.env.find(obj => obj["name"] === envVar)) {
+                return parent.env.find(obj => obj["name"] === envVar).value;
+            } else {
+                return ThingerUtils.getNodeRedThingerEnvVar(parent, envVar);
+            }
+
+        }
+        return "";
+
+    }
+
 }
 

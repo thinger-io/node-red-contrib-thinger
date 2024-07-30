@@ -13,7 +13,7 @@
         outputs:1,
         inputLabels: "event",
         label: function() {
-            return this.name || ((this.device && this.resource) ? (this.device + "/" + this.resource) : "device read");
+            return this.name || ((this.device && this.resource) ? (this.device + "/" + this.resource + " read") : "device read");
         },
         paletteLabel: function() {
             return "device read";
@@ -24,22 +24,12 @@
 
             // Register focus handlers (options select)
             const optionsFields = ["device"];
-            ThingerDOM.registerFocusHandler(optionsFields, node_id);
+            ThingerDOM.registerFocusHandler(node_id, optionsFields);
 
-            $("#node-input-resource").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "resource";
-                const resource = $(this).val();
-                const device = $("#node-input-device").val()
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let devices = new ThingerDevices(device,node_id,svr_id);
-                devices.getDevices().then(function() {
-                    devices.getDeviceOutputResources(device).then(function(data) {
-                        ThingerDOM.showOptions(field,data,resource);
-                    });
-                });
-             });
+            $("#node-input-device").change(function() {
+                $("#node-input-resource").val("");
+                ThingerDOM.registerGenericFocusHandler(node_id, "resource", "device", $(this).val(), undefined, "output");
+            });
 
         }
     });
@@ -87,8 +77,8 @@ For example if Bucket is set to `gw_{{eui}}`, it will have the value of `msg.eui
 
 ### References
 
-- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
-- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
-- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
-- [Thinger.io]("https://thinger.io/") - the company behind the development
+- [Thinger Node-RED Plugin](https://marketplace.thinger.io/plugins/node-red) - full description of the plugin
+- [GitHub](https://github.com/thinger-io/Node-RED) - the nodes github repository
+- [npm](https://www.npmjs.com/package/node-red-contrib-thinger) - the nodes npm repository
+- [Thinger.io](https://thinger.io/) - the company behind the development
 </script>

@@ -16,7 +16,7 @@
         outputs: 1,
         align: 'left',
         label: function() {
-            return this.name || (this.assetId && this.property ? this.assetId +"/"+ this.property : "property read");
+            return this.name || (this.assetId && this.property ? `${this.assetId}/${this.property} read` : "property read");
         },
         paletteLabel: function() {
             return "property read";
@@ -25,66 +25,26 @@
 
             const node_id = this.id;
 
-            // Save original assetId row to restore in case of asset change
-            var originalAssetId = $(".node-row-assetId")[0].outerHTML;
-            var originalProperty = $(".node-row-property")[0].outerHTML;
-            var firstTime = true;
+            $("#node-input-asset").change(function () {
 
-            $("#node-input-asset").change(function() {
-                // Restore form values if not previously set
-                if (!firstTime) {
-                    $(".node-row-assetId").replaceWith(originalAssetId);
-                    $(".node-row-property").replaceWith(originalProperty);
+                $("#node-input-assetId").val("");
+                $("#node-input-property").val("");
+
+                if ( $(this).val() ) {
+                    ThingerDOM.changeFieldAppearance($(this).val(), "assetId");
+                    ThingerDOM.registerGenericFocusHandler(node_id, "assetId", $(this).val());
                 }
-                firstTime = false;
 
-                // Remove previously set handlers or the will acumulate
-                $('#node-input-assetId').off('focus');
-                $('#node-input-property').off('focus');
+            });
 
-                const assetType = $(this).val();
+            $("#node-input-assetId").change(function () {
 
-                if (assetType) {
-                    // Field appearance
-                    ThingerDOM.changeFieldAppearance(assetType,"assetId");
+                $("#node-input-property").val("");
 
-                    // Options and filtering
-                    $("#node-input-assetId").focus(function() {
-                        if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                        const field = "assetId";
-                        const assetId = $(this).val();
-
-                        const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                        let assets = new (assetClass.get(`${assetType}s`))(assetId,node_id,svr_id);
-
-                        assets.getAssets().then(function(data) {
-                            ThingerDOM.showOptions(field,data,assetId,function(value) {
-                                // asset filtering callback
-                                assets = new (assetClass.get(`${assetType}s`))(value,node_id,svr_id);
-                                assets.getAssets().then((data) => {ThingerDOM.showOptions(field, data)});
-                            });
-                        });
-                    });
-
-                    // Properties
-                    $('#node-input-property').focus(function() {
-                        if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                        const assetId = $("#node-input-assetId").val();
-                        const property = $(this).val();
-
-                        const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                        const asset = new (assetClass.get(`${assetType}`))(assetId,"",node_id,svr_id); // If order is altered check devices, types, groups and products
-
-                        if (assetId) {
-                            asset.getProperties().then(function(data) {
-                                ThingerDOM.showOptions("property",data,property);
-                            });
-                        }
-                    });
-
+                if ( $(this).val() ) {
+                    ThingerDOM.registerGenericFocusHandler(node_id, "property", $("#node-input-asset").val(), $(this).val());
                 }
+
             });
 
         }
@@ -101,8 +61,8 @@
     <div class="node-row-asset">
         <div class="form-row">
             <label for="node-input-asset"><i class="fa fa-building"></i> Asset</label>
-            <select id="node-input-asset" style="width:70%; !important">
-                <option value="" default>Select Asset</option>
+            <select id="node-input-asset" style="width:70% !important;">
+                <option value="" selected>Select Asset</option>
                 <option value="device">device</option>
                 <option value="type">type</option>
                 <option value="group">group</option>
@@ -154,8 +114,8 @@ For example if Asset Id is set to `gw_{{eui}}`, it will have the value of `msg.e
 
 ### References
 
-- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
-- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
-- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
-- [Thinger.io]("https://thinger.io/") - the company behind the development
+- [Thinger Node-RED Plugin](https://marketplace.thinger.io/plugins/node-red) - full description of the plugin
+- [GitHub](https://github.com/thinger-io/Node-RED) - the nodes github repository
+- [npm](https://www.npmjs.com/package/node-red-contrib-thinger) - the nodes npm repository
+- [Thinger.io](https://thinger.io/) - the company behind the development
 </script>

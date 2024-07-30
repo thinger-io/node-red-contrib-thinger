@@ -32,12 +32,19 @@ class ThingerAssets {
     }
 
     request() {
+
+        // Set the project v
+        let filter = "";
+        const node = RED.nodes.node(this.node_id);
+        let project = ThingerUtils.getNodeRedThingerEnvVar(node, "THINGER_PROJECT");
+        if ( project !== undefined ) filter = `&project=${project}`;
+
         if ( this._url.includes('{') ) return Promise.resolve(); // When using entry message placholders
 
         if (this._url.includes('?'))
-            return $.getJSON(`${this._url}&node_id=${this.node_id}&svr_id=${this.svr_id}`);
+            return $.getJSON(`${this._url}&node_id=${this.node_id}&svr_id=${this.svr_id}${filter}`);
         else
-            return $.getJSON(`${this._url}?node_id=${this.node_id}&svr_id=${this.svr_id}`);
+            return $.getJSON(`${this._url}?node_id=${this.node_id}&svr_id=${this.svr_id}${filter}`);
     }
 
 }
@@ -118,49 +125,31 @@ class ThingerDevices extends ThingerAssets {
         return this.getDevices();
     }
 
-    async getDeviceResources(id) {
-        const device = this._devices.find(e=>e.id === id);
-        if (device !== undefined) {
-            return device.getResources();
-        }
-        return Promise.resolve([]);
+}
+
+class ThingerHTTPDevices extends ThingerDevices {
+
+    constructor(name,node_id,svr_id="") {
+        super(name,node_id,svr_id);
     }
 
-    async getDeviceInputResources(id) {
-        const device = this._devices.find(e=>e.id === id);
-        if (device !== undefined) {
-            return device.getInputResources();
-        }
-        return Promise.resolve([]);
-    }
-
-    async getDeviceOutputResources(id) {
-        const device = this._devices.find(e=>e.id === id);
-        if (device !== undefined) {
-            return device.getOutputResources();
-        }
-        return Promise.resolve([]);
-    }
-
-    async getDeviceInputOutputResources(id) {
-        const device = this._devices.find(e=>e.id === id);
-        if (device !== undefined) {
-            return device.getInputOutputResources();
-        }
-        return Promise.resolve([]);
-    }
-
-    async getHTTPDevices() {
-        let httpDevices = [];
-        return this.getDevices().then(function(data) {
+    async getDevices() {
+        this._httpDevices = [];
+        const self = this;
+        return super.getDevices().then(function(data) {
             for (let i in data) {
                 if (data[i].isHTTP()) {
-                    httpDevices.push(data[i]);
+                    self._httpDevices.push(data[i]);
                 }
             }
-            return httpDevices;
+            return self._httpDevices;
         });
     }
+
+    async getAssets() {
+        return this.getDevices();
+    }
+
 }
 
 class ThingerDevice extends ThingerAsset {
@@ -183,7 +172,7 @@ class ThingerDevice extends ThingerAsset {
         if ( this.id.includes('{') )
             return Promise.resolve([]); // When using entry message placholders
         else
-          return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/resources?node_id=${this.node_id}&svr_id=${this.svr_id ? this.svr_id : ""}`).
+          return $.getJSON(`${this.#_url}/${this.type}s/${this.id}/resources/api?node_id=${this.node_id}&svr_id=${this.svr_id ? this.svr_id : ""}`).
           then(function(data) {
             for (let i in data) {
                 self._resources.push(
@@ -309,22 +298,6 @@ class ThingerBuckets extends ThingerAssets {
 
     async getAssets() {
         return this.getBuckets();
-    }
-
-    getBucketTagsName(id) {
-      const bucket = this._buckets.find(e=>e.id === id);
-      if (bucket !== undefined) {
-        return bucket.getTagsName();
-      }
-      return [];
-    }
-
-    async getBucketTagsValue(id, tag) {
-      const bucket = this._buckets.find(e=>e.id === id);
-      if (bucket !== undefined) {
-        return bucket.getTagValues(tag);
-      }
-      return Promise.resolve([]);
     }
 
 }
@@ -646,10 +619,6 @@ class ThingerFile {
         this.name = type; // using type for show options in DOM
     }
 
-    isDirectory() {
-        return this.name === "directory" ? true : false;
-    }
-
 }
 
 class ThingerAlarmRules extends ThingerAssets {
@@ -799,6 +768,7 @@ const assetClass = new Map([
     ['rules', ThingerAlarmRules], ['rule', ThingerAlarmRule],
     ['buckets', ThingerBuckets], ['bucket', ThingerBucket],
     ['devices', ThingerDevices], ['device', ThingerDevice],
+    ['httpdevices', ThingerHTTPDevices],
     ['types', ThingerTypes], ['type', ThingerType],
     ['assetTypes', ThingerTypes], ['assetType', ThingerType],
     ['groups', ThingerGroups], ['group', ThingerGroup],
