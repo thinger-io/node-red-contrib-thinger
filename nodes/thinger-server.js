@@ -84,26 +84,21 @@ module.exports = function(RED) {
             let wss = new WebSocket(url);
 
             wss.on('error', function(e){
-                caller.status({fill:"red", shape:"dot", text: 'websocket error'});
                 caller.error(e && e.message ? e.message : "websocket error");
                 if(on_error) on_error(e);
             });
 
             wss.on('open', function open() {
-                caller.status({fill:"green", shape:"dot", text: 'connected'});
                 if(on_open) on_open();
             });
 
             wss.on('message', function incoming(data) {
                 // parse incoming data
                 let payload = JSON.parse(data);
-                caller.status({fill:"blue",shape:"dot",text:"connected"});
                 if(on_message) on_message(payload);
-                caller.status({fill:"green",shape:"dot",text:"connected"});
             });
 
             wss.on('close', function close() {
-                caller.status({fill:"red", shape:"dot", text: 'disconnected'});
                 if(on_close) on_close();
             });
 
@@ -111,9 +106,9 @@ module.exports = function(RED) {
         };
 
         // function used by all nodes
-        node.request = function(caller, url, method, data) {
+        node.request = function(caller, url, method, data, external = false) {
             if (typeof caller === 'undefined') caller = node;
-            return ThingerRequest.request(url, method, data)
+            return ThingerRequest.request(url, method, data, external)
               .then(res => {
                   let body = data;
                   if (typeof data !== 'undefined') {
@@ -383,10 +378,6 @@ module.exports = function(RED) {
 
     // API Endpoints
     RED.httpNode.get("/assets/:asset", async function(req,res) {
-        let filter = "";
-        if (req.query.name) {
-            filter = `name=${req.query.name}`;
-        }
 
         const node = RED.nodes.getNode(req.query.node_id);
 
@@ -399,21 +390,28 @@ module.exports = function(RED) {
         if (req.query.svr_id === "_ADD_") return res.json({});
 
         const server = RED.nodes.getNode(req.query.svr_id);
+        if ( !server ) return res.json({});
+
+        let filter = "";
+        if (req.query.name) {
+            filter = `name=${req.query.name}`;
+        }
+        // Get the project from the flow or group
+        if ( req.query.project ) {
+            filter = `project=${req.query.project}&${filter}`;
+        }
 
         try {
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/${req.params.asset}?${filter}`;
             res.json((await server.request(server, url, 'GET')).payload);
         } catch(err) {
             res.sendStatus(500);
-            server.error(`assets.failed ${err.toString()}`);
+            if ( server )
+                server.error(`assets.failed ${err.toString()}`);
         }
     });
 
     RED.httpNode.get("/assets/:category/:asset", async function(req,res) {
-        let filter = "";
-        if (req.query.name) {
-            filter = `name=${req.query.name}`;
-        }
 
         const node = RED.nodes.getNode(req.query.node_id);
 
@@ -426,9 +424,19 @@ module.exports = function(RED) {
         if (req.query.svr_id === "_ADD_") return res.json({});
 
         const server = RED.nodes.getNode(req.query.svr_id);
+        if ( !server ) return res.json({});
+
+        let filter = "";
+        if (req.query.name) {
+            filter = `name=${req.query.name}`;
+        }
+        // Get the project from the flow or group
+        if ( req.query.project ) {
+            filter = `project=${req.query.project}&${filter}`;
+        }
 
         try {
-            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/${req.params.category}/${req.params.asset}?${filter}`;
+            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/${req.params.category}/${req.params.asset}?${filter}}`;
             res.json((await server.request(server, url, 'GET')).payload);
         } catch(err) {
             res.sendStatus(500);
@@ -438,12 +446,7 @@ module.exports = function(RED) {
 
     RED.httpNode.get("/assets/:asset/:asset_id/:properties", async function(req,res) {
 
-        const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
-
-        let filter = "";
-        if (req.query.name) {
-            filter = "name="+req.query.name;
-        }
+        const apiVersion = (req.params.asset === "devices" ? "v3" : "v1");
 
         const node = RED.nodes.getNode(req.query.node_id);
 
@@ -456,6 +459,16 @@ module.exports = function(RED) {
         if (req.query.svr_id === "_ADD_") return res.json({});
 
         const server = RED.nodes.getNode(req.query.svr_id);
+        if ( !server ) return res.json({});
+
+        let filter = "";
+        if (req.query.name) {
+            filter = "name="+req.query.name;
+        }
+        // Get the project from the flow or group
+        if ( req.query.project ) {
+            filter = `project=${req.query.project}&${filter}`;
+        }
 
         try {
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${req.params.asset}/${req.params.asset_id}/${req.params.properties}?${filter}`;
@@ -468,12 +481,7 @@ module.exports = function(RED) {
 
     RED.httpNode.get("/assets/:asset/:asset_id/:properties/:property_id", async function(req,res) {
 
-        const apiVersion = (req.params.asset == "devices" ? "v3" : "v1");
-
-        let filter = "";
-        if (req.query.name) {
-            filter = "name="+req.query.name;
-        }
+        const apiVersion = (req.params.asset === "devices" ? "v3" : "v1");
 
         const node = RED.nodes.getNode(req.query.node_id);
 
@@ -486,6 +494,17 @@ module.exports = function(RED) {
         if (req.query.svr_id === "_ADD_") return res.json({});
 
         const server = RED.nodes.getNode(req.query.svr_id);
+        if ( !server ) return res.json({});
+
+        let filter = "";
+        if (req.query.name) {
+            filter = "name="+req.query.name;
+        }
+        // Get the project from the flow or group
+        if ( req.query.project ) {
+            filter = `project=${req.query.project}&${filter}`;
+        }
+
 
         try {
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${req.params.asset}/${req.params.asset_id}/${req.params.properties}/${req.params.property_id}?${filter}`;
@@ -507,6 +526,7 @@ module.exports = function(RED) {
         if (req.query.svr_id === "_ADD_") return res.json({});
 
         const server = RED.nodes.getNode(req.query.svr_id);
+        if ( !server ) return res.json({});
 
         // if server is null
         if ( !server ) {

@@ -38,7 +38,7 @@
         inputLabels: "event",
         align: 'left',
         label: function() {
-            return this.name || (this.bucket ? this.bucket : "bucket create");
+            return this.name || (this.bucket ? `${this.bucket} create` : "bucket create");
         },
         paletteLabel: function() {
             return "bucket create";
@@ -56,11 +56,11 @@
                 }
                 firstTime = false;
 
-                if ($(this).val() == "device") {
+                if ($(this).val() === "device") {
                     $(".node-row-device").show();
                     $(".node-row-resource").show();
                     $(".node-row-update").show();
-                } else if ($(this).val() == "mqtt") {
+                } else if ($(this).val() === "mqtt") {
                     $(".node-row-topic").show();
                 }
             });
@@ -75,7 +75,7 @@
               types:["json"]
             })
 
-           $("#node-input-update").change(function() {
+            $("#node-input-update").change(function() {
                 if ($(this).val() === "interval") {
                     $("#node-input-intervalValue").show();
                     $("#node-input-intervalUnits").show();
@@ -91,13 +91,13 @@
             });
 
             // Load values into fields
-            if ($("#node-input-source").val() == "device") {
+            if ($("#node-input-source").val() === "device") {
                 $("#node-input-device").val(this.extraSource);
                 if (this.interval) {
                     $("#node-input-intervalValue").val(this.interval.slice(0,-1));
                     $("#node-input-intervalUnits").val(this.interval.slice(-1));
                 }
-            } else if ($("#node-input-source").val() == "mqtt") {
+            } else if ($("#node-input-source").val() === "mqtt") {
                 $("#node-input-topic").val(this.extraSource);
             }
             if (this.enabled === "") {
@@ -106,28 +106,18 @@
 
             // Register focus handlers (options select)
             const optionsFields = ["device","assetType","assetGroup","product"];
-            ThingerDOM.registerFocusHandler(optionsFields, node_id);
+            ThingerDOM.registerFocusHandler(node_id, optionsFields);
 
-            $("#node-input-resource").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "resource";
-                const resource = $(this).val();
-                const device = $("#node-input-device").val()
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let devices = new ThingerDevices(device,node_id,svr_id);
-                devices.getDevices().then(function() {
-                    devices.getDeviceOutputResources(device).then(function(data) {
-                      ThingerDOM.showOptions(field,data,resource);
-                    });
-                });
-            })
+            $("#node-input-device").change(function() {
+                $("#node-input-resource").val("");
+                ThingerDOM.registerGenericFocusHandler(node_id, "resource", "device", $(this).val(), undefined, "output");
+            });
 
         },
         oneditsave: function() {
-            if ($("#node-input-source").val() == "device") {
+            if ($("#node-input-source").val() === "device") {
                 this.extraSource = $("#node-input-device").val();
-                if ($("#node-input-update").val() == "interval") {
+                if ($("#node-input-update").val() === "interval") {
                     this.interval = $("#node-input-intervalValue").val()+$("#node-input-intervalUnits").val();
                 } else {
                     this.interval = "";
@@ -136,7 +126,7 @@
                 this.extraSource = "";
             }
 
-            if ($("#node-input-source").val()  == "mqtt") {
+            if ($("#node-input-source").val()  === "mqtt") {
                 this.extraSource = $("#node-input-topic").val();
             }
         }
@@ -175,14 +165,14 @@
 
     <div class="form-row">
         <label for="node-input-tags"><i class="fa fa-tag"></i> Data tags</label>
-        <input type="text" id="node-input-tags" placeholder="Type tags..." style="width:70%; !important">
+        <input type="text" id="node-input-tags" placeholder="Type tags..." style="width:70% !important;">
     </div>
 
     <div class="node-row-source">
         <div class="form-row">
             <label for="node-input-source"><i class="fa fa-folder-open"></i> Data Source</label>
-            <select id="node-input-source" style="width:70%; !important">
-                <option value="" default>Select Data Source</option>
+            <select id="node-input-source" style="width:70% !important;">
+                <option value="" selected>Select Data Source</option>
                 <option value="device">From Device Resource</option>
                 <option value="write">From Device Write Call</option>
                 <option value="api">From API Request</option>
@@ -208,14 +198,14 @@
     <div class="node-row-update" style="display: none;">
         <div class="form-row">
             <label for="node-input-update"><i class="fa fa-folder-open"></i> Data Source</label>
-            <select id="node-input-update" style="width:36%; !important">
-                <option value="" default>Select Refresh Mode</option>
+            <select id="node-input-update" style="width:36% !important;">
+                <option value="" selected>Select Refresh Mode</option>
                 <option value="interval">Sampling Interval</option>
                 <option value="events">Stream by Device</option>
                 <option value="none">None</option>
             </select>
-            <input type="number" id="node-input-intervalValue" placeholder="Specify the value of the sampling interval" style="display: none; width:13%; !important" value=5>
-            <select id="node-input-intervalUnits" style="display: none; width:19%; !important">
+            <input type="number" id="node-input-intervalValue" placeholder="Specify the value of the sampling interval" style="display: none; width:13% !important;" value=5>
+            <select id="node-input-intervalUnits" style="display: none; width:19% !important;">
                 <option value="s">seconds</option>
                 <option value="m" selected>minutes</option>
                 <option value="h">hours</option>
@@ -251,7 +241,7 @@
 
     <div class="form-row">
         <label for="node-input-projects"><i class="fa fa-folder"></i> Projects</label>
-        <input type="text" id="node-input-projects" placeholder="Type projects..." style="width:70%; !important">
+        <input type="text" id="node-input-projects" placeholder="Type projects..." style="width:70% !important;">
     </div>
 
     <div class="form-row">
@@ -307,9 +297,9 @@ For example if Bucket Id is set to `gw_{{eui}}`, it will have the value of `msg.
 
 ### References
 
-- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
-- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
-- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
-- [Thinger.io]("https://thinger.io/") - the company behind the development
+- [Thinger Node-RED Plugin](https://marketplace.thinger.io/plugins/node-red) - full description of the plugin
+- [GitHub](https://github.com/thinger-io/Node-RED) - the nodes github repository
+- [npm](https://www.npmjs.com/package/node-red-contrib-thinger) - the nodes npm repository
+- [Thinger.io](https://thinger.io/) - the company behind the development
 </script>
 

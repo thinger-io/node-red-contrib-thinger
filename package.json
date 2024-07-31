@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-thinger",
-  "version": "1.7.6",
+  "version": "1.8.0-alpha.1",
   "description": "Node-Red library for Thinger.io Platform",
   "keywords": [
     "node-red",
@@ -15,19 +15,31 @@
     "type": "git",
     "url": "https://marketplace.thinger.io/plugins/node-red/"
   },
+  "scripts": {
+    "start": "cd ~/.node-red && npm install ~/Documents/repos/thinger/node-red/node-red-contrib-thinger && node-red",
+    "test": "mocha \"test/**/*_spec.js\""
+  },
   "dependencies": {
-    "ws": "8.16.0",
     "jsonwebtoken": "9.0.2",
-    "mustache": "4.2.0"
+    "mustache": "4.2.0",
+    "ws": "8.18.0"
+  },
+  "devDependencies": {
+    "mocha": "^10.7.0",
+    "nock": "^13.5.4",
+    "node-red": "^4.0.2",
+    "node-red-node-test-helper": "^0.3.4",
+    "sinon": "^18.0.0"
   },
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=16.0.0"
   },
   "node-red": {
-    "version": ">=2.0.0",
+    "version": ">=3.0.0",
     "nodes": {
       "asset-iterator": "nodes/asset-iterator.js",
       "bucket-create": "nodes/bucket-create.js",
+      "bucket-export": "nodes/bucket-export.js",
       "bucket-read": "nodes/bucket-read.js",
       "bucket-write": "nodes/bucket-write.js",
       "device-callback": "nodes/device-callback.js",

@@ -17,7 +17,7 @@
         outputs:1,
         inputLabels: "event",
         label: function() {
-            return this.name || ((this.storage && this.file) ? (this.storage + "/" + this.file) : "storage read");
+            return this.name || ((this.storage && this.file) ? (`${this.storage}/${this.file} read`) : "storage read");
         },
         paletteLabel: function() {
             return "storage read";
@@ -28,21 +28,11 @@
 
             // Register focus handlers (options select)
             const optionsFields = ["storage"];
-            ThingerDOM.registerFocusHandler(optionsFields, node_id);
+            ThingerDOM.registerFocusHandler(node_id, optionsFields);
 
-            $("#node-input-file").focus(function() {
-                if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
-
-                const field = "file";
-                const file = $(this).val();
-                const storage = $("#node-input-storage").val()
-                const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                let storages = new ThingerStorages(storage,node_id,svr_id);
-                storages.getStorages().then(function() {
-                    storages.getStorageFiles(storage).then((data) => {
-                        ThingerDOM.showOptions(field, data, file)
-                    });
-                });
+            $("#node-input-storage").change(function() {
+                $("#node-input-file").val("");
+                ThingerDOM.registerGenericFocusHandler(node_id, "file", "storage", $(this).val());
             });
 
             $("#node-input-file").change(function(e,obj) {
@@ -107,7 +97,7 @@
 
     <div class="form-row">
         <label for="node-input-data"><i class="fa fa-file-text"></i> Data</label>
-        <select id="node-input-data" style="width:30%; !important">
+        <select id="node-input-data" style="width:30% !important;">
             <option value="content" selected>file content</option>
             <option value="details">file details</option>
         </select>
@@ -126,14 +116,14 @@
     <div class="node-row-minDepth" style="display: none;">
         <div class="form-row">
             <label for="node-input-minDepth"><i class="fa fa-search-minus "></i> Min Depth</label>
-            <input type="number" id="node-input-minDepth" placeholder="Specify the value for the minimum depth " style="width:15%; !important" min=0>
+            <input type="number" id="node-input-minDepth" placeholder="Specify the value for the minimum depth " style="width:15% !important;" min=0>
         </div>
     </div>
 
     <div class="node-row-maxDepth" style="display: none;">
         <div class="form-row">
             <label for="node-input-maxDepth"><i class="fa fa-search-plus "></i> Max Depth</label>
-            <input type="number" id="node-input-maxDepth" placeholder="Specify the value for the maximum depth " style="width:15%; !important" min=-1>
+            <input type="number" id="node-input-maxDepth" placeholder="Specify the value for the maximum depth " style="width:15% !important;" min=-1>
         </div>
     </div>
 
@@ -151,7 +141,7 @@ Reads a file from a storage.
 
 : storage (string) : the id of the storage to read from.
 : *file* (string) : the file path or directory path of the storage to read.
-: *data* (string) : sets the data to retrieve, file content or file data.
+: *data* (string) : sets the data to retrieve, file content (content) or file data (details).
 : *recursive* (string) : allows the configuration of depth for recursiveness.
 : *min_depth* (string) : do not apply any tests or actions at levels less than.
 : *max_depth* (string) : descend at most levels of directories below the starting points.
@@ -179,8 +169,8 @@ For example if Storage is set to `gw_{{eui}}`, it will have the value of `msg.eu
 
 ### References
 
-- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
-- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
-- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
-- [Thinger.io]("https://thinger.io/") - the company behind the development
+- [Thinger Node-RED Plugin](https://marketplace.thinger.io/plugins/node-red) - full description of the plugin
+- [GitHub](https://github.com/thinger-io/Node-RED) - the nodes github repository
+- [npm](https://www.npmjs.com/package/node-red-contrib-thinger) - the nodes npm repository
+- [Thinger.io](https://thinger.io/) - the company behind the development
 </script>

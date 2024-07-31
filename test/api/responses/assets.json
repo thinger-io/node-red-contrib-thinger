@@ -1,0 +1,178 @@
+[
+  {
+    "asset": "brand",
+    "category": "brand",
+    "paths": {
+      "list": "v1/brands"
+    },
+    "role": "admin"
+  },
+  {
+    "asset": "domain",
+    "category": "domain",
+    "paths": {
+      "list": "v1/domains"
+    },
+    "role": "admin"
+  },
+  {
+    "asset": "host",
+    "category": "host",
+    "paths": {
+      "list": "v1/hosts"
+    },
+    "role": "admin"
+  },
+  {
+    "asset": "oauth_client",
+    "category": "oauth_client",
+    "paths": {
+      "list": "v1/oauth_clients"
+    },
+    "role": "admin"
+  },
+  {
+    "asset": "proxy",
+    "category": "proxy",
+    "paths": {
+      "list": "v1/proxies"
+    },
+    "role": "admin"
+  },
+  {
+    "asset": "user",
+    "category": "user",
+    "paths": {
+      "list": "v1/users"
+    },
+    "role": "admin"
+  },
+  {
+    "asset": "alarm_instance",
+    "category": "alarm",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/alarms/instances"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "alarm_rule",
+    "category": "alarm",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/alarms/rules"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "bucket",
+    "category": "bucket",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/buckets"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "claim",
+    "category": "claim",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/claims"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "dashboard",
+    "category": "dashboard",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/dashboards"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "device",
+    "category": "device",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/devices"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "endpoint",
+    "category": "endpoint",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/endpoints"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "group",
+    "category": "group",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/groups"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "plugin",
+    "category": "plugin",
+    "paths": {
+      "list": ""
+    },
+    "role": "user"
+  },
+  {
+    "asset": "product",
+    "category": "product",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/products"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "project",
+    "category": "project",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/projects"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "role",
+    "category": "role",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/roles"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "storage",
+    "category": "storage",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/storages"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "sync",
+    "category": "sync",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/syncs"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "token",
+    "category": "token",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/tokens"
+    },
+    "role": "user"
+  },
+  {
+    "asset": "type",
+    "category": "type",
+    "paths": {
+      "list": "v1/users/(?<user>[a-zA-Z0-9_-]{1,32})/types"
+    },
+    "role": "user"
+  }
+]

@@ -87,9 +87,7 @@
             $('#node-input-event').focus(function() {
                 if ($(".red-form-options").length && $(".red-form-options").prev()[0].id === $(this)[0].id) return;
 
-                const field = "event";
                 const asset = $("#node-input-asset").val();
-                const event = $(this).val();
 
                 // Show existing events
                 let filteredEvents = events.getAssetEvents(asset);
@@ -137,9 +135,8 @@
             $(".node-row-additional-field").each((index,element) => {
                 let input = element.children[0].children[1];
                 let id = input.id.split('-').pop();
-                let value = input.value;
 
-                this.filters[id] = value;
+                this.filters[id] = input.value;
             });
 
             // slowly remove old version properties
@@ -162,8 +159,8 @@
     <div class="node-row-asset">
         <div class="form-row">
             <label for="node-input-asset"><i class="fa fa-building"></i> Asset</label>
-            <select id="node-input-asset" style="width:70%; !important">
-                <option value="" default>Select Asset</option>
+            <select id="node-input-asset" style="width:70% !important;">
+                <option value="" selected>Select Asset</option>
             </select>
         </div>
     </div>
@@ -209,8 +206,8 @@ To match a device called <samp>esp_8266</samp>, some valid filters are <samp>.*8
 
 ### References
 
-- [Thinger Node-RED Plugin]("https://docs.thinger.io/plugins/node-red") - full description of the plugin
-- [GitHub]("https://github.com/thinger-io/Node-RED") - the nodes github repository
-- [npm]("https://www.npmjs.com/package/node-red-contrib-thinger") - the nodes npm repository
-- [Thinger.io]("https://thinger.io/") - the company behind the development
+- [Thinger Node-RED Plugin](https://marketplace.thinger.io/plugins/node-red) - full description of the plugin
+- [GitHub](https://github.com/thinger-io/Node-RED) - the nodes github repository
+- [npm](https://www.npmjs.com/package/node-red-contrib-thinger) - the nodes npm repository
+- [Thinger.io](https://thinger.io/) - the company behind the development
 </script>

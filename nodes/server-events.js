@@ -49,15 +49,19 @@ module.exports = function(RED) {
         }
 
         function on_open(){
+            node.status({fill:"green", shape:"dot", text: 'connected'});
             node.log("sending event subscription: " + JSON.stringify(subscription));
             wss.send(JSON.stringify(subscription));
         }
 
         function on_message(payload){
+            node.status({fill:"blue",shape:"dot",text:"connected"});
             node.send({payload: payload});
+            node.status({fill:"green",shape:"dot",text:"connected"});
         }
 
         function reconnect(){
+            node.status({fill:"red", shape:"dot", text: 'websocket error'});
             if(closing || timeout) return;
             timeout = setTimeout(function() {
                 node.log("trying to reconnect");
@@ -77,6 +81,7 @@ module.exports = function(RED) {
 
         // unregister listener on close
         this.on('close', function() {
+            node.status({fill:"red", shape:"dot", text: 'disconnected'});
             closing = true;
             clearTimeout(timeout);
             node.log("closing websocket connection");
