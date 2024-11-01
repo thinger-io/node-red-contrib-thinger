@@ -28,7 +28,7 @@ class ThingerDOM {
      */
     static registerGenericFocusHandler(node_id, field, assetType, assetId, editor, option = "") {
 
-        //  Remove previously set handlers or the will acumulate
+        //  Remove previously set handlers
         $(`#node-input-${field}`).off('focus');
 
         $(`#node-input-${field}`).focus(function() {
@@ -36,7 +36,7 @@ class ThingerDOM {
             const val = $(this).val();
             const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
 
-            if ( assetId !== undefined ) {
+            if ( assetId !== undefined && assetId !== "" ) {
 
                 // specific asset
                 let asset;
@@ -66,6 +66,8 @@ class ThingerDOM {
 
                 if (promise !== undefined) {
                     promise.then(function(data) {
+                        if ( data.hasOwnProperty("data") && data.data.length === 0 ) return;
+
                         ThingerDOM.showOptions(field, data, val);
                         if ( editor !== undefined ) {
                             $(`#node-input-${field}`).off('change');
@@ -76,7 +78,7 @@ class ThingerDOM {
                     });
                 }
 
-            } else {
+            } else if ( assetId !== "" ) {
 
                 // asset family
                 let assets = new (assetClass.get(`${option}${assetType}s`))(val, node_id, svr_id);

@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 
 - Transform operations in bucket read node
 
+### Fixed
+
+- Fields in node configuration modal not restored correctly
+
 ## [1.8.0] - 2024-07-30
 
 ### Added

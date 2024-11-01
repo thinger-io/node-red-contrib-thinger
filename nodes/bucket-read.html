@@ -102,6 +102,7 @@
             var aggregationType = this.aggregationType;
 
             $("#node-input-bucket").change(function() {
+                console.log("Change bucket");
 
                 $(".node-row-additional-field").remove();
 
@@ -112,18 +113,13 @@
                 buckets.getBuckets().then(function(data) {
                     if ( data.length === 0 ) return;
                     let bucket = data.find(e=>e.id === bucket_id);
-                    let tags = bucket.getTagsName();
+                    let tags = bucket.getTagsName() || [];
                     tags.forEach(tag => {
                         // Create fields
                         ThingerDOM.addInputField(`tag_${tag}`, `Select or search a ${tag}...`, "filter", "tag");
-                        // Set values from config
-                        if ( _tags && _tags !== "" ) {
-                            for (let key in _tags) {
-                                $(`#node-input-${key}`).val(_tags[key]);
-                            }
-                            _tags = {};
+                        if ( typeof _tags[`tag_${tag}`] !== 'undefined' ) {
+                            $(`#node-input-tag_${tag}`).val(_tags[`tag_${tag}`]);
                         }
-
                         // Show tag options
                         ThingerDOM.registerGenericFocusHandler(node_id, `tag_${tag}`, "bucket", bucket);
                   });
