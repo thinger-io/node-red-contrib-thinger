@@ -66,6 +66,7 @@
             limit: {value: ""},
             aggregation: {value: ""}, //1m, 5h, 1w
             aggregationType: {value: ""}, // mean, median, 
+            transform: {value: ""},
             sort: {value: ""},
             timezone: {value: Intl.DateTimeFormat().resolvedOptions().timeZone},
             server: {type:"thinger-server", required:true}
@@ -329,6 +330,23 @@
     </div>
 
     <div class="form-row">
+        <label for="node-input-transform"><i class="fa fa-bar-chart"></i> Transform</label>
+        <select id="node-input-transform" style="width:70% !important;">
+            <option value="" selected>None</option>
+            <option value="abs">abs</option>
+            <option value="ceil">ceil</option>
+            <option value="cumulative_sum">cumulative_sum</option>
+            <option value="derivative">derivative</option>
+            <option value="difference">difference</option>
+            <option value="elapsed">elapsed</option>
+            <option value="floor">floor</option>
+            <option value="round">round</option>
+            <option value="non_negative_derivative">non_negative_derivative</option>
+            <option value="non_negative_difference">non_negative_difference</option>
+        </select>
+    </div>
+
+    <div class="form-row">
         <label for="node-input-sort"><i class="fa fa-sort"></i> Sort</label>
         <select id="node-input-sort" style="width: 70% !important;">
             <option value="asc" selected>ascending</option>
@@ -366,6 +384,7 @@ Reads data from a data bucket.
 : sort (string) : the sorting order for the retrieved items (<samp>asc</samp> or <samp>desc</samp>).
 : *aggregation* (string) : the value for aggregating the retrieved data (<samp>1d</samp> for 1 day and so on).
 : *aggregation_type* (string) : the type of aggregation to apply over the data (<samp>median</samp>, <samp>mean</samp>, <samp>max</samp>, <samp>min</samp>, <samp>count</samp> or <samp>sum</samp>).
+: *transform* (string) : the type of data transformation to apply to the resulting data(<samp>abs</samp>, <samp>ceil</samp>, <samp>cumulative_sum</samp>, <samp>derivative</samp>, <samp>difference</samp>, <samp>elapsed</samp>, <samp>floor</samp>, <samp>round</samp>, <samp>non_negative_derivative</samp> or <samp>non_negative_difference</samp>).
 : *timezone* (string) : the timezone string to query the backend, default is UTC.
 
 ### Outputs
