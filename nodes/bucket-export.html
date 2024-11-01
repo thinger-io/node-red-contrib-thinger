@@ -78,6 +78,7 @@
             loadDateField(this.maxTs,"end");
 
             /* TODO: uncomment when bucket export allows tags
+            // Might need a setTimeout, see other nodes with registerGenericFocusHandler
             $("#node-input-bucket").change(function() {
 
                 $(".node-row-additional-field").remove();
@@ -139,9 +140,6 @@
             });
 
             $("#node-input-callback").change(function () {
-                //  Remove previously set handlers or the will acumulate
-                $('#node-input-callbackId').off('focus');
-
                 if ( $(this).val() ) {
                     $(".node-row-callbackId").show();
                     ThingerDOM.changeFieldAppearance($(this).val(),"callbackId");

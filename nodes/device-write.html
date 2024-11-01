@@ -51,10 +51,14 @@
             ThingerDOM.registerFocusHandler(node_id, optionsFields);
 
 
-            $("#node-input-device").change(function() {
-                $("#node-input-resource").val("");
-                ThingerDOM.registerGenericFocusHandler(node_id, "resource", "device", $(this).val(), undefined, "input");
+            // Register event after inputs have initialized
+            setTimeout(() => {
+                $("#node-input-device").change(function () {
+                    $("#node-input-resource").val("");
+                    ThingerDOM.registerGenericFocusHandler(node_id, "resource", "device", $(this).val(), undefined, "input");
+                });
             });
+            ThingerDOM.registerGenericFocusHandler(node_id, "resource", "device", this.device, undefined, "input");
 
         },
         oneditsave: function() {
