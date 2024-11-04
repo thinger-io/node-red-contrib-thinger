@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.9.0] - 2024-11-01
+## [1.9.0] - 2024-11-04
 
 ### Added
 
@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Fields in node configuration modal not restored correctly
+- Thinger Server node always showing default environment variable for token
 
 ## [1.8.0] - 2024-07-30
 
