@@ -30,37 +30,41 @@
             const optionsFields = ["storage"];
             ThingerDOM.registerFocusHandler(node_id, optionsFields);
 
-            $("#node-input-storage").change(function() {
-                $("#node-input-file").val("");
-                ThingerDOM.registerGenericFocusHandler(node_id, "file", "storage", $(this).val());
+            // Register events after inputs have initialized
+            setTimeout(() => {
+                $("#node-input-storage").change(function () {
+                    $("#node-input-file").val("");
+                    ThingerDOM.registerGenericFocusHandler(node_id, "file", "storage", $(this).val());
+                });
+
+                $("#node-input-file").change(function (e, obj) {
+
+                    if (typeof obj !== "undefined" && obj.textContent !== "") {
+                        if (obj.textContent.endsWith('directory')) {
+                            $(".node-row-recursive").show();
+                            $(".node-row-recursive").trigger("change");
+                        } else {
+                            $(".node-row-recursive").hide();
+                            $("#node-input-recursive").prop("checked", false);
+                            $("#node-input-recursive").trigger("change");
+                        }
+                    } else if ($(this).val() !== "") {
+
+                        const file = $(this).val();
+                        const storage = $("#node-input-storage").val()
+                        const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
+                        let storages = new ThingerStorages(storage, node_id, svr_id);
+                        storages.getStorages().then(function () {
+                            storages.getStorageFiles(storage).then((data) => {
+                                const fileDetails = data.find(e => e.id === file);
+                                if (typeof fileDetails !== 'undefined')
+                                    $("#node-input-file").trigger("change", {"textContent": fileDetails.name});
+                            });
+                        });
+                    }
+                });
             });
-
-            $("#node-input-file").change(function(e,obj) {
-
-                if (typeof obj !== "undefined" && obj.textContent !== "") {
-                  if (obj.textContent.endsWith('directory')) {
-                    $(".node-row-recursive").show();
-                    $(".node-row-recursive").trigger("change");
-                  } else {
-                    $(".node-row-recursive").hide();
-                    $("#node-input-recursive").prop("checked", false);
-                    $("#node-input-recursive").trigger("change");
-                  }
-                } else if ($(this).val() !== "") {
-
-                    const file = $(this).val();
-                    const storage = $("#node-input-storage").val()
-                    const svr_id = $('#node-input-server').find(":selected")[0].value; // extracted each time to account for changes of the server field
-                    let storages = new ThingerStorages(storage,node_id,svr_id);
-                    storages.getStorages().then(function() {
-                      storages.getStorageFiles(storage).then((data) => {
-                          const fileDetails = data.find(e=>e.id === file);
-                          if ( typeof fileDetails !== 'undefined' )
-                            $("#node-input-file").trigger("change",{"textContent":fileDetails.name});
-                      });
-                    });
-                }
-            });
+            ThingerDOM.registerGenericFocusHandler(node_id, "file", "storage", this.storage);
 
             $("#node-input-recursive").change(function() {
                 if ($(this).is(':checked')) {

@@ -108,10 +108,15 @@
             const optionsFields = ["device","assetType","assetGroup","product"];
             ThingerDOM.registerFocusHandler(node_id, optionsFields);
 
-            $("#node-input-device").change(function() {
-                $("#node-input-resource").val("");
-                ThingerDOM.registerGenericFocusHandler(node_id, "resource", "device", $(this).val(), undefined, "output");
+            setTimeout(() => {
+                $("#node-input-device").change(function () {
+                    $("#node-input-resource").val("");
+                    ThingerDOM.registerGenericFocusHandler(node_id, "resource", "device", $(this).val(), undefined, "output");
+                });
             });
+            if ( this.source === "device" ) {
+                ThingerDOM.registerGenericFocusHandler(node_id, "resource", "device", this.extraSource, undefined, "output");
+            }
 
         },
         oneditsave: function() {

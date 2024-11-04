@@ -123,6 +123,7 @@ module.exports = function(RED) {
             queryParameters.set('items',config.items || msg.items);
             queryParameters.set('agg',config.aggregation || msg.aggregation);
             queryParameters.set('agg_type',config.aggregationType || msg.aggregation_type);
+            queryParameters.set('transform',config.transform || msg.transform);
             queryParameters.set('sort',config.sort || msg.sort);
             queryParameters.set('tz', msg.timezone || config.timezone);
             for ( let key in tags ) {

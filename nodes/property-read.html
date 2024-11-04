@@ -25,27 +25,35 @@
 
             const node_id = this.id;
 
-            $("#node-input-asset").change(function () {
+            // Register events after inputs have initialized
+            setTimeout(() => {
+                $("#node-input-asset").change(function () {
 
-                $("#node-input-assetId").val("");
-                $("#node-input-property").val("");
+                    $("#node-input-assetId").val("");
+                    $("#node-input-property").val("");
 
-                if ( $(this).val() ) {
-                    ThingerDOM.changeFieldAppearance($(this).val(), "assetId");
-                    ThingerDOM.registerGenericFocusHandler(node_id, "assetId", $(this).val());
-                }
+                    if ($(this).val()) {
+                        ThingerDOM.changeFieldAppearance($(this).val(), "assetId");
+                        ThingerDOM.registerGenericFocusHandler(node_id, "assetId", $(this).val());
+                    }
 
+                });
+
+                $("#node-input-assetId").change(function () {
+
+                    $("#node-input-property").val("");
+
+                    if ( $(this).val() ) {
+                        ThingerDOM.registerGenericFocusHandler(node_id, "property", $("#node-input-asset").val(), $(this).val());
+                    }
+
+                });
             });
-
-            $("#node-input-assetId").change(function () {
-
-                $("#node-input-property").val("");
-
-                if ( $(this).val() ) {
-                    ThingerDOM.registerGenericFocusHandler(node_id, "property", $("#node-input-asset").val(), $(this).val());
-                }
-
-            });
+            if ( this.asset ) {
+                ThingerDOM.changeFieldAppearance(this.asset, "assetId");
+                ThingerDOM.registerGenericFocusHandler(node_id, "assetId", this.asset);
+                ThingerDOM.registerGenericFocusHandler(node_id, "property", this.asset, this.assetId);
+            }
 
         }
     });

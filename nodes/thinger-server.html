@@ -18,7 +18,8 @@
             // Set default initial values for the host and token
             const node = this;
             if ( node.host === "" || typeof node.host === "undefined") $("#node-config-input-host").val("${THINGER_HOST}");
-            if ( !node.credentials.has_token ) $("#node-config-input-token").val("${THINGER_TOKEN_NODE_RED_PLUGIN}");
+            //if ( !node.credentials.has_token ) $("#node-config-input-token").val("${THINGER_TOKEN_NODE_RED_PLUGIN}");
+            if ( !node.credentials.token ) $("#node-config-input-token").val("${THINGER_TOKEN_NODE_RED_PLUGIN}");
         },
         onpaletteadd: function() {
             // Load static scripts, also needed for stylesheets

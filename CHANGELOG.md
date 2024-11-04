@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.0] - 2024-11-04
+
+### Added
+
+- Transform operations in bucket read node
+
+### Fixed
+
+- Fields in node configuration modal not restored correctly
+- Thinger Server node always showing default environment variable for token
+
 ## [1.8.0] - 2024-07-30
 
 ### Added
@@ -347,6 +358,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.9.0]: https://github.com/thinger-io/Node-RED/compare/1.8.0...1.9.0
 [1.8.0]: https://github.com/thinger-io/Node-RED/compare/1.7.6...1.8.0
 [1.7.6]: https://github.com/thinger-io/Node-RED/compare/1.7.5...1.7.6
 [1.7.5]: https://github.com/thinger-io/Node-RED/compare/1.7.4...1.7.5
