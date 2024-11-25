@@ -68,6 +68,7 @@
             aggregationType: {value: ""}, // mean, median, 
             transform: {value: ""},
             sort: {value: ""},
+            project: {value: ""},
             timezone: {value: Intl.DateTimeFormat().resolvedOptions().timeZone},
             server: {type:"thinger-server", required:true}
         },
@@ -179,7 +180,7 @@
             });
 
             // Register focus handlers (options select)
-            const optionsFields = ["bucket"];
+            const optionsFields = ["bucket", "project"];
             ThingerDOM.registerFocusHandler(node_id, optionsFields);
 
         },
@@ -350,6 +351,13 @@
         </select>
     </div>
 
+    <div class="node-row-project">
+        <div class="form-row">
+            <label for="node-input-project"><i class="fa fa-folder"></i> Project</label>
+            <input type="text" id="node-input-project" placeholder="Select Project...">
+        </div>
+    </div>
+
     <div class="form-row">
         <label for="node-input-timezone"><i class="fa fa-globe"></i> Timezone</label>
         <select id="node-input-timezone" style="width: 70% !important;">
@@ -382,6 +390,7 @@ Reads data from a data bucket.
 : *aggregation_type* (string) : the type of aggregation to apply over the data (<samp>median</samp>, <samp>mean</samp>, <samp>max</samp>, <samp>min</samp>, <samp>count</samp> or <samp>sum</samp>).
 : *transform* (string) : the type of data transformation to apply to the resulting data(<samp>abs</samp>, <samp>ceil</samp>, <samp>cumulative_sum</samp>, <samp>derivative</samp>, <samp>difference</samp>, <samp>elapsed</samp>, <samp>floor</samp>, <samp>round</samp>, <samp>non_negative_derivative</samp> or <samp>non_negative_difference</samp>).
 : *timezone* (string) : the timezone string to query the backend, default is UTC.
+: *project* (string) : the project to filter the data based on the device tag.
 
 ### Outputs
 

@@ -125,6 +125,7 @@ module.exports = function(RED) {
             queryParameters.set('agg_type',config.aggregationType || msg.aggregation_type);
             queryParameters.set('transform',config.transform || msg.transform);
             queryParameters.set('sort',config.sort || msg.sort);
+            queryParameters.set('project',config.project || msg.project);
             queryParameters.set('tz', msg.timezone || config.timezone);
             for ( let key in tags ) {
               let array = [];
