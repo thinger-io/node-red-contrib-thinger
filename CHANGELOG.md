@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.1] - 2025-02-25
+
+### Fixed
+
+- Exception when checking if values are templates when value is not string
+
 ## [1.9.0] - 2024-11-04
 
 ### Added
@@ -358,6 +364,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.9.1]: https://github.com/thinger-io/Node-RED/compare/1.9.0...1.9.1
 [1.9.0]: https://github.com/thinger-io/Node-RED/compare/1.8.0...1.9.0
 [1.8.0]: https://github.com/thinger-io/Node-RED/compare/1.7.6...1.8.0
 [1.7.6]: https://github.com/thinger-io/Node-RED/compare/1.7.5...1.7.6
