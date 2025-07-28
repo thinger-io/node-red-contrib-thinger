@@ -1,98 +1,107 @@
-module.exports = function(RED) {
+module.exports = function (RED) {
+  "use strict";
 
-    "use strict";
+  const Utils = require("../lib/utils/utils.js");
 
-    const Utils = require('../lib/utils/utils.js');
+  function PropertyWriteNode(config) {
+    RED.nodes.createNode(this, config);
 
-    function PropertyWriteNode(config) {
+    // get node
+    const node = this;
 
-        RED.nodes.createNode(this, config);
+    // get server configuration
+    const server = RED.nodes.getNode(config.server);
 
-        // get node
-        const node = this;
+    // call property read on input
+    node.on("input", async function (msg, send, done) {
+      try {
+        let asset = (config.asset || msg.asset) + "s";
 
-        // get server configuration
-        const server = RED.nodes.getNode(config.server);
+        let assetId = config.assetId || msg.asset_id;
+        assetId = Utils.mustacheRender(assetId, msg);
 
-        // call property read on input
-        node.on("input",async function(msg, send, done) {
-            let asset = (config.asset || msg.asset)+"s";
+        let property = config.property || msg.property;
+        property = Utils.mustacheRender(property, msg);
 
-            let assetId = config.assetId || msg.asset_id;
-            assetId = Utils.mustacheRender(assetId, msg);
+        let data = Utils.transformValue(config.value);
+        if (data === null) {
+          if (typeof msg.payload !== "undefined") {
+            data = Utils.transformValue(msg.payload);
+          } else if (typeof msg.value !== "undefined") {
+            data = Utils.transformValue(msg.value);
+          }
+        }
+        data = Utils.mustacheRender(data, msg);
 
-            let property = config.property || msg.property;
-            property = Utils.mustacheRender(property, msg);
+        const apiVersion = asset === "devices" ? "v3" : "v1";
+        let url = `${server.config.ssl ? "https://" : "http://"}${
+          server.config.host
+        }/${apiVersion}/users/${
+          server.config.username
+        }/${asset}/${assetId}/properties`;
 
-            let data = Utils.transformValue(config.value);
-            if ( data === null ) {
-                if ( typeof msg.payload !== 'undefined' ) {
-                    data = Utils.transformValue(msg.payload);
-                }
-                else if ( typeof msg.value !== 'undefined' ) {
-                    data = Utils.transformValue(msg.value);
-                }
+        if (typeof server.request === "function") {
+          // TODO: check if device exists? if not it returns a 500
+
+          // Check if property exists
+          let exists = false;
+          let res;
+
+          try {
+            res = await server.request(node, `${url}`, "GET");
+            for (let i in res.payload) {
+              if (res.payload[i].property === property) {
+                exists = true;
+                break;
+              }
             }
-            data = Utils.mustacheRender(data, msg);
 
-            const apiVersion = (asset === "devices" ? "v3" : "v1");
-            let url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${asset}/${assetId}/properties`;
+            if (
+              typeof data === "undefined" ||
+              data === null ||
+              (typeof data !== "object" && data.length === 0)
+            )
+              throw new Error("Property value cannot be empty");
 
-            if (typeof server.request === "function") {
-                // TODO: check if device exists? if not it returns a 500
+            data = {
+              property: property,
+              value: typeof data === "object" ? data : JSON.parse(data),
+            };
 
-                // Check if property exists
-                let exists = false;
-                let res;
+            // Update if exist or create it
+            let method;
+            if (exists) {
+              method = "PUT";
+              url = `${url}/${property}`;
+              delete data.property;
+            } else method = "POST";
 
-                try {
-                    res = await server.request(node,`${url}`, 'GET');
-                    for (let i in res.payload) {
-                        if (res.payload[i].property === property) {
-                            exists = true;
-                            break;
-                        }
-                    }
+            res = await server.request(node, url, method, data);
+          } catch (err) {
+            delete err.stack;
+            msg.payload = {};
+            msg.payload.asset = asset;
+            msg.payload.asset_id = assetId;
+            msg.payload.property = property;
+            msg.payload.data = data;
 
-                    if (typeof data === 'undefined' || data === null || (typeof data !== 'object' && data.length === 0))
-                        throw new Error("Property value cannot be empty");
+            if (err.hasOwnProperty("status")) msg.payload.status = err.status;
 
-                    data = {property: property, value: (typeof data === 'object') ? data : JSON.parse(data)};
+            done(err);
+            return;
+          }
 
-                    // Update if exist or create it
-                    let method;
-                    if ( exists ) {
-                      method = 'PUT';
-                      url = `${url}/${property}`;
-                      delete data.property;
-                    } else
-                      method = 'POST';
+          msg.payload = res.payload;
+          send(msg);
+          done();
+        } else done("Check Thinger Server Configuration");
+      } catch (err) {
+        delete err.stack;
+        msg.payload = {};
+        done(err);
+      }
+    });
+  }
 
-                    res = await server.request(node, url, method, data);
-                } catch (err) {
-                    delete err.stack;
-                    msg.payload = {};
-                    msg.payload.asset = asset;
-                    msg.payload.asset_id = assetId;
-                    msg.payload.property = property;
-                    msg.payload.data = data;
-
-                    if ( err.hasOwnProperty("status") )
-                      msg.payload.status = err.status;
-
-                    done(err);
-                    return;
-                }
-
-                msg.payload = res.payload;
-                send(msg);
-                done();
-            }
-            else
-              done("Check Thinger Server Configuration");
-        });
-    }
-
-    RED.nodes.registerType("property-write", PropertyWriteNode);
-
+  RED.nodes.registerType("property-write", PropertyWriteNode);
 };

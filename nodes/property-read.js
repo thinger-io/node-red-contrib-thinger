@@ -25,7 +25,9 @@ module.exports = function(RED) {
 
             const method = 'GET';
             const apiVersion = (asset == "devices" ? "v3" : "v1");
+          console.log("shit8");
             const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/${apiVersion}/users/${server.config.username}/${asset}/${assetId}/properties/${property}`;
+          console.log("shit9");
 
             if (typeof server.request === "function") {
 
@@ -37,6 +39,7 @@ module.exports = function(RED) {
                   done();
               })
               .catch(e => {
+                console.log("hola");
                   delete e.stack;
                   msg.payload = {};
                   msg.payload.asset = asset;

@@ -1,63 +1,59 @@
-module.exports = function(RED) {
+module.exports = function (RED) {
+  "use strict";
 
-    "use strict";
+  const Utils = require("../lib/utils/utils");
 
-    const Utils = require('../lib/utils/utils');
+  function EndpointCallNode(config) {
+    RED.nodes.createNode(this, config);
 
-    function EndpointCallNode(config) {
-        RED.nodes.createNode(this, config);
+    // get node
+    const node = this;
 
-        // get node
-        const node = this;
+    // get server configuration
+    const server = RED.nodes.getNode(config.server);
 
-        // get server configuration
-        const server = RED.nodes.getNode(config.server);
+    // call endpoint on message reception
+    node.on("input", function (msg, send, done) {
+      let endpoint = config.endpoint || msg.endpoint;
+      endpoint = Utils.mustacheRender(endpoint, msg);
 
-        // call endpoint on message reception
-        node.on("input",function(msg, send, done) {
+      let data = Utils.transformValue(config.value);
+      if (data === null) {
+        if (typeof msg.payload !== "undefined") {
+          data = Utils.transformValue(msg.payload);
+        } else if (typeof msg.value !== "undefined") {
+          data = Utils.transformValue(msg.value);
+        }
+      }
+      data = Utils.mustacheRender(data, msg);
 
-            let endpoint = config.endpoint || msg.endpoint;
-            endpoint = Utils.mustacheRender(endpoint, msg);
+      const method = "POST";
+      const url = `${server.config.ssl ? "https://" : "http://"}${
+        server.config.host
+      }/v1/users/${server.config.username}/endpoints/${endpoint}/call`;
 
-            let data = Utils.transformValue(config.value);
-            if ( data === null ) {
-                if ( typeof msg.payload !== 'undefined' ) {
-                    data = Utils.transformValue(msg.payload);
-                }
-                else if ( typeof msg.value !== 'undefined' ) {
-                    data = Utils.transformValue(msg.value);
-                }
-            }
-            data = Utils.mustacheRender(data, msg);
+      if (typeof server.request === "function") {
+        server
+          .request(node, url, method, data)
+          .then((res) => {
+            msg.payload = res.payload;
+            send(msg);
+            done();
+          })
+          .catch((e) => {
+            delete e.stack;
+            let payload = msg.payload;
+            msg.payload = {};
+            msg.payload.endpoint = endpoint;
+            msg.payload.data = payload;
 
-            const method = 'POST';
-            const url = `${server.config.ssl ? "https://" : "http://"}${server.config.host}/v1/users/${server.config.username}/endpoints/${endpoint}/call`;
+            if (e.hasOwnProperty("status")) msg.payload.status = e.status;
 
-            if (typeof server.request === "function") {
-              server.request(node, url, method, data)
-              .then(res => {
+            done(e);
+          });
+      } else done("Check Thinger Server Configuration");
+    });
+  }
 
-                  msg.payload = res.payload;
-                  send(msg);
-                  done();
-              })
-              .catch(e => {
-                  delete e.stack;
-                  let payload = msg.payload;
-                  msg.payload = {};
-                  msg.payload.endpoint = endpoint;
-                  msg.payload.data = payload;
-
-                  if ( e.hasOwnProperty("status") )
-                    msg.payload.status = e.status;
-
-                  done(e);
-              });
-            }
-            else
-              done("Check Thinger Server Configuration");
-        });
-    }
-
-    RED.nodes.registerType("endpoint-call", EndpointCallNode);
+  RED.nodes.registerType("endpoint-call", EndpointCallNode);
 };
