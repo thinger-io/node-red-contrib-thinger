@@ -1,37 +1,39 @@
-module.exports = function(RED) {
+module.exports = function (RED) {
+  "use strict";
 
-    "use strict";
+  function DeviceStreamNode(config) {
+    RED.nodes.createNode(this, config);
 
-    function DeviceStreamNode(config) {
-        RED.nodes.createNode(this, config);
+    // get node
+    const node = this;
 
-        // get node
-        const node = this;
+    // get server configuration
+    const server = RED.nodes.getNode(config.server);
 
-        // get server configuration
-        const server = RED.nodes.getNode(config.server);
+    // register listener on creation
+    let device = config.device || msg.device;
+    let resource = config.resource || msg.resource;
+    let interval = config.interval || msg.interval;
 
-        // register listener on creation
-        let device = config.device || msg.device;
-        let resource = config.resource || msg.resource;
-        let interval = config.interval || msg.interval;
+    if (typeof server.registerDeviceResourceListener === "function")
+      server.registerDeviceResourceListener(
+        device,
+        resource,
+        Number(interval),
+        node
+      );
+    else node.error("Check Thinger Server Configuration"); // Not done object at this point
 
-        if (typeof server.registerDeviceResourceListener === "function")
-            server.registerDeviceResourceListener(device, resource, Number(interval), node);
-        else
-            node.error("Check Thinger Server Configuration"); // Not done object at this point
+    // unregister listener on close
+    node.on("close", function (removed, done) {
+      if (removed) {
+        if (typeof server.unRegisterDeviceResourceListener === "function")
+          server.unRegisterDeviceResourceListener(device, resource, node);
+        else done("Check Thinger Server Configuration");
+      }
+      done();
+    });
+  }
 
-        // unregister listener on close
-        node.on('close', function(removed, done) {
-            if(removed){
-                if (typeof server.unRegisterDeviceResourceListener === "function")
-                    server.unRegisterDeviceResourceListener(device, resource, node);
-                else
-                    done("Check Thinger Server Configuration");
-            }
-            done();
-        });
-    }
-
-    RED.nodes.registerType("device-stream", DeviceStreamNode);
+  RED.nodes.registerType("device-stream", DeviceStreamNode);
 };

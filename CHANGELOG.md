@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.2] - 2025-07-28
+
+### Fixed
+
+- Unhandled exception when some configuration missing in nodes
+
+### Changed
+
+- Improved automatic release of alpha version
+
 ## [1.9.1] - 2025-02-25
 
 ### Fixed
@@ -364,6 +374,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.6] - 2019-06-20
 
+[1.9.2]: https://github.com/thinger-io/Node-RED/compare/1.9.1...1.9.2
 [1.9.1]: https://github.com/thinger-io/Node-RED/compare/1.9.0...1.9.1
 [1.9.0]: https://github.com/thinger-io/Node-RED/compare/1.8.0...1.9.0
 [1.8.0]: https://github.com/thinger-io/Node-RED/compare/1.7.6...1.8.0
